@@ -35,6 +35,10 @@ func GetHostByName(hostname string) string {
 			if v.To4() != nil {
 				return v.String()
 			}
+			// If IPv4 not found, return IPv6
+			if v.To16() != nil {
+				return v.String()
+			}
 		}
 	}
 	return ""
@@ -116,7 +120,12 @@ func ChangeHostAndHeader(r *http.Request, host string, header string, addr strin
 			}
 		}
 	}
-	addr = strings.Split(addr, ":")[0]
+	// Handle IPv6 addresses properly for X-Forwarded-For
+	if strings.HasPrefix(addr, "[") && strings.Contains(addr, "]:") {
+		addr = addr[1:strings.LastIndex(addr, "]")]
+	} else {
+		addr = strings.Split(addr, ":")[0]
+	}
 	if prior, ok := r.Header["X-Forwarded-For"]; ok {
 		addr = strings.Join(prior, ", ") + ", " + addr
 	}
@@ -265,17 +274,35 @@ func FormatAddress(s string) string {
 
 // get address from the complete address
 func GetIpByAddr(addr string) string {
+	// Handle IPv6 addresses properly
+	if strings.Contains(addr, ":") {
+		lastColonIndex := strings.LastIndex(addr, ":")
+		if lastColonIndex != -1 && strings.Count(addr, ":") > 1 {
+			return addr[:lastColonIndex]
+		}
+	}
 	arr := strings.Split(addr, ":")
 	return arr[0]
 }
 
 // get port from the complete address
 func GetPortByAddr(addr string) int {
+	// Handle IPv6 addresses properly
+	if strings.Contains(addr, ":") {
+		lastColonIndex := strings.LastIndex(addr, ":")
+		if lastColonIndex != -1 && strings.Count(addr, ":") > 1 {
+			p, err := strconv.Atoi(addr[lastColonIndex+1:])
+			if err != nil {
+				return 0
+			}
+			return p
+		}
+	}
 	arr := strings.Split(addr, ":")
 	if len(arr) < 2 {
 		return 0
 	}
-	p, err := strconv.Atoi(arr[1])
+	p, err := strconv.Atoi(arr[len(arr)-1])
 	if err != nil {
 		return 0
 	}
@@ -453,10 +480,10 @@ func GetIntranetIp() (error, string) {
 		return nil, ""
 	}
 	for _, address := range addrs {
-		// 检查ip地址判断是否回环地址
+		// 检查 IP 地址判断是否为回环地址
 		if ipnet, ok := address.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
-			if ipnet.IP.To4() != nil {
-				return nil, ipnet.IP.To4().String()
+			if ipnet.IP.To4() != nil || ipnet.IP.To16() != nil {
+				return nil, ipnet.IP.String()
 			}
 		}
 	}
@@ -478,6 +505,13 @@ func IsPublicIP(IP net.IP) bool {
 		default:
 			return true
 		}
+	}
+	// Check for IPv6 private addresses
+	if ip6 := IP.To16(); ip6 != nil && ip4 == nil {
+		if ip6.IsPrivate() {
+			return false
+		}
+		return true
 	}
 	return false
 }
