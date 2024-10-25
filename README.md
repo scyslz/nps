@@ -7,25 +7,13 @@
 
 此版本基于 nps 0.26.10的基础上二次开发而来。
 
-***DockerHub***： [NPS](https://hub.docker.com/r/yisier1/nps) [NPC](https://hub.docker.com/r/yisier1/npc)
+***DockerHub***： [NPS](https://hub.docker.com/r/duan2001/nps) [NPC](https://hub.docker.com/r/duan2001/npc)
 
-# 交流群
-聊天灌水QQ群：770569342,619833483(已满)
+## 更新日志 
+- 2024-10-25  v0.26.20  
+  - 修复ipv6支持
+  - 同时支持传入证书路径和证书文本内容
 
-# 公益云内网穿透
-https://natnps.com/
-公益NPS内网穿透服务，长期免费，6M带宽，3条隧道，不限流量，欢迎来嫖，自行注册账号。
-
-# 特价云服务器  
-国内BGP，游戏开服，2核 2G 15M上行 25元/月，[专属连接，首月5折](https://www.rainyun.com/MjY0MzY1_)
-
-  
-# 捐赠
-![image](image/new/payCode.png)
-
-
-
-## 更新日志  
 - 2024-06-01  v0.26.19  
   - golang 版本升级到 1.22.
   - 增加自动https，自动将http 重定向（301）到 https.  
