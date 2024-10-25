@@ -275,7 +275,12 @@ func FormatAddress(s string) string {
 // get address from the complete address
 func GetIpByAddr(addr string) string {
 	// Handle IPv6 addresses properly
-	if strings.Contains(addr, ":") {
+	if strings.HasPrefix(addr, "[") && strings.Contains(addr, "]:") {
+		lastBracketIndex := strings.LastIndex(addr, "]")
+		if lastBracketIndex != -1 {
+			return addr[1:lastBracketIndex]
+		}
+	} else if strings.Contains(addr, ":") {
 		lastColonIndex := strings.LastIndex(addr, ":")
 		if lastColonIndex != -1 && strings.Count(addr, ":") > 1 {
 			return addr[:lastColonIndex]
@@ -288,7 +293,14 @@ func GetIpByAddr(addr string) string {
 // get port from the complete address
 func GetPortByAddr(addr string) int {
 	// Handle IPv6 addresses properly
-	if strings.Contains(addr, ":") {
+	if strings.HasPrefix(addr, "[") && strings.Contains(addr, "]:") {
+		lastColonIndex := strings.LastIndex(addr, ":")
+		p, err := strconv.Atoi(addr[lastColonIndex+1:])
+		if err != nil {
+			return 0
+		}
+		return p
+	} else if strings.Contains(addr, ":") {
 		lastColonIndex := strings.LastIndex(addr, ":")
 		if lastColonIndex != -1 && strings.Count(addr, ":") > 1 {
 			p, err := strconv.Atoi(addr[lastColonIndex+1:])
@@ -507,7 +519,7 @@ func IsPublicIP(IP net.IP) bool {
 		}
 	}
 	// Check for IPv6 private addresses
-	if ip6 := IP.To16(); ip6 != nil && ip4 == nil {
+	if ip6 := IP.To16(); ip6 != nil {
 		if ip6.IsPrivate() {
 			return false
 		}

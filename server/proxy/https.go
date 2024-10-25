@@ -4,6 +4,8 @@ import (
 	"net"
 	"net/http"
 	"net/url"
+	"path/filepath"
+	"strings"
 	"sync"
 
 	"ehang.io/nps/lib/cache"
@@ -11,6 +13,7 @@ import (
 	"ehang.io/nps/lib/conn"
 	"ehang.io/nps/lib/crypt"
 	"ehang.io/nps/lib/file"
+	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
 	"github.com/pkg/errors"
 )
@@ -34,7 +37,6 @@ func NewHttpsServer(l net.Listener, bridge NetBridge, useCache bool, cacheLen in
 
 // start https server
 func (https *HttpsServer) Start() error {
-
 	conn.Accept(https.listener, func(c net.Conn) {
 		serverName, rb := GetServerNameFromClientHello(c)
 		r := buildHttpsRequest(serverName)
@@ -43,12 +45,35 @@ func (https *HttpsServer) Start() error {
 			logs.Debug("the url %s can't be parsed!,remote addr %s", serverName, c.RemoteAddr().String())
 			return
 		} else {
-			if host.CertFilePath == "" || host.KeyFilePath == "" {
-				logs.Debug("加载客户端本地证书")
+			var certContent, keyContent string
+			var certErr, keyErr error
+
+			// 检测是否是证书内容或路径，并读取内容
+			if strings.Contains(host.CertFilePath, "-----BEGIN CERTIFICATE-----") {
+				certContent = host.CertFilePath
+			} else {
+				certContent, certErr = common.ReadAllFromFile(host.CertFilePath)
+				if certErr != nil || !strings.Contains(certContent, "-----BEGIN CERTIFICATE-----") {
+					certContent = ""
+				}
+			}
+
+			if strings.Contains(host.KeyFilePath, "-----BEGIN PRIVATE KEY-----") {
+				keyContent = host.KeyFilePath
+			} else {
+				keyContent, keyErr = common.ReadAllFromFile(host.KeyFilePath)
+				if keyErr != nil || !strings.Contains(keyContent, "-----BEGIN PRIVATE KEY-----") {
+					keyContent = ""
+				}
+			}
+
+			// 如果证书内容为空字符串，则加载本地证书
+			if certContent == "" || keyContent == "" {
+				logs.Debug("由客户端处理证书")
 				https.handleHttps2(c, serverName, rb, r)
 			} else {
 				logs.Debug("使用上传证书")
-				https.cert(host, c, rb, host.CertFilePath, host.KeyFilePath)
+				https.cert(host, c, rb, certContent, keyContent)
 			}
 		}
 	})
@@ -110,7 +135,7 @@ func (https *HttpsServer) Start() error {
 	return nil
 }
 
-func (https *HttpsServer) cert(host *file.Host, c net.Conn, rb []byte, certFileUrl string, keyFileUrl string) {
+func (https *HttpsServer) cert(host *file.Host, c net.Conn, rb []byte, certContent string, keyContent string) {
 	var l *HttpsListener
 	i := 0
 	https.hostIdCertMap.Range(func(key, value interface{}) bool {
@@ -139,15 +164,15 @@ func (https *HttpsServer) cert(host *file.Host, c net.Conn, rb []byte, certFileU
 	logs.Info("当前 Listener 连接数量", i)
 
 	if cert, ok := https.hostIdCertMap.Load(host.Id); ok {
-		if cert == certFileUrl {
+		if cert == certContent {
 			// 证书已经存在，直接加载
-			if v, ok := https.httpsListenerMap.Load(certFileUrl); ok {
+			if v, ok := https.httpsListenerMap.Load(certContent); ok {
 				l = v.(*HttpsListener)
 			}
 		} else {
 			// 证书修改过，重新加载证书
 			l = NewHttpsListener(https.listener)
-			https.NewHttps(l, certFileUrl, keyFileUrl)
+			https.NewHttps(l, certContent, keyContent)
 			if oldL, ok := https.httpsListenerMap.Load(cert); ok {
 				err := oldL.(*HttpsListener).Close()
 				if err != nil {
@@ -155,15 +180,15 @@ func (https *HttpsServer) cert(host *file.Host, c net.Conn, rb []byte, certFileU
 				}
 				https.httpsListenerMap.Delete(cert)
 			}
-			https.httpsListenerMap.Store(certFileUrl, l)
-			https.hostIdCertMap.Store(host.Id, certFileUrl)
+			https.httpsListenerMap.Store(certContent, l)
+			https.hostIdCertMap.Store(host.Id, certContent)
 		}
 	} else {
 		// 第一次加载证书
 		l = NewHttpsListener(https.listener)
-		https.NewHttps(l, certFileUrl, keyFileUrl)
-		https.httpsListenerMap.Store(certFileUrl, l)
-		https.hostIdCertMap.Store(host.Id, certFileUrl)
+		https.NewHttps(l, certContent, keyContent)
+		https.httpsListenerMap.Store(certContent, l)
+		https.hostIdCertMap.Store(host.Id, certContent)
 	}
 
 	acceptConn := conn.NewConn(c)

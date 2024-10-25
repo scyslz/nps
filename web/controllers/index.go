@@ -311,7 +311,7 @@ func (s *IndexController) EditHost() {
 				}
 			}
 			if client, err := file.GetDb().GetClient(s.GetIntNoErr("client_id")); err != nil {
-				s.AjaxErr("modified error,the client is not exist")
+				s.AjaxErr("modified error, the client is not exist")
 			} else {
 				h.Client = client
 			}
