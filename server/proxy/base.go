@@ -67,7 +67,7 @@ func (s *BaseServer) writeConnFail(c net.Conn) {
 //auth check
 func (s *BaseServer) auth(r *http.Request, c *conn.Conn, u, p string, task *file.Tunnel) error {
 	var accountMap map[string]string
-	if task.MultiAccount.AccountMap == nil {
+	if task.MultiAccount == nil {
 		accountMap = nil
 	} else {
 		accountMap = task.MultiAccount.AccountMap

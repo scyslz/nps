@@ -343,7 +343,7 @@ func (s *Sock5ModeServer) Auth(c net.Conn) error {
 		return err
 	}
 	var accountMap map[string]string
-	if s.task.MultiAccount.AccountMap == nil {
+	if s.task.MultiAccount == nil {
 		accountMap = nil
 	} else {
 		accountMap = s.task.MultiAccount.AccountMap
