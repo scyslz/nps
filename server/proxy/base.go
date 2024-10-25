@@ -65,8 +65,8 @@ func (s *BaseServer) writeConnFail(c net.Conn) {
 }
 
 //auth check
-func (s *BaseServer) auth(r *http.Request, c *conn.Conn, u, p string, AccountMap map[string]string) error {
-	if !common.CheckAuth(r, u, p, AccountMap) {
+func (s *BaseServer) auth(r *http.Request, c *conn.Conn, u, p string, multiAccount MultiAccount) error {
+	if !common.CheckAuth(r, u, p, multiAccount) {
 		var resp = common.UnauthorizedBytes
 		resp = strings.ReplaceAll(resp, "\n", "\r\n")
 		c.Write([]byte(resp))

@@ -56,84 +56,41 @@ func DomainCheck(domain string) bool {
 	return match
 }
 
-// 判断是否有有效的账号
-func hasValidAccount(accountMap map[string]string) bool {
-	if accountMap == nil {
-		return false
-	}
-
-	for u, p := range accountMap {
-		if u != "" && p != "" {
-			return true
-		}
-	}
-	return false
-}
-
-// 判断是否需要验证
-// user global user
-// passwd global passwd
-// accountMap enable multi user auth
-func HasValid(user, passwd string, accountMap map[string]string) bool {
-	return hasValidAccount(accountMap) || (user != "" && passwd != "")
-}
-
 // CheckAuthWithAccountMap
 // u current login user
 // p current login passwd
 // user global user
 // passwd global passwd
-// accountMap enable multi user auth
-func checkAuthWithAccountMap(u, p, user, passwd string, accountMap map[string]string) bool {
-	// 是否需要验证
-	if !HasValid(user, passwd, accountMap) {
-		return true
-	}
+// multiAccount enable multi user auth
+func checkAuthWithAccountMap(u, p, user, passwd string, multiAccount MultiAccount) bool {
+    // Bypass authentication only if user, passwd are empty and multiAccount is nil or empty
+    if user == "" && passwd == "" && (multiAccount == nil || len(multiAccount.AccountMap) == 0) {
+        return true
+    }
 
-	// 防止空用户名连接
-	if len(u) == 0 {
-		return false
-	}
+    // Single account check
+    if multiAccount == nil || len(multiAccount.AccountMap) == 0 {
+        return u == user && p == passwd
+    }
 
-	// invalid user or passwd
-	if u == "" || p == "" {
-		return false
-	}
+    // Multi-account authentication check
+    if len(u) == 0 {
+        return false
+    }
+    
+    if u == user && p == passwd {
+        return true
+    }
 
-	// global user auth
-	if u == user && p == passwd {
-		return true
-	}
+    if tmp, ok := multiAccount.AccountMap[u]; ok && p == tmp {
+        return true
+    }
 
-	// multi user auth
-	if accountMap == nil {
-		return false
-	}
-
-	return accountMap[u] == p
-}
-
-// CheckAuthWithAccountMap
-// u current login user
-// p current login passwd
-// user global user
-// passwd global passwd
-// accountMap enable multi user auth
-func CheckAuthWithAccountMap(u, p, user, passwd string, accountMap map[string]string) bool {
-	isValid := checkAuthWithAccountMap(u, p, user, passwd, accountMap)
-	if !isValid {
-		logs.Info("账号验证失败")
-	}
-	return isValid
+    return false
 }
 
 // Check if the Request request is validated
-func CheckAuth(r *http.Request, user, passwd string, accountMap map[string]string) bool {
-	// 是否需要验证
-	if !HasValid(user, passwd, accountMap) {
-		return true
-	}
-
+func CheckAuth(r *http.Request, user, passwd string, multiAccount MultiAccount) bool {
 	s := strings.SplitN(r.Header.Get("Authorization"), " ", 2)
 	if len(s) != 2 {
 		s = strings.SplitN(r.Header.Get("Proxy-Authorization"), " ", 2)
@@ -152,7 +109,7 @@ func CheckAuth(r *http.Request, user, passwd string, accountMap map[string]strin
 		return false
 	}
 
-	return CheckAuthWithAccountMap(pair[0], pair[1], user, passwd, accountMap)
+	return CheckAuthWithAccountMap(pair[0], pair[1], user, passwd, multiAccount)
 }
 
 // get bool by str

@@ -305,13 +305,7 @@ func (s *Sock5ModeServer) handleConn(c net.Conn) {
 		c.Close()
 		return
 	}
-
-	var accountMap map[string]string = nil
-	if s.task.MultiAccount != nil {
-		accountMap = s.task.MultiAccount.AccountMap
-	}
-
-	if common.HasValid(s.task.Client.Cnf.U, s.task.Client.Cnf.P, accountMap) {
+	if (s.task.Client.Cnf.U != "" && s.task.Client.Cnf.P != "") || (s.task.MultiAccount != nil && len(s.task.MultiAccount.AccountMap) > 0) {
 		buf[1] = UserPassAuth
 		c.Write(buf)
 		if err := s.Auth(c); err != nil {
@@ -349,7 +343,7 @@ func (s *Sock5ModeServer) Auth(c net.Conn) error {
 		return err
 	}
 
-	if common.CheckAuthWithAccountMap(string(user), string(pass), s.task.Client.Cnf.U, s.task.Client.Cnf.P, s.task.MultiAccount.AccountMap) {
+	if common.CheckAuthWithAccountMap(string(user), string(pass), s.task.Client.Cnf.U, s.task.Client.Cnf.P, s.task.MultiAccount) {
 		if _, err := c.Write([]byte{userAuthVersion, authSuccess}); err != nil {
 			return err
 		}

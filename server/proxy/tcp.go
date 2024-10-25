@@ -119,7 +119,7 @@ func ProcessHttp(c *conn.Conn, s *TunnelModeServer) error {
 		return err
 	}
 
-	if err := s.auth(r, c, s.task.Client.Cnf.U, s.task.Client.Cnf.P, s.task.MultiAccount.AccountMap); err != nil {
+	if err := s.auth(r, c, s.task.Client.Cnf.U, s.task.Client.Cnf.P, s.task.MultiAccount); err != nil {
 		return err
 	}
 
