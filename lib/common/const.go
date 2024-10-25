@@ -27,15 +27,11 @@ const (
 	CONN_TCP          = "tcp"
 	CONN_UDP          = "udp"
 	CONN_TEST         = "TST"
-	UnauthorizedBytes = `HTTP/1.1 407 Proxy Authentication Required
-Server: Proxy
-Proxy-Authenticate: Basic realm="easyProxy Authentication"
-Connection: Close
-Proxy-Connection: Close
-Content-Length: 0
+	UnauthorizedBytes = `HTTP/1.1 401 Unauthorized
+Content-Type: text/plain; charset=utf-8
+WWW-Authenticate: Basic realm="easyProxy"
 
-`
-
+401 Unauthorized`
 	ConnectionFailBytes = `HTTP/1.1 404 Not Found
 
 `

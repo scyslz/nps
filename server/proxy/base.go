@@ -5,7 +5,6 @@ import (
 	"net"
 	"net/http"
 	"sort"
-	"strings"
 	"sync"
 
 	"ehang.io/nps/bridge"
@@ -73,11 +72,9 @@ func (s *BaseServer) auth(r *http.Request, c *conn.Conn, u, p string, task *file
 		accountMap = task.MultiAccount.AccountMap
 	}
 	if !common.CheckAuth(r, u, p, accountMap) {
-		var resp = common.UnauthorizedBytes
-		resp = strings.ReplaceAll(resp, "\n", "\r\n")
-		c.Write([]byte(resp))
+		c.Write([]byte(common.UnauthorizedBytes))
 		c.Close()
-		return errors.New("407 Unauthorized")
+		return errors.New("401 Unauthorized")
 	}
 	return nil
 }

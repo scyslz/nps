@@ -23,7 +23,7 @@ type HTTPError struct {
 }
 
 type HttpReverseProxy struct {
-	//BaseServer
+	BaseServer
 	proxy                 *ReverseProxy
 	responseHeaderTimeout time.Duration
 }
@@ -39,7 +39,6 @@ type flowConn struct {
 func (rp *HttpReverseProxy) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	var (
 		host       *file.Host
-		task       *file.Tunnel
 		targetAddr string
 		err        error
 	)
@@ -50,10 +49,10 @@ func (rp *HttpReverseProxy) ServeHTTP(rw http.ResponseWriter, req *http.Request)
 	}
 
 	var accountMap map[string]string
-	if task.MultiAccount == nil {
+	if rp.task.MultiAccount == nil {
 		accountMap = nil
 	} else {
-		accountMap = task.MultiAccount.AccountMap
+		accountMap = rp.task.MultiAccount.AccountMap
 	}
 	if host.Client.Cnf.U != "" && host.Client.Cnf.P != "" && !common.CheckAuth(req, host.Client.Cnf.U, host.Client.Cnf.P, accountMap) {
 		rw.WriteHeader(http.StatusUnauthorized)
@@ -103,6 +102,10 @@ func (*flowConn) SetWriteDeadline(t time.Time) error { return nil }
 
 func NewHttpReverseProxy(s *httpServer) *HttpReverseProxy {
 	rp := &HttpReverseProxy{
+		BaseServer: BaseServer{
+			task:   s.task,  // 从 httpServer 传入 task，确保 task 被正确初始化
+			bridge: s.bridge,
+		},
 		responseHeaderTimeout: 30 * time.Second,
 	}
 	local, _ := net.ResolveTCPAddr("tcp", "127.0.0.1")
