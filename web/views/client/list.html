@@ -74,8 +74,8 @@
                 + getRow('word-connectbyconfig', '<span langtag="word-' + row.ConfigConnAllow + '"></span>')
                 + getRow('word-blackip', row.BlackIpList)
                 + getRow('word-lastonlinetime', row.LastOnlineTime)
-                + getRow('word-commandclient', "<code>./npc{{.win}} -server={{.ip}}:{{.p}} -vkey=" + row.VerifyKey + " -type=" + {{.bridgeType}} + "</code>")
-                + getRow('word-commandclient-tls', "<code>./npc{{.win}} -server={{.ip}}:{{.tls_p}} -vkey=" + row.VerifyKey + " -tls_enable=true</code>")
+                + getRow('word-commandclient', "<code>./npc{{.win}} -server={{.ip}}:{{.p}} -vkey=" + row.VerifyKey + " -type=" + {{.bridgeType}} + "</code>", true)
+                + getRow('word-commandclient-tls', "<code>./npc{{.win}} -server={{.ip}}:{{.tls_p}} -vkey=" + row.VerifyKey + " -tls_enable=true</code>", true)
                 + '</div>'
         },
         //表格的列
@@ -215,8 +215,9 @@
             }
         ]
     });
-    function getRow(name, val){
-      console.log(name, val);
-     return '<div class="details_item"><div langtag="'+name+'"> </div>' + '<div>' + val + '</div></div>'
+    function getRow(name, val, fullWidth = false) {
+        console.log(name, val);
+        const fullWidthClass = fullWidth ? ' full-width' : ''; // 根据参数确定是否添加 full-width 类
+        return '<div class="details_item' + fullWidthClass + '"><div langtag="'+ name +'"> </div>' + '<div>' + val + '</div></div>'
     }
 </script>
