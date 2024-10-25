@@ -38,6 +38,7 @@ type flowConn struct {
 func (rp *HttpReverseProxy) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	var (
 		host       *file.Host
+		task       *file.Tunnel
 		targetAddr string
 		err        error
 	)
@@ -46,7 +47,7 @@ func (rp *HttpReverseProxy) ServeHTTP(rw http.ResponseWriter, req *http.Request)
 		rw.Write([]byte(req.Host + " not found"))
 		return
 	}
-	if host.Client.Cnf.U != "" && host.Client.Cnf.P != "" && !common.CheckAuth(req, host.Client.Cnf.U, host.Client.Cnf.P) {
+	if host.Client.Cnf.U != "" && host.Client.Cnf.P != "" && !common.CheckAuth(req, host.Client.Cnf.U, host.Client.Cnf.P, task.MultiAccount.AccountMap) {
 		rw.WriteHeader(http.StatusUnauthorized)
 		rw.Write([]byte("Unauthorized"))
 		return

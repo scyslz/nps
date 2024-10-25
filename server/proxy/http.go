@@ -3,6 +3,16 @@ package proxy
 import (
 	"bufio"
 	"crypto/tls"
+	"io"
+	"net"
+	"net/http"
+	"net/http/httputil"
+	"os"
+	"path/filepath"
+	"strconv"
+	"strings"
+	"sync"
+
 	"ehang.io/nps/bridge"
 	"ehang.io/nps/lib/cache"
 	"ehang.io/nps/lib/common"
@@ -11,14 +21,6 @@ import (
 	"ehang.io/nps/lib/goroutine"
 	"ehang.io/nps/server/connection"
 	"github.com/astaxie/beego/logs"
-	"io"
-	"net"
-	"net/http"
-	"os"
-	"path/filepath"
-	"strconv"
-	"strings"
-	"sync"
 )
 
 type httpServer struct {
@@ -187,7 +189,7 @@ reset:
 	if !isReset {
 		defer host.Client.AddConn()
 	}
-	if err = s.auth(r, c, host.Client.Cnf.U, host.Client.Cnf.P); err != nil {
+	if err = s.auth(r, c, host.Client.Cnf.U, host.Client.Cnf.P, s.task.MultiAccount.AccountMap); err != nil {
 		logs.Warn("auth error", err, r.RemoteAddr)
 		return
 	}

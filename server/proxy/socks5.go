@@ -96,6 +96,9 @@ func (s *Sock5ModeServer) sendReply(c net.Conn, rep uint8) {
 	localAddr := c.LocalAddr().String()
 	localHost, localPort, _ := net.SplitHostPort(localAddr)
 	ipBytes := net.ParseIP(localHost).To4()
+	if ipBytes == nil {
+		ipBytes = net.ParseIP("127.0.0.1").To4()
+	}
 	nPort, _ := strconv.Atoi(localPort)
 	reply = append(reply, ipBytes...)
 	portBytes := make([]byte, 2)
@@ -302,7 +305,13 @@ func (s *Sock5ModeServer) handleConn(c net.Conn) {
 		c.Close()
 		return
 	}
-	if (s.task.Client.Cnf.U != "" && s.task.Client.Cnf.P != "") || (s.task.MultiAccount != nil && len(s.task.MultiAccount.AccountMap) > 0) {
+
+	var accountMap map[string]string = nil
+	if s.task.MultiAccount != nil {
+		accountMap = s.task.MultiAccount.AccountMap
+	}
+
+	if common.HasValid(s.task.Client.Cnf.U, s.task.Client.Cnf.P, accountMap) {
 		buf[1] = UserPassAuth
 		c.Write(buf)
 		if err := s.Auth(c); err != nil {
@@ -340,24 +349,7 @@ func (s *Sock5ModeServer) Auth(c net.Conn) error {
 		return err
 	}
 
-	var U, P string
-	if s.task.MultiAccount != nil {
-		// enable multi user auth
-		U = string(user)
-		if len(U) == 0 {
-		        return errors.New("验证不通过")
-		}
-		var ok bool
-		P, ok = s.task.MultiAccount.AccountMap[U]
-		if !ok {
-			return errors.New("验证不通过")
-		}
-	} else {
-		U = s.task.Client.Cnf.U
-		P = s.task.Client.Cnf.P
-	}
-
-	if string(user) == U && string(pass) == P {
+	if common.CheckAuthWithAccountMap(string(user), string(pass), s.task.Client.Cnf.U, s.task.Client.Cnf.P, s.task.MultiAccount.AccountMap) {
 		if _, err := c.Write([]byte{userAuthVersion, authSuccess}); err != nil {
 			return err
 		}

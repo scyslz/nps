@@ -28,9 +28,9 @@ import (
 var ServerTlsEnable bool = false
 
 type Client struct {
-	tunnel    *nps_mux.Mux
-	signal    *conn.Conn
-	file      *nps_mux.Mux
+	tunnel    *nps_mux.Mux // WORK_CHAN connection
+	signal    *conn.Conn   // WORK_MAIN connection
+	file      *nps_mux.Mux // WORK_FILE connection
 	Version   string
 	retryTime int // it will be add 1 when ping not ok until to 3 will close the client
 }

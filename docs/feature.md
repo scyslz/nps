@@ -115,7 +115,7 @@ location=/static
 在需要访问的机器上，运行客户端
 
 ```
-./npc register -server=ip:port -vkey=公钥或客户端密钥 time=2
+./npc register -server=ip:port -vkey=公钥或客户端密钥 -time=2
 ```
 
 time为有效小时数，例如time=2，在当前时间后的两小时内，本机公网ip都可以访问nps代理.
@@ -201,7 +201,7 @@ health_check_target=127.0.0.1:8083,127.0.0.1:8082
 
 第一种是http模式，也就是以get的方式请求目标+url，返回状态码为200表示成功
 
-第一种是tcp模式，也就是以tcp的方式与目标建立连接，能成功建立连接表示成功
+第二种是tcp模式，也就是以tcp的方式与目标建立连接，能成功建立连接表示成功
 
 如果失败次数超过`health_check_max_failed`，nps则会移除该npc下的所有该目标，如果失败后目标重新上线，nps将自动将目标重新加入。
 

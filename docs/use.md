@@ -23,7 +23,7 @@
 注册到服务后，日志文件windows位于当前目录下，linux和darwin位于/var/log/npc.log
 
 ## 客户端更新
-首先进入到对于的客户端二进制文件目录
+首先进入到对应的客户端二进制文件目录
 
 请首先执行`sudo npc stop`或者`npc.exe stop`停止运行，然后
 
@@ -53,8 +53,8 @@ npc-update.exe update
 server_addr=1.1.1.1:8024
 conn_type=tcp
 vkey=123
-username=111
-password=222
+basic_username=111
+basic_password=222
 compress=true
 crypt=true
 rate_limit=10000
@@ -68,8 +68,8 @@ max_conn=10
 server_addr | 服务端ip/域名:port
 conn_type | 与服务端通信模式(tcp或kcp)
 vkey|服务端配置文件中的密钥(非web)
-username|socks5或http(s)密码保护用户名(可忽略)
-password|socks5或http(s)密码保护密码(可忽略)
+basic_username|socks5或http(s)密码保护用户名(可忽略)
+basic_password|socks5或http(s)密码保护密码(可忽略)
 compress|是否压缩传输(true或false或忽略)
 crypt|是否加密传输(true或false或忽略)
 rate_limit|速度限制，可忽略
@@ -144,6 +144,7 @@ server_port=9003
 ---|---
 mode | httpProxy
 server_port | 在服务端的代理端口
+
 #### socks5代理模式
 
 ```ini
@@ -159,7 +160,8 @@ multi_account=multi_account.conf
 ---|---
 mode | socks5
 server_port | 在服务端的代理端口
-multi_account | socks5多账号配置文件（可选),配置后使用basic_username和basic_password无法通过认证
+multi_account | socks5多账号配置文件（可选),配置后使用basic_username和basic_password无法通过认证 <br> multi_account.conf要与可执行文件npc同一目录，或者npc.conf里面写相对路径,conf/multi_account.conf
+
 #### 私密代理模式
 
 ```ini
