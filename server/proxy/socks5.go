@@ -342,8 +342,13 @@ func (s *Sock5ModeServer) Auth(c net.Conn) error {
 	if _, err := io.ReadAtLeast(c, pass, passLen); err != nil {
 		return err
 	}
-
-	if common.CheckAuthWithAccountMap(string(user), string(pass), s.task.Client.Cnf.U, s.task.Client.Cnf.P, s.task.MultiAccount) {
+	var accountMap map[string]string
+	if s.task.MultiAccount.AccountMap == nil {
+		accountMap = nil
+	} else {
+		accountMap = s.task.MultiAccount.AccountMap
+	}
+	if common.CheckAuthWithAccountMap(string(user), string(pass), s.task.Client.Cnf.U, s.task.Client.Cnf.P, accountMap) {
 		if _, err := c.Write([]byte{userAuthVersion, authSuccess}); err != nil {
 			return err
 		}

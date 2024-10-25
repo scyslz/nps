@@ -213,7 +213,7 @@ func (https *HttpsServer) handleHttps2(c net.Conn, hostName string, rb []byte, r
 		return
 	}
 	defer host.Client.AddConn()
-	if err = https.auth(r, conn.NewConn(c), host.Client.Cnf.U, host.Client.Cnf.P, https.task.MultiAccount); err != nil {
+	if err = https.auth(r, conn.NewConn(c), host.Client.Cnf.U, host.Client.Cnf.P, https.task); err != nil {
 		logs.Warn("auth error", err, r.RemoteAddr)
 		return
 	}
@@ -256,7 +256,7 @@ func (https *HttpsServer) handleHttps(c net.Conn) {
 		return
 	}
 	defer host.Client.AddConn()
-	if err = https.auth(r, conn.NewConn(c), host.Client.Cnf.U, host.Client.Cnf.P, https.task.MultiAccount); err != nil {
+	if err = https.auth(r, conn.NewConn(c), host.Client.Cnf.U, host.Client.Cnf.P, https.task); err != nil {
 		logs.Warn("auth error", err, r.RemoteAddr)
 		return
 	}

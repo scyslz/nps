@@ -61,15 +61,15 @@ func DomainCheck(domain string) bool {
 // p current login passwd
 // user global user
 // passwd global passwd
-// multiAccount enable multi user auth
-func checkAuthWithAccountMap(u, p, user, passwd string, multiAccount MultiAccount) bool {
+// accountMap enable multi user auth
+func CheckAuthWithAccountMap(u, p, user, passwd string, accountMap map[string]string) bool {
     // Bypass authentication only if user, passwd are empty and multiAccount is nil or empty
-    if user == "" && passwd == "" && (multiAccount == nil || len(multiAccount.AccountMap) == 0) {
+    if user == "" && passwd == "" && (accountMap == nil || len(accountMap) == 0) {
         return true
     }
 
     // Single account check
-    if multiAccount == nil || len(multiAccount.AccountMap) == 0 {
+    if accountMap == nil || len(accountMap) == 0 {
         return u == user && p == passwd
     }
 
@@ -82,7 +82,7 @@ func checkAuthWithAccountMap(u, p, user, passwd string, multiAccount MultiAccoun
         return true
     }
 
-    if tmp, ok := multiAccount.AccountMap[u]; ok && p == tmp {
+    if P, ok := accountMap[u]; ok && p == P {
         return true
     }
 
@@ -90,7 +90,7 @@ func checkAuthWithAccountMap(u, p, user, passwd string, multiAccount MultiAccoun
 }
 
 // Check if the Request request is validated
-func CheckAuth(r *http.Request, user, passwd string, multiAccount MultiAccount) bool {
+func CheckAuth(r *http.Request, user, passwd string, accountMap map[string]string) bool {
 	s := strings.SplitN(r.Header.Get("Authorization"), " ", 2)
 	if len(s) != 2 {
 		s = strings.SplitN(r.Header.Get("Proxy-Authorization"), " ", 2)
@@ -109,7 +109,7 @@ func CheckAuth(r *http.Request, user, passwd string, multiAccount MultiAccount) 
 		return false
 	}
 
-	return CheckAuthWithAccountMap(pair[0], pair[1], user, passwd, multiAccount)
+	return CheckAuthWithAccountMap(pair[0], pair[1], user, passwd, accountMap)
 }
 
 // get bool by str
