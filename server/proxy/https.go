@@ -4,7 +4,6 @@ import (
 	"net"
 	"net/http"
 	"net/url"
-	"path/filepath"
 	"strings"
 	"sync"
 
@@ -13,7 +12,6 @@ import (
 	"ehang.io/nps/lib/conn"
 	"ehang.io/nps/lib/crypt"
 	"ehang.io/nps/lib/file"
-	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
 	"github.com/pkg/errors"
 )
@@ -49,22 +47,14 @@ func (https *HttpsServer) Start() error {
 			var certErr, keyErr error
 
 			// 检测是否是证书内容或路径，并读取内容
-			if strings.Contains(host.CertFilePath, "-----BEGIN CERTIFICATE-----") {
-				certContent = host.CertFilePath
-			} else {
-				certContent, certErr = common.ReadAllFromFile(host.CertFilePath)
-				if certErr != nil || !strings.Contains(certContent, "-----BEGIN CERTIFICATE-----") {
-					certContent = ""
-				}
+			certContent, certErr = getCertOrKeyContent(host.CertFilePath, "-----BEGIN CERTIFICATE-----")
+			if certErr != nil {
+				certContent = ""
 			}
 
-			if strings.Contains(host.KeyFilePath, "-----BEGIN PRIVATE KEY-----") {
-				keyContent = host.KeyFilePath
-			} else {
-				keyContent, keyErr = common.ReadAllFromFile(host.KeyFilePath)
-				if keyErr != nil || !strings.Contains(keyContent, "-----BEGIN PRIVATE KEY-----") {
-					keyContent = ""
-				}
+			keyContent, keyErr = getCertOrKeyContent(host.KeyFilePath, "-----BEGIN PRIVATE KEY-----")
+			if keyErr != nil {
+				keyContent = ""
 			}
 
 			// 如果证书内容为空字符串，则加载本地证书
@@ -133,6 +123,17 @@ func (https *HttpsServer) Start() error {
 	//	})
 	//}
 	return nil
+}
+
+func getCertOrKeyContent(filePath string, header string) (string, error) {
+	if strings.Contains(filePath, header) {
+		return filePath, nil
+	}
+	fileBytes, err := common.ReadAllFromFile(filePath)
+	if err != nil || !strings.Contains(string(fileBytes), header) {
+		return "", err
+	}
+	return string(fileBytes), nil
 }
 
 func (https *HttpsServer) cert(host *file.Host, c net.Conn, rb []byte, certContent string, keyContent string) {
@@ -212,7 +213,7 @@ func (https *HttpsServer) handleHttps2(c net.Conn, hostName string, rb []byte, r
 		return
 	}
 	defer host.Client.AddConn()
-	if err = https.auth(r, conn.NewConn(c), host.Client.Cnf.U, host.Client.Cnf.P); err != nil {
+	if err = https.auth(r, conn.NewConn(c), host.Client.Cnf.U, host.Client.Cnf.P, https.task.MultiAccount.AccountMap); err != nil {
 		logs.Warn("auth error", err, r.RemoteAddr)
 		return
 	}
