@@ -82,7 +82,7 @@ func (s *httpServer) Start() error {
 				logs.Error(err)
 				os.Exit(0)
 			}
-			logs.Error(NewHttpsServer(s.httpsListener, s.bridge, s.useCache, s.cacheLen).Start())
+			logs.Error(NewHttpsServer(s.httpsListener, s.bridge, s.useCache, s.cacheLen, s.task).Start())
 		}()
 	}
 	return nil

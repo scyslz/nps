@@ -23,9 +23,17 @@ type HttpsServer struct {
 	hostIdCertMap    sync.Map
 }
 
-func NewHttpsServer(l net.Listener, bridge NetBridge, useCache bool, cacheLen int) *HttpsServer {
-	https := &HttpsServer{listener: l}
-	https.bridge = bridge
+func NewHttpsServer(l net.Listener, bridge NetBridge, useCache bool, cacheLen int, task *file.Tunnel) *HttpsServer {
+	https := &HttpsServer{
+	listener: l,
+	httpServer: httpServer{
+		BaseServer: BaseServer{
+				task:   task,   // 初始化 task 确保其不为空
+				bridge: bridge,
+				Mutex:  sync.Mutex{},
+			},
+		},
+	}
 	https.useCache = useCache
 	if useCache {
 		https.cache = cache.New(cacheLen)
