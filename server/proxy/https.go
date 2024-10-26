@@ -55,12 +55,12 @@ func (https *HttpsServer) Start() error {
 			var certErr, keyErr error
 
 			// 检测是否是证书内容或路径，并读取内容
-			certContent, certErr = getCertOrKeyContent(host.CertFilePath, "-----BEGIN CERTIFICATE-----")
+			certContent, certErr = getCertOrKeyContent(host.CertFilePath, "CERTIFICATE")
 			if certErr != nil {
 				certContent = ""
 			}
 
-			keyContent, keyErr = getCertOrKeyContent(host.KeyFilePath, "-----BEGIN PRIVATE KEY-----")
+			keyContent, keyErr = getCertOrKeyContent(host.KeyFilePath, "PRIVATE")
 			if keyErr != nil {
 				keyContent = ""
 			}
