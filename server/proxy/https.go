@@ -106,6 +106,7 @@ func (https *HttpsServer) Start() error {
 	//			r := buildHttpsRequest(serverName)
 	//			if host, err := file.GetDb().GetInfoByHost(serverName, r); err != nil {
 	//				c.Close()
+	//				//common.SafeClose(c)
 	//				logs.Notice("the url %s can't be parsed!,remote addr %s", serverName, c.RemoteAddr().String())
 	//				return
 	//			} else {
@@ -114,7 +115,8 @@ func (https *HttpsServer) Start() error {
 	//					if v, ok := https.httpsListenerMap.Load("default"); ok {
 	//						l = v.(*HttpsListener)
 	//					} else {
-	//						c.Close()
+	//						//c.Close()
+	//						common.SafeClose(c)
 	//						logs.Error("the key %s cert %s file is not exist", host.KeyFilePath, host.CertFilePath)
 	//						return
 	//					}

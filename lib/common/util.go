@@ -573,3 +573,10 @@ func GetServerIpByClientIp(clientIp net.IP) string {
 func PrintVersion() {
 	fmt.Printf("Version: %s\nCore version: %s\nSame core version of client and server can connect each other\n", version.VERSION, version.GetVersion())
 }
+
+// SafeClose safely closes a connection and ignores any error if the connection is already closed.
+func SafeClose(c net.Conn) {
+    if c != nil {
+        _ = c.Close()
+    }
+}

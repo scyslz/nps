@@ -109,88 +109,95 @@ func StartFromFile(path string) {
 
 	SetTlsEnable(cnf.CommonConfig.TlsEnable)
 	logs.Info("the version of client is %s, the core version of client is %s,tls enable is %t", version.VERSION, version.GetVersion(), GetTlsEnable())
-re:
-	if first || cnf.CommonConfig.AutoReconnection {
+
+	for {
+		if !first && !cnf.CommonConfig.AutoReconnection {
+			return
+		}
 		if !first {
 			logs.Info("Reconnecting...")
 			time.Sleep(time.Second * 5)
 		}
-	} else {
-		return
-	}
-	first = false
-	c, err := NewConn(cnf.CommonConfig.Tp, cnf.CommonConfig.VKey, cnf.CommonConfig.Server, common.WORK_CONFIG, cnf.CommonConfig.ProxyUrl)
-	if err != nil {
-		logs.Error(err)
-		goto re
-	}
-	var isPub bool
-	binary.Read(c, binary.LittleEndian, &isPub)
+		first = false
 
-	// get tmp password
-	var b []byte
-	vkey := cnf.CommonConfig.VKey
-	if isPub {
-		// send global configuration to server and get status of config setting
-		if _, err := c.SendInfo(cnf.CommonConfig.Client, common.NEW_CONF); err != nil {
+		c, err := NewConn(cnf.CommonConfig.Tp, cnf.CommonConfig.VKey, cnf.CommonConfig.Server, common.WORK_CONFIG, cnf.CommonConfig.ProxyUrl)
+		if err != nil {
 			logs.Error(err)
-			goto re
-		}
-		if !c.GetAddStatus() {
-			logs.Error("the web_user may have been occupied!")
-			goto re
+			continue
 		}
 
-		if b, err = c.GetShortContent(16); err != nil {
-			logs.Error(err)
-			goto re
-		}
-		vkey = string(b)
-	}
-	ioutil.WriteFile(filepath.Join(common.GetTmpPath(), "npc_vkey.txt"), []byte(vkey), 0600)
+		var isPub bool
+		binary.Read(c, binary.LittleEndian, &isPub)
 
-	//send hosts to server
-	for _, v := range cnf.Hosts {
-		if _, err := c.SendInfo(v, common.NEW_HOST); err != nil {
-			logs.Error(err)
-			goto re
-		}
-		if !c.GetAddStatus() {
-			logs.Error(errAdd, v.Host)
-			goto re
-		}
-	}
+		// get tmp password
+		var b []byte
+		vkey := cnf.CommonConfig.VKey
+		if isPub {
+			// send global configuration to server and get status of config setting
+			if _, err := c.SendInfo(cnf.CommonConfig.Client, common.NEW_CONF); err != nil {
+				logs.Error(err)
+				continue
+			}
+			if !c.GetAddStatus() {
+				logs.Error("the web_user may have been occupied!")
+				continue
+			}
 
-	//send  task to server
-	for _, v := range cnf.Tasks {
-		if _, err := c.SendInfo(v, common.NEW_TASK); err != nil {
-			logs.Error(err)
-			goto re
+			if b, err = c.GetShortContent(16); err != nil {
+				logs.Error(err)
+				continue
+			}
+			vkey = string(b)
 		}
-		if !c.GetAddStatus() {
-			logs.Error(errAdd, v.Ports, v.Remark)
-			goto re
-		}
-		if v.Mode == "file" {
-			//start local file server
-			go startLocalFileServer(cnf.CommonConfig, v, vkey)
-		}
-	}
 
-	//create local server secret or p2p
-	for _, v := range cnf.LocalServer {
-		go StartLocalServer(v, cnf.CommonConfig)
-	}
+		if err := ioutil.WriteFile(filepath.Join(common.GetTmpPath(), "npc_vkey.txt"), []byte(vkey), 0600); err != nil {
+			logs.Error("Failed to write vkey file:", err)
+			continue
+		}
 
-	c.Close()
-	if cnf.CommonConfig.Client.WebUserName == "" || cnf.CommonConfig.Client.WebPassword == "" {
-		logs.Notice("web access login username:user password:%s", vkey)
-	} else {
-		logs.Notice("web access login username:%s password:%s", cnf.CommonConfig.Client.WebUserName, cnf.CommonConfig.Client.WebPassword)
+		//send hosts to server
+		for _, v := range cnf.Hosts {
+			if _, err := c.SendInfo(v, common.NEW_HOST); err != nil {
+				logs.Error(err)
+				continue
+			}
+			if !c.GetAddStatus() {
+				logs.Error(errAdd, v.Host)
+				continue
+			}
+		}
+
+		//send  task to server
+		for _, v := range cnf.Tasks {
+			if _, err := c.SendInfo(v, common.NEW_TASK); err != nil {
+				logs.Error(err)
+				continue
+			}
+			if !c.GetAddStatus() {
+				logs.Error(errAdd, v.Ports, v.Remark)
+				continue
+			}
+			if v.Mode == "file" {
+				//start local file server
+				go startLocalFileServer(cnf.CommonConfig, v, vkey)
+			}
+		}
+
+		//create local server secret or p2p
+		for _, v := range cnf.LocalServer {
+			go StartLocalServer(v, cnf.CommonConfig)
+		}
+
+		c.Close()
+		if cnf.CommonConfig.Client.WebUserName == "" || cnf.CommonConfig.Client.WebPassword == "" {
+			logs.Notice("web access login username:user password:%s", vkey)
+		} else {
+			logs.Notice("web access login username:%s password:%s", cnf.CommonConfig.Client.WebUserName, cnf.CommonConfig.Client.WebPassword)
+		}
+
+		NewRPClient(cnf.CommonConfig.Server, vkey, cnf.CommonConfig.Tp, cnf.CommonConfig.ProxyUrl, cnf, cnf.CommonConfig.DisconnectTime).Start()
+		CloseLocalServer()
 	}
-	NewRPClient(cnf.CommonConfig.Server, vkey, cnf.CommonConfig.Tp, cnf.CommonConfig.ProxyUrl, cnf, cnf.CommonConfig.DisconnectTime).Start()
-	CloseLocalServer()
-	goto re
 }
 
 // Create a new connection with the server and verify it
@@ -198,6 +205,10 @@ func NewConn(tp string, vkey string, server string, connType string, proxyUrl st
 	var err error
 	var connection net.Conn
 	var sess *kcp.UDPSession
+
+	timeout := time.Second * 10
+	dialer := net.Dialer{Timeout: timeout}
+
 	if tp == "tcp" {
 		if proxyUrl != "" {
 			u, er := url.Parse(proxyUrl)
@@ -217,12 +228,10 @@ func NewConn(tp string, vkey string, server string, connType string, proxyUrl st
 		} else {
 			if GetTlsEnable() {
 				//tls 流量加密
-				conf := &tls.Config{
-					InsecureSkipVerify: true,
-				}
-				connection, err = tls.Dial("tcp", server, conf)
+				conf := &tls.Config{InsecureSkipVerify: true}
+				connection, err = tls.DialWithDialer(&dialer, "tcp", server, conf)
 			} else {
-				connection, err = net.Dial("tcp", server)
+				connection, err = dialer.Dial("tcp", server)
 			}
 
 			//header := &proxyproto.Header{
@@ -249,11 +258,14 @@ func NewConn(tp string, vkey string, server string, connType string, proxyUrl st
 			connection = sess
 		}
 	}
+
 	if err != nil {
 		return nil, err
 	}
-	connection.SetDeadline(time.Now().Add(time.Second * 10))
-	defer connection.SetDeadline(time.Time{})
+
+	defer connection.SetDeadline(time.Time{}) // 解除超时限制
+	connection.SetDeadline(time.Now().Add(timeout))
+
 	c := conn.NewConn(connection)
 	if _, err := c.Write([]byte(common.CONN_TEST)); err != nil {
 		return nil, err
@@ -264,6 +276,7 @@ func NewConn(tp string, vkey string, server string, connType string, proxyUrl st
 	if err := c.WriteLenContent([]byte(version.VERSION)); err != nil {
 		return nil, err
 	}
+
 	b, err := c.GetShortContent(32)
 	if err != nil {
 		logs.Error(err)
@@ -273,6 +286,7 @@ func NewConn(tp string, vkey string, server string, connType string, proxyUrl st
 		//logs.Error("The client does not match the server version. The current core version of the client is", version.GetVersion())
 		//return nil, err
 	}
+
 	if _, err := c.Write([]byte(common.Getverifyval(vkey))); err != nil {
 		return nil, err
 	}
@@ -281,6 +295,7 @@ func NewConn(tp string, vkey string, server string, connType string, proxyUrl st
 	} else if s == common.VERIFY_EER {
 		return nil, errors.New(fmt.Sprintf("Validation key %s incorrect", vkey))
 	}
+
 	if _, err := c.Write([]byte(connType)); err != nil {
 		return nil, err
 	}

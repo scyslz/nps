@@ -34,12 +34,15 @@ func NewTunnelModeServer(process process, bridge NetBridge, task *file.Tunnel) *
 //开始
 func (s *TunnelModeServer) Start() error {
 	return conn.NewTcpListenerAndProcess(s.task.ServerIp+":"+strconv.Itoa(s.task.Port), func(c net.Conn) {
+
 		if err := s.CheckFlowAndConnNum(s.task.Client); err != nil {
 			logs.Warn("client id %d, task id %d,error %s, when tcp connection", s.task.Client.Id, s.task.Id, err.Error())
 			c.Close()
 			return
 		}
+
 		logs.Trace("new tcp connection,local port %d,client %d,remote address %s", s.task.Port, s.task.Client.Id, c.RemoteAddr())
+
 		err := s.process(conn.NewConn(c), s)
 		if err == nil {
 			s.task.Client.AddConn()

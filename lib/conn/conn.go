@@ -3,11 +3,9 @@ package conn
 import (
 	"bufio"
 	"bytes"
-	"ehang.io/nps/lib/goroutine"
 	"encoding/binary"
 	"encoding/json"
 	"errors"
-	"github.com/astaxie/beego/logs"
 	"io"
 	"net"
 	"net/http"
@@ -20,8 +18,10 @@ import (
 	"ehang.io/nps/lib/common"
 	"ehang.io/nps/lib/crypt"
 	"ehang.io/nps/lib/file"
+	"ehang.io/nps/lib/goroutine"
 	"ehang.io/nps/lib/pmux"
 	"ehang.io/nps/lib/rate"
+	"github.com/astaxie/beego/logs"
 	"github.com/xtaci/kcp-go"
 )
 
@@ -425,6 +425,7 @@ type LenConn struct {
 func NewLenConn(conn io.Writer) *LenConn {
 	return &LenConn{conn: conn}
 }
+
 func (c *LenConn) Write(p []byte) (n int, err error) {
 	n, err = c.conn.Write(p)
 	c.Len += n

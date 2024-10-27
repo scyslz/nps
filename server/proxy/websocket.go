@@ -25,7 +25,7 @@ type HTTPError struct {
 }
 
 type HttpReverseProxy struct {
-	BaseServer
+	//BaseServer
 	proxy                 *ReverseProxy
 	responseHeaderTimeout time.Duration
 }
@@ -109,9 +109,9 @@ func (*flowConn) SetWriteDeadline(t time.Time) error { return nil }
 
 func NewHttpReverseProxy(s *httpServer) *HttpReverseProxy {
 	rp := &HttpReverseProxy{
-		BaseServer: BaseServer{
-			task: s.task, // 从 httpServer 传入 task，确保 task 被正确初始化
-		},
+		//BaseServer: BaseServer{
+		//	task: s.task, // 从 httpServer 传入 task，确保 task 被正确初始化
+		//},
 		responseHeaderTimeout: 30 * time.Second,
 	}
 	local, _ := net.ResolveTCPAddr("tcp", "127.0.0.1")
