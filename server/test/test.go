@@ -48,7 +48,7 @@ func TestServerConfig() {
 		}
 	}
 	if p := beego.AppConfig.String("https_proxy_port"); p != "" {
-		if b, err := beego.AppConfig.Bool("https_just_proxy"); !(err == nil && b) {
+		//if b, err := beego.AppConfig.Bool("https_just_proxy"); !(err == nil && b) {
 			if port, err := strconv.Atoi(p); err != nil {
 				log.Fatalln("get https port error", err)
 			} else {
@@ -60,7 +60,7 @@ func TestServerConfig() {
 				}
 				isInArr(&postTcpArr, port, "http port", "tcp")
 			}
-		}
+		//}
 	}
 }
 

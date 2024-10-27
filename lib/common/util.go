@@ -7,7 +7,7 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
-	"github.com/astaxie/beego"
+	//"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
 	"html/template"
 	"io"
@@ -141,21 +141,22 @@ func Getverifyval(vkey string) string {
 }
 
 // Change headers and host of request
-func ChangeHostAndHeader(r *http.Request, host string, header string, addr string) {
+func ChangeHostAndHeader(r *http.Request, host string, header string, addr string, addOrigin bool) {
 	if host != "" {
 		r.Host = host
 	}
 	if header != "" {
 		h := strings.Split(header, "\n")
 		for _, v := range h {
-			hd := strings.Split(v, ":")
+			v = strings.TrimRight(v, "\r") // 去除每行末尾的 `\r`
+			hd := strings.SplitN(v, ":", 2) // 以第一个冒号为分割点
 			if len(hd) == 2 {
-				r.Header.Set(hd[0], hd[1])
+				r.Header.Set(strings.TrimSpace(hd[0]), strings.TrimSpace(hd[1]))
 			}
 		}
 	}
-	// Handle IPv6 addresses properly for X-Forwarded-For
-	if strings.HasPrefix(addr, "[") && strings.Contains(addr, "]:") {
+	// 处理 IPv6 地址，确保 X-Forwarded-For 正确格式
+	if strings.HasPrefix(addr, "[") && strings.Contains(addr, "]") {
 		addr = addr[1:strings.LastIndex(addr, "]")]
 	} else {
 		addr = strings.Split(addr, ":")[0]
@@ -164,7 +165,7 @@ func ChangeHostAndHeader(r *http.Request, host string, header string, addr strin
 		addr = strings.Join(prior, ", ") + ", " + addr
 	}
 
-	addOrigin, _ := beego.AppConfig.Bool("http_add_origin_header")
+	//addOrigin, _ := beego.AppConfig.Bool("http_add_origin_header")
 
 	if addOrigin {
 		logs.Debug("set X-Forwarded-For X-Real-IP = " + addr)

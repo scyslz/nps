@@ -31,22 +31,24 @@ type httpServer struct {
 	httpsListener net.Listener
 	useCache      bool
 	addOrigin     bool
+	httpOnlyPass  string
 	cache         *cache.Cache
 	cacheLen      int
 }
 
-func NewHttp(bridge *bridge.Bridge, c *file.Tunnel, httpPort, httpsPort int, useCache bool, cacheLen int, addOrigin bool) *httpServer {
+func NewHttp(bridge *bridge.Bridge, c *file.Tunnel, httpPort, httpsPort int, useCache bool, cacheLen int, httpOnlyPass string, addOrigin bool) *httpServer {
 	httpServer := &httpServer{
 		BaseServer: BaseServer{
 			task:   c,
 			bridge: bridge,
 			Mutex:  sync.Mutex{},
 		},
-		httpPort:  httpPort,
-		httpsPort: httpsPort,
-		useCache:  useCache,
-		cacheLen:  cacheLen,
-		addOrigin: addOrigin,
+		httpPort:      httpPort,
+		httpsPort:     httpsPort,
+		useCache:      useCache,
+		cacheLen:      cacheLen,
+		httpOnlyPass:  httpOnlyPass,
+		addOrigin:     addOrigin,
 	}
 	if useCache {
 		httpServer.cache = cache.New(cacheLen)
@@ -102,7 +104,6 @@ func (s *httpServer) Close() error {
 }
 
 func (s *httpServer) handleTunneling(w http.ResponseWriter, r *http.Request) {
-
 	var host *file.Host
 	var err error
 	host, err = file.GetDb().GetInfoByHost(r.Host, r)
@@ -111,8 +112,14 @@ func (s *httpServer) handleTunneling(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// 检查是否为 HTTP-only 请求
+	isHttpOnlyRequest := s.httpOnlyPass != "" && r.Header.Get("X-NPS-Http-Only") == s.httpOnlyPass
+	if isHttpOnlyRequest {
+		r.Header.Del("X-NPS-Http-Only") // 删除头部，保持请求的原始性
+	}
+
 	// 自动 http 301 https
-	if host.AutoHttps && r.TLS == nil {
+	if !isHttpOnlyRequest && host.AutoHttps && r.TLS == nil {
 		http.Redirect(w, r, "https://"+r.Host+r.RequestURI, http.StatusMovedPermanently)
 		return
 	}
@@ -136,12 +143,11 @@ func (s *httpServer) handleTunneling(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusServiceUnavailable)
 		}
 
-		s.handleHttp(conn.NewConn(c), r)
+		s.handleHttp(conn.NewConn(c), r, isHttpOnlyRequest)
 	}
-
 }
 
-func (s *httpServer) handleHttp(c *conn.Conn, r *http.Request) {
+func (s *httpServer) handleHttp(c *conn.Conn, r *http.Request, isHttpOnlyRequest bool) {
 	var (
 		host       *file.Host
 		target     net.Conn
@@ -266,7 +272,7 @@ reset:
 		}
 
 		//change the host and header and set proxy setting
-		common.ChangeHostAndHeader(r, host.HostChange, host.HeaderChange, c.Conn.RemoteAddr().String())
+		common.ChangeHostAndHeader(r, host.HostChange, host.HeaderChange, c.Conn.RemoteAddr().String(), s.addOrigin && !isHttpOnlyRequest)
 
 		logs.Info("%s request, method %s, host %s, url %s, remote address %s, target %s", r.URL.Scheme, r.Method, r.Host, r.URL.Path, remoteAddr, lk.Host)
 
@@ -325,7 +331,6 @@ func (s *httpServer) NewServer(port int, scheme string) *http.Server {
 }
 
 func (s *httpServer) NewServerWithTls(port int, scheme string, l net.Listener, certFile string, keyFile string) error {
-
 	if certFile == "" || keyFile == "" {
 		logs.Error("证书文件为空")
 		return nil

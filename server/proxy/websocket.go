@@ -115,16 +115,24 @@ func NewHttpReverseProxy(s *httpServer) *HttpReverseProxy {
 		responseHeaderTimeout: 30 * time.Second,
 	}
 	local, _ := net.ResolveTCPAddr("tcp", "127.0.0.1")
+
 	proxy := NewReverseProxy(&httputil.ReverseProxy{
 		Director: func(r *http.Request) {
 			host := r.Context().Value("host").(*file.Host)
+
+			// 检查是否为 HTTP-only 请求
+			isHttpOnlyRequest := s.httpOnlyPass != "" && r.Header.Get("X-NPS-Http-Only") == s.httpOnlyPass
+			if isHttpOnlyRequest {
+				r.Header.Del("X-NPS-Http-Only") // 删除该头部
+			}
 
 			// 保存 Connection 和 Upgrade 头信息
 			upgradeHeader := r.Header.Get("Upgrade")
 			connectionHeader := r.Header.Get("Connection")
 
 			// 修改 Host 和其他头信息
-			common.ChangeHostAndHeader(r, host.HostChange, host.HeaderChange, "")
+			logs.Debug("websocket %s, isHttpOnlyRequest %s", r.RemoteAddr, isHttpOnlyRequest)
+			common.ChangeHostAndHeader(r, host.HostChange, host.HeaderChange, r.RemoteAddr, s.addOrigin && !isHttpOnlyRequest)
 
 			// 恢复 Connection 和 Upgrade 头信息
 			if upgradeHeader != "" {
@@ -194,6 +202,7 @@ func NewHttpReverseProxy(s *httpServer) *HttpReverseProxy {
 			host:            host,
 		}, nil
 	}
+
 	rp.proxy = proxy
 	return rp
 }

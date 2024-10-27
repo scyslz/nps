@@ -151,7 +151,8 @@ func NewMode(Bridge *bridge.Bridge, c *file.Tunnel) proxy.Service {
 		useCache, _ := beego.AppConfig.Bool("http_cache")
 		cacheLen, _ := beego.AppConfig.Int("http_cache_length")
 		addOrigin, _ := beego.AppConfig.Bool("http_add_origin_header")
-		service = proxy.NewHttp(Bridge, c, httpPort, httpsPort, useCache, cacheLen, addOrigin)
+		httpOnlyPass := beego.AppConfig.String("x_nps_http_only")
+		service = proxy.NewHttp(Bridge, c, httpPort, httpsPort, useCache, cacheLen, httpOnlyPass, addOrigin)
 	}
 	return service
 }
