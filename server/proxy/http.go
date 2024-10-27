@@ -118,6 +118,11 @@ func (s *httpServer) handleTunneling(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if r.Header.Get("Upgrade") != "" {
+		// 确保 Host 头设置正确
+		if host.HostChange != "" {
+			r.Host = host.HostChange
+			r.Header.Set("Host", host.HostChange)
+		}
 		rProxy := NewHttpReverseProxy(s)
 		rProxy.ServeHTTP(w, r)
 	} else {

@@ -1,13 +1,9 @@
 package proxy
 
 import (
+	"bufio"
 	"context"
-	"ehang.io/nps/lib/common"
-	"ehang.io/nps/lib/conn"
-	"ehang.io/nps/lib/file"
-	"ehang.io/nps/lib/goroutine"
 	"errors"
-	"github.com/astaxie/beego/logs"
 	"io"
 	"net"
 	"net/http"
@@ -15,6 +11,12 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"ehang.io/nps/lib/common"
+	"ehang.io/nps/lib/conn"
+	"ehang.io/nps/lib/file"
+	"ehang.io/nps/lib/goroutine"
+	"github.com/astaxie/beego/logs"
 )
 
 type HTTPError struct {
@@ -27,6 +29,7 @@ type HttpReverseProxy struct {
 	proxy                 *ReverseProxy
 	responseHeaderTimeout time.Duration
 }
+
 type flowConn struct {
 	io.ReadWriteCloser
 	fakeAddr net.Addr
@@ -48,6 +51,8 @@ func (rp *HttpReverseProxy) ServeHTTP(rw http.ResponseWriter, req *http.Request)
 		return
 	}
 
+	// 删除对认证信息的检查，让后端服务器处理 WebSocket 认证
+	/*
 	var accountMap map[string]string
 	if rp.task.MultiAccount == nil {
 		accountMap = nil
@@ -59,6 +64,8 @@ func (rp *HttpReverseProxy) ServeHTTP(rw http.ResponseWriter, req *http.Request)
 		rw.Write([]byte("Unauthorized"))
 		return
 	}
+	*/
+
 	if targetAddr, err = host.Target.GetRandomTarget(); err != nil {
 		rw.WriteHeader(http.StatusBadGateway)
 		rw.Write([]byte("502 Bad Gateway"))
@@ -103,8 +110,7 @@ func (*flowConn) SetWriteDeadline(t time.Time) error { return nil }
 func NewHttpReverseProxy(s *httpServer) *HttpReverseProxy {
 	rp := &HttpReverseProxy{
 		BaseServer: BaseServer{
-			task:   s.task,  // 从 httpServer 传入 task，确保 task 被正确初始化
-			bridge: s.bridge,
+			task: s.task, // 从 httpServer 传入 task，确保 task 被正确初始化
 		},
 		responseHeaderTimeout: 30 * time.Second,
 	}
@@ -112,7 +118,21 @@ func NewHttpReverseProxy(s *httpServer) *HttpReverseProxy {
 	proxy := NewReverseProxy(&httputil.ReverseProxy{
 		Director: func(r *http.Request) {
 			host := r.Context().Value("host").(*file.Host)
+
+			// 保存 Connection 和 Upgrade 头信息
+			upgradeHeader := r.Header.Get("Upgrade")
+			connectionHeader := r.Header.Get("Connection")
+
+			// 修改 Host 和其他头信息
 			common.ChangeHostAndHeader(r, host.HostChange, host.HeaderChange, "")
+
+			// 恢复 Connection 和 Upgrade 头信息
+			if upgradeHeader != "" {
+				r.Header.Set("Upgrade", upgradeHeader)
+			}
+			if connectionHeader != "" {
+				r.Header.Set("Connection", connectionHeader)
+			}
 		},
 		Transport: &http.Transport{
 			ResponseHeaderTimeout: rp.responseHeaderTimeout,
@@ -234,33 +254,75 @@ func (p *ReverseProxy) ServeHTTP(rw http.ResponseWriter, req *http.Request, host
 
 func (p *ReverseProxy) serveWebSocket(rw http.ResponseWriter, req *http.Request, host *file.Host) {
 	if p.WebSocketDialContext == nil {
-		rw.WriteHeader(500)
+		rw.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+
 	targetConn, err := p.WebSocketDialContext(req.Context(), "tcp", "")
 	if err != nil {
-		rw.WriteHeader(501)
+		rw.WriteHeader(http.StatusBadGateway)
 		return
 	}
 	defer targetConn.Close()
 
-	p.Director(req)
+	// 确保使用 HTTP/1.1
+	req.Proto = "HTTP/1.1"
+	req.ProtoMajor = 1
+	req.ProtoMinor = 1
+
+	// 设置 Host 头信息
+	if host.HostChange != "" {
+		req.Host = host.HostChange
+		req.Header.Set("Host", host.HostChange)
+	}
+
+	// 确保请求头中包含正确的 Connection 和 Upgrade 头信息
+	req.Header.Set("Connection", "Upgrade")
+	req.Header.Set("Upgrade", "websocket")
 
 	hijacker, ok := rw.(http.Hijacker)
 	if !ok {
-		rw.WriteHeader(500)
+		rw.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	conn, _, errHijack := hijacker.Hijack()
+	clientConn, bufrw, errHijack := hijacker.Hijack()
 	if errHijack != nil {
-		rw.WriteHeader(500)
+		rw.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	defer conn.Close()
+	defer clientConn.Close()
 
-	req.Write(targetConn)
+	// 将客户端的请求写入目标服务器
+	err = req.Write(targetConn)
+	if err != nil {
+		rw.WriteHeader(http.StatusBadGateway)
+		return
+	}
 
-	Join(conn, targetConn, host)
+	// 从目标服务器读取响应，并确保响应成功
+	targetReader := bufio.NewReader(targetConn)
+	resp, err := http.ReadResponse(targetReader, req)
+	if err != nil || resp.StatusCode != http.StatusSwitchingProtocols {
+		rw.WriteHeader(http.StatusBadGateway)
+		return
+	}
+
+	// 将响应写回客户端
+	err = resp.Write(bufrw)
+	if err != nil {
+		rw.WriteHeader(http.StatusBadGateway)
+		return
+	}
+
+	// 刷新缓冲区
+	err = bufrw.Flush()
+	if err != nil {
+		rw.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	// WebSocket 握手完成，开始传输数据
+	Join(clientConn, targetConn, host)
 }
 
 func Join(c1 io.ReadWriteCloser, c2 io.ReadWriteCloser, host *file.Host) (inCount int64, outCount int64) {
