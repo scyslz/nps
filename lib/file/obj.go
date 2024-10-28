@@ -195,15 +195,26 @@ type MultiAccount struct {
 }
 
 func (s *Target) GetRandomTarget() (string, error) {
+	// 初始化 TargetArr 并过滤空行
 	if s.TargetArr == nil {
-		s.TargetArr = strings.Split(strings.ReplaceAll(s.TargetStr, "\r\n", "\n"), "\n")
+		lines := strings.Split(strings.ReplaceAll(s.TargetStr, "\r\n", "\n"), "\n")
+		for _, v := range lines {
+			trimmed := strings.TrimSpace(v) // 去除前后空白
+			if trimmed != "" {
+				s.TargetArr = append(s.TargetArr, trimmed)
+			}
+		}
 	}
+
+	// 确保 TargetArr 中有有效内容
 	if len(s.TargetArr) == 1 {
 		return s.TargetArr[0], nil
 	}
 	if len(s.TargetArr) == 0 {
 		return "", errors.New("all inward-bending targets are offline")
 	}
+
+	// 锁定并更新索引
 	s.Lock()
 	defer s.Unlock()
 	if s.nowIndex >= len(s.TargetArr)-1 {

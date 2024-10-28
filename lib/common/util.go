@@ -460,8 +460,9 @@ func GetEnvMap() map[string]string {
 func TrimArr(arr []string) []string {
 	newArr := make([]string, 0)
 	for _, v := range arr {
-		if v != "" {
-			newArr = append(newArr, v)
+		trimmed := strings.TrimSpace(v) // 去除前后空白
+		if trimmed != "" {
+			newArr = append(newArr, trimmed)
 		}
 	}
 	return newArr
