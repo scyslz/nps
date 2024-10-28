@@ -48,19 +48,17 @@ func TestServerConfig() {
 		}
 	}
 	if p := beego.AppConfig.String("https_proxy_port"); p != "" {
-		//if b, err := beego.AppConfig.Bool("https_just_proxy"); !(err == nil && b) {
-			if port, err := strconv.Atoi(p); err != nil {
-				log.Fatalln("get https port error", err)
-			} else {
-				if beego.AppConfig.String("pemPath") != "" && !common.FileExists(filepath.Join(common.GetRunPath(), beego.AppConfig.String("pemPath"))) {
-					log.Fatalf("ssl certFile %s is not exist", beego.AppConfig.String("pemPath"))
-				}
-				if beego.AppConfig.String("keyPath") != "" && !common.FileExists(filepath.Join(common.GetRunPath(), beego.AppConfig.String("keyPath"))) {
-					log.Fatalf("ssl keyFile %s is not exist", beego.AppConfig.String("pemPath"))
-				}
-				isInArr(&postTcpArr, port, "http port", "tcp")
+		if port, err := strconv.Atoi(p); err != nil {
+			log.Fatalln("get https port error", err)
+		} else {
+			if beego.AppConfig.String("pemPath") != "" && !common.FileExists(filepath.Join(common.GetRunPath(), beego.AppConfig.String("pemPath"))) {
+				log.Fatalf("ssl certFile %s is not exist", beego.AppConfig.String("pemPath"))
 			}
-		//}
+			if beego.AppConfig.String("keyPath") != "" && !common.FileExists(filepath.Join(common.GetRunPath(), beego.AppConfig.String("keyPath"))) {
+				log.Fatalf("ssl keyFile %s is not exist", beego.AppConfig.String("pemPath"))
+			}
+			isInArr(&postTcpArr, port, "http port", "tcp")
+		}
 	}
 }
 

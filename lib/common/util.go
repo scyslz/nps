@@ -7,7 +7,7 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
-	//"github.com/astaxie/beego"
+	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
 	"html/template"
 	"io"
@@ -141,32 +141,44 @@ func Getverifyval(vkey string) string {
 }
 
 // Change headers and host of request
-func ChangeHostAndHeader(r *http.Request, host string, header string, addr string, addOrigin bool) {
+func ChangeHostAndHeader(r *http.Request, host string, header string, addr string, httpOnly bool) {
+	// 设置 Host 头部信息
 	if host != "" {
 		r.Host = host
 	}
+
+	// 设置自定义头部信息
 	if header != "" {
-		h := strings.Split(header, "\n")
+		h := strings.Split(strings.ReplaceAll(header, "\r\n", "\n"), "\n")
 		for _, v := range h {
-			v = strings.TrimRight(v, "\r") // 去除每行末尾的 `\r`
-			hd := strings.SplitN(v, ":", 2) // 以第一个冒号为分割点
+			hd := strings.SplitN(v, ":", 2)
 			if len(hd) == 2 {
 				r.Header.Set(strings.TrimSpace(hd[0]), strings.TrimSpace(hd[1]))
 			}
 		}
 	}
-	// 处理 IPv6 地址，确保 X-Forwarded-For 正确格式
+
+	// 处理 IPv6 地址
 	if strings.HasPrefix(addr, "[") && strings.Contains(addr, "]") {
 		addr = addr[1:strings.LastIndex(addr, "]")]
 	} else {
 		addr = strings.Split(addr, ":")[0]
 	}
+
+	// 获取 X-Forwarded-For 头部的先前值
 	if prior, ok := r.Header["X-Forwarded-For"]; ok {
 		addr = strings.Join(prior, ", ") + ", " + addr
 	}
 
-	//addOrigin, _ := beego.AppConfig.Bool("http_add_origin_header")
+	// 判断是否需要添加真实 IP 信息
+	var addOrigin bool
+	if !httpOnly {
+		addOrigin, _ = beego.AppConfig.Bool("http_add_origin_header")
+	} else {
+		addOrigin = false
+	}
 
+	// 添加 X-Forwarded-For 和 X-Real-IP 头部信息
 	if addOrigin {
 		logs.Debug("set X-Forwarded-For X-Real-IP = " + addr)
 		r.Header.Set("X-Forwarded-For", addr)
@@ -573,11 +585,4 @@ func GetServerIpByClientIp(clientIp net.IP) string {
 
 func PrintVersion() {
 	fmt.Printf("Version: %s\nCore version: %s\nSame core version of client and server can connect each other\n", version.VERSION, version.GetVersion())
-}
-
-// SafeClose safely closes a connection and ignores any error if the connection is already closed.
-func SafeClose(c net.Conn) {
-    if c != nil {
-        _ = c.Close()
-    }
 }

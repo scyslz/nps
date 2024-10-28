@@ -131,8 +131,8 @@ func NewHttpReverseProxy(s *httpServer) *HttpReverseProxy {
 			connectionHeader := r.Header.Get("Connection")
 
 			// 修改 Host 和其他头信息
-			logs.Debug("websocket %s, isHttpOnlyRequest %s", r.RemoteAddr, isHttpOnlyRequest)
-			common.ChangeHostAndHeader(r, host.HostChange, host.HeaderChange, r.RemoteAddr, s.addOrigin && !isHttpOnlyRequest)
+			//logs.Debug("websocket %s, isHttpOnlyRequest %s", r.RemoteAddr, isHttpOnlyRequest)
+			common.ChangeHostAndHeader(r, host.HostChange, host.HeaderChange, r.RemoteAddr, isHttpOnlyRequest)
 
 			// 恢复 Connection 和 Upgrade 头信息
 			if upgradeHeader != "" {
@@ -202,7 +202,6 @@ func NewHttpReverseProxy(s *httpServer) *HttpReverseProxy {
 			host:            host,
 		}, nil
 	}
-
 	rp.proxy = proxy
 	return rp
 }

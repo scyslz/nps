@@ -272,7 +272,7 @@ reset:
 		}
 
 		//change the host and header and set proxy setting
-		common.ChangeHostAndHeader(r, host.HostChange, host.HeaderChange, c.Conn.RemoteAddr().String(), s.addOrigin && !isHttpOnlyRequest)
+		common.ChangeHostAndHeader(r, host.HostChange, host.HeaderChange, c.Conn.RemoteAddr().String(), isHttpOnlyRequest)
 
 		logs.Info("%s request, method %s, host %s, url %s, remote address %s, target %s", r.URL.Scheme, r.Method, r.Host, r.URL.Path, remoteAddr, lk.Host)
 
