@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io"
 	"net"
+	"fmt"
 	"strconv"
 
 	"ehang.io/nps/lib/common"
@@ -203,7 +204,7 @@ func (s *Sock5ModeServer) handleUDP(c net.Conn) {
 	//读取端口
 	var port uint16
 	binary.Read(c, binary.BigEndian, &port)
-	logs.Warn(host, string(port))
+	logs.Warn(host, fmt.Sprint(port))
 	replyAddr, err := net.ResolveUDPAddr("udp", s.task.ServerIp+":0")
 	if err != nil {
 		logs.Error("build local reply addr error", err)
