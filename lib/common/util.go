@@ -158,12 +158,14 @@ func ChangeHostAndHeader(r *http.Request, host string, header string, addr strin
 		}
 	}
 
+	logs.Debug("get X-Remote-Addr = " + addr)
 	// 处理 IPv6 地址
 	if strings.HasPrefix(addr, "[") && strings.Contains(addr, "]") {
 		addr = addr[1:strings.LastIndex(addr, "]")]
 	} else {
 		addr = strings.Split(addr, ":")[0]
 	}
+	logs.Debug("get X-Remote-IP = " + addr)
 
 	// 获取 X-Forwarded-For 头部的先前值
 	if prior, ok := r.Header["X-Forwarded-For"]; ok {

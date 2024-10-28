@@ -196,7 +196,7 @@ type MultiAccount struct {
 
 func (s *Target) GetRandomTarget() (string, error) {
 	if s.TargetArr == nil {
-		s.TargetArr = strings.Split(s.TargetStr, "\n")
+		s.TargetArr = strings.Split(strings.ReplaceAll(s.TargetStr, "\r\n", "\n"), "\n")
 	}
 	if len(s.TargetArr) == 1 {
 		return s.TargetArr[0], nil

@@ -131,7 +131,7 @@ func (s *Bridge) GetHealthFromClient(id int, c *conn.Conn) {
 				if v.Client.Id == id && v.Mode == "tcp" && strings.Contains(v.Target.TargetStr, info) {
 					v.Lock()
 					if v.Target.TargetArr == nil || (len(v.Target.TargetArr) == 0 && len(v.HealthRemoveArr) == 0) {
-						v.Target.TargetArr = common.TrimArr(strings.Split(v.Target.TargetStr, "\n"))
+						v.Target.TargetArr = common.TrimArr(strings.Split(strings.ReplaceAll(v.Target.TargetStr, "\r\n", "\n"), "\n"))
 					}
 					v.Target.TargetArr = common.RemoveArrVal(v.Target.TargetArr, info)
 					if v.HealthRemoveArr == nil {
@@ -147,7 +147,7 @@ func (s *Bridge) GetHealthFromClient(id int, c *conn.Conn) {
 				if v.Client.Id == id && strings.Contains(v.Target.TargetStr, info) {
 					v.Lock()
 					if v.Target.TargetArr == nil || (len(v.Target.TargetArr) == 0 && len(v.HealthRemoveArr) == 0) {
-						v.Target.TargetArr = common.TrimArr(strings.Split(v.Target.TargetStr, "\n"))
+						v.Target.TargetArr = common.TrimArr(strings.Split(strings.ReplaceAll(v.Target.TargetStr, "\r\n", "\n"), "\n"))
 					}
 					v.Target.TargetArr = common.RemoveArrVal(v.Target.TargetArr, info)
 					if v.HealthRemoveArr == nil {
