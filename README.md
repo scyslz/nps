@@ -16,12 +16,12 @@ nps是一款轻量级、高性能、功能强大的**内网穿透**代理服务�
 ***DockerHub***： [NPS](https://hub.docker.com/r/duan2001/nps) [NPC](https://hub.docker.com/r/duan2001/npc)
 
 ## 更新日志 
-- 2024-10-27  v0.26.21  
+- 2024-10-28  v0.26.21  
   - 修复websocket支持(支持类似homeassistant的网站反向代理)
-  - 删除websocket的认证操作，交给应用层进行处理
-  - 重构优化代码（目前测试CPU占用还可以，功能也正常，不知道引入没引入新BUG，代码维护的人多了有点乱腾）
+    删除websocket的认证操作，交给应用层进行处理
+  - 重构优化代码（目前简单测试功能正常，CPU占用也不高，不知道引入没引入新BUG，代码维护的人多了有点乱腾）
   - 新增X-NPS-Http-Only头支持，当需要在NPS前添加反向代理时可以通过插入头（X-NPS-Http-Only: password）
-  - 修复重构代码引入的Bug
+    此时可以反向代理http_proxy_port避免301重定向和添加真实IP
 
 - 2024-10-25  v0.26.20  
   - 修复ipv6支持
