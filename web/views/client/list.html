@@ -73,6 +73,7 @@
                 + getRow('word-compress', '<span langtag="word-' + row.Cnf.Compress + '"></span>')
                 + getRow('word-connectbyconfig', '<span langtag="word-' + row.ConfigConnAllow + '"></span>')
                 + getRow('word-blackip', row.BlackIpList)
+                + getRow('word-createtime', row.CreateTime)
                 + getRow('word-lastonlinetime', row.LastOnlineTime)
                 + getRow('word-commandclient', "<code>./npc{{.win}} -server={{.ip}}:{{.p}} -vkey=" + row.VerifyKey + " -type=" + {{.bridgeType}} + "</code>", true)
                 + getRow('word-commandclient-tls', "<code>./npc{{.win}} -server={{.ip}}:{{.tls_p}} -vkey=" + row.VerifyKey + " -tls_enable=true</code>", true)
