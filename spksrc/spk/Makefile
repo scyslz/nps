@@ -3,7 +3,7 @@ SPK_VERS = $(VERSION)
 SPK_REV = 1
 SPK_ICON = src/npc.png
 
-DEPENDS = cross/busybox cross/npc
+DEPENDS = cross/busybox cross/$(SPK_NAME)
 SPK_CONFLICT = npc
 #UNSUPPORTED_ARCHES = $(PPC_ARCHES)
 
@@ -63,7 +63,7 @@ ENV += GOPATH="$(WORK_DIR)" \
 	GOOS=linux \
 	GOARCH="$(GO_ARCH)" \
 	CGO_ENABLED=0 \
-	PATH=$(WORK_DIR)/../../../native/go/work-native/go/bin/:$$PATH \
+	PATH=$(WORK_DIR)/../../../native/go/work-native/go/bin/:$$PATH
 
 .PHONY: npc_extra_install
 npc_extra_install: copy_msg

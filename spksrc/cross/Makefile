@@ -13,8 +13,8 @@ LICENSE  = ISC
 DEPENDS = native/go
 
 CONFIGURE_TARGET = nope
-COMPILE_TARGET = npc_compile
-INSTALL_TARGET = npc_install
+COMPILE_TARGET = nps_compile
+INSTALL_TARGET = nps_install
 
 include ../../mk/spksrc.cross-cc.mk
 
@@ -38,9 +38,10 @@ ifeq ($(findstring $(ARCH),$(x64_ARCHES)),$(ARCH))
 GO_ARCH = amd64
 endif
 
-NPC_DIR = $(WORK_DIR)/src/github.com/$(PKG_NAME)/nps-$(PKG_VERS)
+#PKG_NAME=nps
+NPS_DIR = $(WORK_DIR)/src/github.com/$(PKG_NAME)/nps-$(PKG_VERS)
 EXTRACT_PATH = $(WORK_DIR)/src/github.com/$(PKG_NAME)
-NPC_BIN = $(WORK_DIR)/src/github.com/$(PKG_NAME)/nps-$(PKG_VERS)/npc
+NPS_BIN = $(WORK_DIR)/src/github.com/$(PKG_NAME)/nps-$(PKG_VERS)/$(PKG_NAME)
 
 CONF_ARGS = -ldflags="-s -w"
 ENV += GOPATH="$(WORK_DIR)" \
@@ -50,12 +51,12 @@ ENV += GOPATH="$(WORK_DIR)" \
 	GOPROXY=direct \
 	PATH=$(WORK_DIR)/../../../native/go/work-native/go/bin/:$$PATH \
 
-.PHONY: npc_compile
-npc_compile:
+.PHONY: nps_compile
+nps_compile:
 	mkdir -p $(GOPATH)/bin
-	cd $(NPC_DIR) && cp -rf /spksrc/nps/* ./ && env $(ENV) go build $(CONF_ARGS) cmd/npc/npc.go
+	cd $(NPS_DIR) && cp -rf /spksrc/nps/* ./ && env $(ENV) go build $(CONF_ARGS) cmd/npc/npc.go
 
-.PHONY: npc_install
-npc_install:
+.PHONY: nps_install
+nps_install:
 	mkdir -p $(STAGING_INSTALL_PREFIX)/bin
-	install -m 755 $(NPC_BIN) $(STAGING_INSTALL_PREFIX)/bin
+	install -m 755 $(NPS_BIN) $(STAGING_INSTALL_PREFIX)/bin
