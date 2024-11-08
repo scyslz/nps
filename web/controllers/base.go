@@ -24,7 +24,6 @@ type BaseController struct {
 //初始化参数
 func (s *BaseController) Prepare() {
 	s.Data["web_base_url"] = beego.AppConfig.String("web_base_url")
-	s.Data["data"] = map[string]interface{}{"version": server.GetDashboardData()["version"]}
 	controllerName, actionName := s.GetControllerAndAction()
 	s.controllerName = strings.ToLower(controllerName[0 : len(controllerName)-10])
 	s.actionName = strings.ToLower(actionName)
@@ -70,7 +69,6 @@ func (s *BaseController) Prepare() {
 //加载模板
 func (s *BaseController) display(tpl ...string) {
 	s.Data["web_base_url"] = beego.AppConfig.String("web_base_url")
-	s.Data["data"] = map[string]interface{}{"version": server.GetDashboardData()["version"]}
 	var tplname string
 	if s.Data["menu"] == nil {
 		s.Data["menu"] = s.actionName
