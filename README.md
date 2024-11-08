@@ -15,7 +15,14 @@ nps是一款轻量级、高性能、功能强大的**内网穿透**代理服务�
 
 ***DockerHub***： [NPS](https://hub.docker.com/r/duan2001/nps) [NPC](https://hub.docker.com/r/duan2001/npc)
 
-## 更新日志 
+## 更新日志
+- 2024-11-09  v0.26.24
+  - 修复语言翻译缺失
+  - 请求静态文件携带版本号，避免浏览器缓存旧文件（升级后记得替换web目录）
+  - 优化代码逻辑和效率
+  - 修复通配符匹配优先级，另外优先匹配Host其次是Location
+  - 新增群晖套件编译
+
 - 2024-11-08  v0.26.23  
   - 合并同类项目分支补丁更新
     - 客户端增加创建时间 [yisier](https://github.com/yisier/nps)
