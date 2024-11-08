@@ -31,7 +31,7 @@ SSS_SCRIPT = src/service-setup.sh
 SERVICE_TYPE = legacy
 SERVICE_URL = /webman/3rdparty/npc/index.cgi
 INSTALL_PREFIX = /usr/local/$(SPK_NAME)
-PRE_COPY_TARGET = dnscrypt_extra_install
+PRE_COPY_TARGET = npc_extra_install
 BUSYBOX_CONFIG = usrmng daemon
 ENV += BUSYBOX_CONFIG="$(BUSYBOX_CONFIG)"
 include ../../mk/spksrc.spk.mk
@@ -60,19 +60,19 @@ endif
 
 CONF_ARGS = -ldflags="-s -w"
 ENV += GOPATH="$(WORK_DIR)" \
-	GOOS=linux \
-	GOARCH="$(GO_ARCH)" \
-	CGO_ENABLED=0 \
-	PATH=$(WORK_DIR)/../../../native/go/work-native/go/bin/:$$PATH
+    GOOS=linux \
+    GOARCH="$(GO_ARCH)" \
+    CGO_ENABLED=0 \
+    PATH=$(WORK_DIR)/../../../native/go/work-native/go/bin/:$$PATH
 
-.PHONY: dnscrypt_extra_install
-dnscrypt_extra_install: copy_msg
-	@echo "===> Copying files"
-	mkdir -p $(STAGING_DIR)/conf/
-	cp -rf $(CURDIR)/src/conf/* $(STAGING_DIR)/conf/
-#	install -m 755 $(CURDIR)/src/update-blocklist.sh $(STAGING_DIR)/blocklist/update-blocklist.sh
-	@echo "===> UI - Copying files"
-	mkdir -p $(STAGING_DIR)/$(DSM_UI_DIR)/
-	cp -rf $(CURDIR)/src/$(DSM_UI_DIR)/* $(STAGING_DIR)/$(DSM_UI_DIR)/
-	@echo "===> UI - Compiling cgi"
-	env $(ENV) go build $(CONF_ARGS) -o $(STAGING_DIR)/$(DSM_UI_DIR)/index.cgi $(CURDIR)/src/$(DSM_UI_DIR)/cgi.go
+.PHONY: npc_extra_install
+npc_extra_install: copy_msg
+    @echo "===> Copying files"
+    mkdir -p $(STAGING_DIR)/conf/
+    cp -rf $(CURDIR)/src/conf/* $(STAGING_DIR)/conf/
+#    install -m 755 $(CURDIR)/src/update-blocklist.sh $(STAGING_DIR)/blocklist/update-blocklist.sh
+    @echo "===> UI - Copying files"
+    mkdir -p $(STAGING_DIR)/$(DSM_UI_DIR)/
+    cp -rf $(CURDIR)/src/$(DSM_UI_DIR)/* $(STAGING_DIR)/$(DSM_UI_DIR)/
+    @echo "===> UI - Compiling cgi"
+    env $(ENV) go build $(CONF_ARGS) -o $(STAGING_DIR)/$(DSM_UI_DIR)/index.cgi $(CURDIR)/src/$(DSM_UI_DIR)/cgi.go
