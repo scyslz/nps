@@ -340,94 +340,61 @@ func (s *DbUtils) GetInfoByHost(host string, r *http.Request) (h *Host, err erro
 			return true
 		}
 
-		// 判断是完全匹配还是通配符匹配
-		if v.Host == host {
-			hosts = append(hosts, v) // 完全匹配，直接添加到候选列表
-		} else if strings.Contains(v.Host, "*") {
-			// 使用精确的通配符匹配逻辑
-			if isPreciseWildcardMatch(host, v.Host) {
-				hosts = append(hosts, v)
-			}
-		}
-		return true
-	})
-
-	// 遍历候选列表，选择最精确的匹配项
-	for _, v := range hosts {
 		// 如果 Location 没有设置，默认匹配所有路径
 		if v.Location == "" {
 			v.Location = "/"
 		}
 
-		// 检查请求 URI 是否从左往右包含当前 Host 项的 Location
-		if leftToRightContains(r.RequestURI, v.Location) {
-			// 优先选择更具体的匹配项
-			// 1. 如果 h 为空，则直接选中当前项
-			// 2. 如果 v 的 Host 层级更高，或 Location 包含层级最多，优先选择该项
-			if h == nil || isMoreSpecificMatch(v, h, r.RequestURI) {
-				h = v
+		// 如果请求的路径为空（如使用 WebSocket 协议时），默认路径为 /
+		requestPath := r.RequestURI
+		if requestPath == "" {
+			requestPath = "/"
+		}
+
+		// 判断是否匹配域名和路径
+		if v.Host == host && strings.HasPrefix(requestPath, v.Location) {
+			hosts = append(hosts, v) // 完全匹配的域名，路径匹配
+		} else if strings.HasPrefix(v.Host, "*") {
+			patternDomain := v.Host[1:] // 去掉 `*`
+			if strings.HasSuffix(host, patternDomain) && strings.HasPrefix(requestPath, v.Location) {
+				hosts = append(hosts, v) // 通配符匹配的域名，路径匹配
+			}
+		}
+		return true
+	})
+
+	// 查找最合适的匹配项
+	var bestMatch *Host
+	for _, v := range hosts {
+		if bestMatch == nil {
+			bestMatch = v
+			continue
+		}
+
+		// 比较域名长度，去掉通配符后的长度越长优先级越高
+		iDomainLength := len(strings.TrimPrefix(v.Host, "*"))
+		bestDomainLength := len(strings.TrimPrefix(bestMatch.Host, "*"))
+		if iDomainLength > bestDomainLength {
+			bestMatch = v
+		} else if iDomainLength == bestDomainLength {
+			// 如果域名长度相同，则比较路径长度，路径越长优先级越高
+			if len(v.Location) > len(bestMatch.Location) {
+				bestMatch = v
+			} else if len(v.Location) == len(bestMatch.Location) {
+				// 如果域名长度和路径长度相同，优先匹配域名完全一致的项
+				if !strings.HasPrefix(v.Host, "*") && strings.HasPrefix(bestMatch.Host, "*") {
+					bestMatch = v
+				}
 			}
 		}
 	}
 
 	// 如果找到匹配项，则返回；否则返回错误
-	if h != nil {
+	if bestMatch != nil {
+		h = bestMatch
 		return
 	}
+
 	err = errors.New("The host could not be parsed")
 	return
-}
-
-// leftToRightContains 函数用于从左往右检查路径的包含关系
-func leftToRightContains(requestURI, location string) bool {
-	// 将 requestURI 和 location 按路径层级拆分
-	requestParts := strings.Split(requestURI, "/")
-	locationParts := strings.Split(location, "/")
-
-	// 如果请求路径层级少于配置路径层级，则不匹配
-	if len(requestParts) < len(locationParts) {
-		return false
-	}
-
-	// 从左往右逐级检查是否包含
-	for i := range locationParts {
-		if requestParts[i] != locationParts[i] {
-			return false
-		}
-	}
-	return true
-}
-
-// isPreciseWildcardMatch 函数用于从右往左进行更精确的通配符匹配
-func isPreciseWildcardMatch(host, pattern string) bool {
-	if strings.HasPrefix(pattern, "*.") {
-		patternDomain := pattern[2:] // 移除 `*.`
-
-		// 检查 host 是否以 patternDomain 结尾，并且层级多于 pattern
-		return strings.HasSuffix(host, patternDomain) && strings.Count(host, ".") > strings.Count(patternDomain, ".")
-	} else if strings.HasPrefix(pattern, "*") {
-		// 对 `*example.com` 匹配
-		return strings.HasSuffix(host, pattern[1:])
-	}
-	return false
-}
-
-// isMoreSpecificMatch 函数用于比较两个 Host 项的具体性
-func isMoreSpecificMatch(v, h *Host, requestURI string) bool {
-	// 比较 Host 层级
-	vHostLevel := strings.Count(v.Host, ".")
-	hHostLevel := strings.Count(h.Host, ".")
-
-	// 若 v 的 Host 层级更高，优先选择 v
-	if vHostLevel > hHostLevel {
-		return true
-	} else if vHostLevel < hHostLevel {
-		return false
-	}
-
-	// 若 Host 层级相同，则比较 Location 的包含层级
-	vLocationLevel := strings.Count(v.Location, "/")
-	hLocationLevel := strings.Count(h.Location, "/")
-
-	return vLocationLevel > hLocationLevel || (vLocationLevel == hLocationLevel && len(v.Location) > len(h.Location))
 }
