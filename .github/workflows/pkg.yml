@@ -4,12 +4,12 @@ on:
   workflow_dispatch:
   release:
     types: [published]
-    branches: [ master ]
+    branches: [master]
 
 jobs:
 
   build_assets:
-    
+
     runs-on: ubuntu-latest
     steps:
 
@@ -87,8 +87,8 @@ jobs:
       run: |
         git clone https://github.com/SynoCommunity/spksrc.git ~/spksrc
         mkdir ~/spksrc/nps && cp -rf ./* ~/spksrc/nps/
-	mkdir ~/spksrc/spk/npc && cp -rf ./spksrc/spk/* ~/spksrc/spk/npc/
-	mkdir ~/spksrc/cross/npc && cp -rf ./spksrc/cross/* ~/spksrc/cross/npc/
+        mkdir ~/spksrc/spk/npc && cp -rf ./spksrc/spk/* ~/spksrc/spk/npc/
+        mkdir ~/spksrc/cross/npc && cp -rf ./spksrc/cross/* ~/spksrc/cross/npc/
         docker run -id --name spksrc --env VERSION=${{ env.RELEASE_VERSION }} -e GOPROXY=direct -v ~/spksrc:/spksrc synocommunity/spksrc /bin/bash
         docker exec spksrc /bin/bash -c 'cd /spksrc && make setup && cd /spksrc/spk/npc && make'
         cp ~/spksrc/packages/npc_noarch-all_${{ env.RELEASE_VERSION }}-1.spk ./npc_syno.spk
@@ -100,4 +100,3 @@ jobs:
           npc_syno.spk
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
