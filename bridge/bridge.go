@@ -54,11 +54,11 @@ type Bridge struct {
 	CloseClient    chan int
 	SecretChan     chan *conn.Secret
 	ipVerify       bool
-	runList        sync.Map //map[int]interface{}
+	runList        *sync.Map //map[int]interface{}
 	disconnectTime int
 }
 
-func NewTunnel(tunnelPort int, tunnelType string, ipVerify bool, runList sync.Map, disconnectTime int) *Bridge {
+func NewTunnel(tunnelPort int, tunnelType string, ipVerify bool, runList *sync.Map, disconnectTime int) *Bridge {
 	return &Bridge{
 		TunnelPort:     tunnelPort,
 		tunnelType:     tunnelType,
@@ -131,7 +131,7 @@ func (s *Bridge) GetHealthFromClient(id int, c *conn.Conn) {
 				if v.Client.Id == id && v.Mode == "tcp" && strings.Contains(v.Target.TargetStr, info) {
 					v.Lock()
 					if v.Target.TargetArr == nil || (len(v.Target.TargetArr) == 0 && len(v.HealthRemoveArr) == 0) {
-						v.Target.TargetArr = common.TrimArr(strings.Split(strings.ReplaceAll(v.Target.TargetStr, "\r\n", "\n"), "\n"))
+						v.Target.TargetArr = common.TrimArr(strings.Split(v.Target.TargetStr, "\n"))
 					}
 					v.Target.TargetArr = common.RemoveArrVal(v.Target.TargetArr, info)
 					if v.HealthRemoveArr == nil {
@@ -147,7 +147,7 @@ func (s *Bridge) GetHealthFromClient(id int, c *conn.Conn) {
 				if v.Client.Id == id && strings.Contains(v.Target.TargetStr, info) {
 					v.Lock()
 					if v.Target.TargetArr == nil || (len(v.Target.TargetArr) == 0 && len(v.HealthRemoveArr) == 0) {
-						v.Target.TargetArr = common.TrimArr(strings.Split(strings.ReplaceAll(v.Target.TargetStr, "\r\n", "\n"), "\n"))
+						v.Target.TargetArr = common.TrimArr(strings.Split(v.Target.TargetStr, "\n"))
 					}
 					v.Target.TargetArr = common.RemoveArrVal(v.Target.TargetArr, info)
 					if v.HealthRemoveArr == nil {
@@ -201,7 +201,7 @@ func (s *Bridge) cliProcess(c *conn.Conn) {
 		return
 	}
 	//version check
-	if b, err := c.GetShortLenContent(); err != nil || string(b) != version.GetVersion() {
+	if ver, err := c.GetShortLenContent(); err != nil || string(ver) != version.GetVersion() {
 		//logs.Info("The client %s version does not match or error occurred", c.Conn.RemoteAddr())
 		//c.Close()
 		//common.SafeClose(c)
@@ -211,7 +211,7 @@ func (s *Bridge) cliProcess(c *conn.Conn) {
 	var vs []byte
 	var err error
 	if vs, err = c.GetShortLenContent(); err != nil {
-		logs.Info("get client %s version error", err.Error())
+		logs.Error("Get client %s version error: %s", c.Conn.RemoteAddr(), err.Error())
 		c.Close()
 		return
 	}
@@ -227,7 +227,7 @@ func (s *Bridge) cliProcess(c *conn.Conn) {
 	//verify
 	id, err := file.GetDb().GetIdByVerifyKey(string(buf), c.Conn.RemoteAddr().String())
 	if err != nil {
-		logs.Info("Current client connection validation error, close this client: %s", c.Conn.RemoteAddr())
+		logs.Error("Client %s vkey %s validation error, close it's connection.", c.Conn.RemoteAddr(), string(buf))
 		s.verifyError(c)
 		return
 	} else {
@@ -270,7 +270,6 @@ func (s *Bridge) typeDeal(typeVal string, c *conn.Conn, id int, vs string) {
 			c.Close()
 			return
 		}
-
 		tcpConn, ok := c.Conn.(*net.TCPConn)
 		if ok {
 			// add tcp keep alive option for signal connection

@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"strings"
 	"ehang.io/nps/lib/file"
 	"ehang.io/nps/server"
 	"ehang.io/nps/server/tool"
@@ -97,7 +98,7 @@ func (s *IndexController) Add() {
 			Port:      s.GetIntNoErr("port"),
 			ServerIp:  s.getEscapeString("server_ip"),
 			Mode:      s.getEscapeString("type"),
-			Target:    &file.Target{TargetStr: s.getEscapeString("target"), LocalProxy: s.GetBoolNoErr("local_proxy")},
+			Target:    &file.Target{TargetStr: strings.ReplaceAll(s.getEscapeString("target"), "\r\n", "\n"), LocalProxy: s.GetBoolNoErr("local_proxy")},
 			Id:        id,
 			Status:    true,
 			Remark:    s.getEscapeString("remark"),
@@ -177,7 +178,7 @@ func (s *IndexController) Edit() {
 			}
 			t.ServerIp = s.getEscapeString("server_ip")
 			t.Mode = s.getEscapeString("type")
-			t.Target = &file.Target{TargetStr: s.getEscapeString("target")}
+			t.Target = &file.Target{TargetStr: strings.ReplaceAll(s.getEscapeString("target"), "\r\n", "\n")}
 			t.Password = s.getEscapeString("password")
 			t.Id = id
 			t.LocalPath = s.getEscapeString("local_path")
@@ -263,7 +264,7 @@ func (s *IndexController) AddHost() {
 		h := &file.Host{
 			Id:           id,
 			Host:         s.getEscapeString("host"),
-			Target:       &file.Target{TargetStr: s.getEscapeString("target"), LocalProxy: s.GetBoolNoErr("local_proxy")},
+			Target:       &file.Target{TargetStr: strings.ReplaceAll(s.getEscapeString("target"), "\r\n", "\n"), LocalProxy: s.GetBoolNoErr("local_proxy")},
 			HeaderChange: s.getEscapeString("header"),
 			HostChange:   s.getEscapeString("hostchange"),
 			Remark:       s.getEscapeString("remark"),
@@ -320,7 +321,7 @@ func (s *IndexController) EditHost() {
 				h.Client = client
 			}
 			h.Host = s.getEscapeString("host")
-			h.Target = &file.Target{TargetStr: s.getEscapeString("target")}
+			h.Target = &file.Target{TargetStr: strings.ReplaceAll(s.getEscapeString("target"), "\r\n", "\n")}
 			h.HeaderChange = s.getEscapeString("header")
 			h.HostChange = s.getEscapeString("hostchange")
 			h.Remark = s.getEscapeString("remark")
