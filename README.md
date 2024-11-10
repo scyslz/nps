@@ -1,6 +1,5 @@
 # NPS
 ![](https://img.shields.io/github/stars/djylb/nps.svg)   ![](https://img.shields.io/github/forks/djylb/nps.svg)
-[![Gitter](https://badges.gitter.im/cnlh-nps/community.svg)](https://gitter.im/cnlh-nps/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 ![Release](https://github.com/djylb/nps/workflows/Release/badge.svg)
 ![GitHub All Releases](https://img.shields.io/github/downloads/djylb/nps/total)
 
@@ -11,7 +10,9 @@ nps是一款轻量级、高性能、功能强大的**内网穿透**代理服务�
 # 说明
 由于[nps](https://github.com/ehang-io/nps)已经有二年多的时间没有更新了，存留了不少bug和未完善的功能。
 
-此版本基于 nps 0.26.10的基础上二次开发而来。
+此版本基于 nps 0.26 的基础上二次开发而来。
+
+[Telegram](https://t.me/npsdev)
 
 ***DockerHub***： [NPS](https://hub.docker.com/r/duan2001/nps) [NPC](https://hub.docker.com/r/duan2001/npc)
 
@@ -22,6 +23,8 @@ nps是一款轻量级、高性能、功能强大的**内网穿透**代理服务�
   - 优化代码逻辑和效率
   - 修复通配符匹配优先级（优先完全匹配Host，通配符根据匹配程度确定优先级）
   - 修复根据路径分流功能
+
+<details>
 
 - 2024-11-08  v0.26.23  
   - 合并同类项目分支补丁更新
@@ -134,3 +137,4 @@ nps是一款轻量级、高性能、功能强大的**内网穿透**代理服务�
 - 2022-09-14:  
 修改NPS工作目录为当前可执行文件目录（即配置文件和nps可执行文件放在同一目录下，直接执行nps文件即可），去除注册系统服务，启动、停止、升级等命令
 
+</details>
