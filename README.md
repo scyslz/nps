@@ -12,18 +12,15 @@ nps是一款轻量级、高性能、功能强大的**内网穿透**代理服务�
 
 此版本基于 nps 0.26 的基础上二次开发而来。
 
-由于 [yisier](https://github.com/yisier/nps) 分支更新不再活跃且其公益云NPS项目闭源违反了原始[nps](https://github.com/ehang-io/nps)项目[GPL](https://github.com/ehang-io/nps/blob/master/LICENSE)协议，客户端存在被当作肉鸡的可能，本人不再信任该分支的开发。但仍旧感谢其之前对NPS项目做出的贡献。
-
-![image](https://github.com/user-attachments/assets/56c23fc9-71cd-45df-a820-9b3c71a760fd)
-目前本人已被对方拉黑，看来对方急了。
-
-同时本人承诺对该项目的后续维护更新。
-
 [Telegram](https://t.me/npsdev)
 
 ***DockerHub***： [NPS](https://hub.docker.com/r/duan2001/nps) [NPC](https://hub.docker.com/r/duan2001/npc)
 
 ## 更新日志
+- 2024-11-09  v0.26.25
+  - 调整界面显示
+  - 增强日志控制
+
 - 2024-11-09  v0.26.24
   - 修复语言翻译缺失
   - 请求静态文件携带版本号，避免浏览器缓存旧文件（升级后记得替换web目录）
