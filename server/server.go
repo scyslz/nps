@@ -508,6 +508,16 @@ func GetDashboardData() map[string]interface{} {
 	return data
 }
 
+// 获取服务端版本号
+func GetVersion() string {
+    return version.VERSION
+}
+
+// 获取年份
+func GetCurrentYear() int {
+    return time.Now().Year()
+}
+
 // 实例化流量数据到文件
 func flowSession(m time.Duration) {
 	ticker := time.NewTicker(m)

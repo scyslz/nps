@@ -69,6 +69,8 @@ func (s *BaseController) Prepare() {
 //加载模板
 func (s *BaseController) display(tpl ...string) {
 	s.Data["web_base_url"] = beego.AppConfig.String("web_base_url")
+	s.Data["version"] = server.GetVersion()
+	s.Data["year"] = server.GetCurrentYear()
 	var tplname string
 	if s.Data["menu"] == nil {
 		s.Data["menu"] = s.actionName
@@ -103,7 +105,8 @@ func (s *BaseController) display(tpl ...string) {
 //错误
 func (s *BaseController) error() {
 	s.Data["web_base_url"] = beego.AppConfig.String("web_base_url")
-	s.Data["data"] = map[string]interface{}{"version": server.GetDashboardData()["version"]}
+	s.Data["version"] = server.GetVersion()
+	s.Data["year"] = server.GetCurrentYear()
 	s.Layout = "public/layout.html"
 	s.TplName = "public/error.html"
 }
