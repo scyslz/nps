@@ -23,9 +23,6 @@ import (
 
 // 全局配置变量
 var (
-	svcName        = flag.String("svc_name", "Npc", "Service name (Npc)")
-        svcDisplayName = flag.String("svc_display_name", "NPS内网穿透客户端", "Service display name")
-        svcDescription = flag.String("svc_description", "一款轻量级、功能强大的内网穿透代理客户端。", "Service description")
 	serverAddr     = flag.String("server", "", "Server addr (ip:port)")
 	configPath     = flag.String("config", "", "Configuration file path")
 	verifyKey      = flag.String("vkey", "", "Authentication key")
@@ -69,9 +66,9 @@ func main() {
 	// 初始化服务
 	options := make(service.KeyValue)
 	svcConfig := &service.Config{
-		Name:        *svcName,
-		DisplayName: *svcDisplayName,
-		Description: *svcDescription,
+		Name:        "Npc",
+		DisplayName: "nps内网穿透客户端",
+		Description: "一款轻量级、功能强大的内网穿透代理服务器。支持tcp、udp流量转发，支持内网http代理、内网socks5代理，同时支持snappy压缩、站点保护、加密传输、多路复用、header修改等。支持web图形化管理，集成多用户模式。",
 		Option:      options,
 	}
 
