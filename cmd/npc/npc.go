@@ -23,12 +23,15 @@ import (
 
 // 全局配置变量
 var (
+	svcName        = flag.String("svc_name", "Npc", "Service name (Npc)")
+        svcDisplayName = flag.String("svc_display_name", "NPS内网穿透客户端", "Service display name")
+        svcDescription = flag.String("svc_description", "一款轻量级、功能强大的内网穿透代理客户端。", "Service description")
 	serverAddr     = flag.String("server", "", "Server addr (ip:port)")
 	configPath     = flag.String("config", "", "Configuration file path")
 	verifyKey      = flag.String("vkey", "", "Authentication key")
-	logType        = flag.String("log", "stdout", "Log output mode (stdout|file)")
+	logType        = flag.String("log", "file", "Log output mode (stdout|file|both|off)")
 	connType       = flag.String("type", "tcp", "Connection type with the server (kcp|tcp)")
-	proxyUrl       = flag.String("proxy", "", "Proxy socks5 URL (eg: socks5://111:222@127.0.0.1:9007)")
+	proxyUrl       = flag.String("proxy", "", "Proxy socks5 URL (eg: socks5://user:pass@127.0.0.1:9007)")
 	logLevel       = flag.String("log_level", "7", "Log level 0~7")
 	registerTime   = flag.Int("time", 2, "Register time in hours")
 	localPort      = flag.Int("local_port", 2000, "P2P local port")
@@ -36,9 +39,10 @@ var (
 	target         = flag.String("target", "", "P2P target")
 	localType      = flag.String("local_type", "p2p", "P2P target type")
 	logPath        = flag.String("log_path", "", "NPC log path (empty to use default, 'off' to disable)")
-	logMaxSize     = flag.Int("log_max_size", 10, "Maximum log file size in MB before rotation (0 to disable)")
-	logMaxDays     = flag.Int("log_max_days", 7, "Number of days to retain old log files (0 to disable)")
-	logDaily       = flag.Bool("log_daily", false, "Rotate log daily (true or false)")
+	logMaxSize     = flag.Int("log_max_size", 5, "Maximum log file size in MB before rotation (0 to disable)")
+	logMaxDays     = flag.String("log_max_days", "7", "Number of days to retain old log files (0 to disable)")
+	logMaxFiles    = flag.String("log_max_files", "10", "Maximum number of log files to retain (0 to disable)")
+	logDaily       = flag.String("log_daily", "false", "Rotate log daily (true or false)")
 	debug          = flag.Bool("debug", true, "Enable debug mode")
 	pprofAddr      = flag.String("pprof", "", "PProf debug address (ip:port)")
 	stunAddr       = flag.String("stun_addr", "stun.stunprotocol.org:3478", "STUN server address")
@@ -63,52 +67,11 @@ func main() {
 	configureLogging()
 
 	// 初始化服务
-	initService()
-}
-
-// 配置日志记录
-func configureLogging() {
-	// 处理日志路径默认值
-	if *logPath == "" {
-		*logPath = common.GetNpcLogPath() // 使用默认路径
-	} else if strings.EqualFold(*logPath, "off") || strings.EqualFold(*logPath, "false") || strings.EqualFold(*logPath, "/dev/null") {
-		*logPath = "" // 禁用文件日志输出
-	}
-
-	// 针对 Windows 系统调整日志路径中的反斜杠
-	if common.IsWindows() && *logPath != "" {
-		*logPath = strings.Replace(*logPath, "\\", "\\\\", -1)
-	}
-
-	// 仅启用控制台日志（如果 logPath 被禁用）
-	if *logPath == "" {
-		if *debug {
-			logs.SetLogger(logs.AdapterConsole, `{"level":`+*logLevel+`,"color":true}`)
-		}
-		return
-	}
-
-	// 设置文件日志，按大小和天数滚动
-	if strings.EqualFold(*logType, "file") {
-		logs.SetLogger(logs.AdapterFile, `{
-			"filename":"`+*logPath+`",
-			"level":`+*logLevel+`,
-			"daily":`+fmt.Sprintf("%v", *logDaily)+`,
-			"maxsize":`+fmt.Sprintf("%d", *logMaxSize*1024*1024)+`, 
-			"maxdays":`+fmt.Sprintf("%d", *logMaxDays)+`
-		}`)
-	} else { // 默认控制台日志
-		logs.SetLogger(logs.AdapterConsole, `{"level":`+*logLevel+`,"color":true}`)
-	}
-}
-
-// 初始化服务
-func initService() {
 	options := make(service.KeyValue)
 	svcConfig := &service.Config{
-		Name:        "Npc",
-		DisplayName: "nps内网穿透客户端",
-		Description: "一款轻量级、功能强大的内网穿透代理服务器。支持tcp、udp流量转发，支持内网http代理、内网socks5代理，同时支持snappy压缩、站点保护、加密传输、多路复用、header修改等。支持web图形化管理，集成多用户模式。",
+		Name:        *svcName,
+		DisplayName: *svcDisplayName,
+		Description: *svcDescription,
 		Option:      options,
 	}
 
@@ -140,25 +103,15 @@ func initService() {
 	s, err := service.New(prg, svcConfig)
 	if err != nil {
 		logs.Error(err, "service function disabled")
-		runWithoutService()
+		run()
+		// run without service
+		wg := sync.WaitGroup{}
+		wg.Add(1)
+		wg.Wait()
 		return
 	}
 
 	// 处理服务命令
-	handleServiceCommands(s)
-	s.Run()
-}
-
-// 无服务运行
-func runWithoutService() {
-	run()
-	wg := sync.WaitGroup{}
-	wg.Add(1)
-	wg.Wait()
-}
-
-// 处理服务相关命令
-func handleServiceCommands(s service.Service) {
 	if len(os.Args) >= 2 {
 		switch os.Args[1] {
 		case "status":
@@ -173,72 +126,93 @@ func handleServiceCommands(s service.Service) {
 			install.UpdateNpc()
 			return
 		case "nat":
-			handleNAT()
+			c := stun.NewClient()
+			flag.CommandLine.Parse(os.Args[2:])
+			c.SetServerAddr(*stunAddr)
+			nat, host, err := c.Discover()
+			if err != nil || host == nil {
+				logs.Error("get nat type error", err)
+				return
+			}
+			fmt.Printf("nat type: %s \npublic address: %s\n", nat.String(), host.String())
+			os.Exit(0)
 		case "start", "stop", "restart":
-			handleUnixServiceCommands(s)
+			// support busyBox and sysV, for openWrt
+			if service.Platform() == "unix-systemv" {
+				logs.Info("unix-systemv service")
+				cmd := exec.Command("/etc/init.d/"+svcConfig.Name, os.Args[1])
+				err := cmd.Run()
+				if err != nil {
+					logs.Error(err)
+				}
+				return
+			}
+			err := service.Control(s, os.Args[1])
+			if err != nil {
+				logs.Error("Valid actions: %q\n%s", service.ControlAction, err.Error())
+			}
+			return
 		case "install":
-			installAndStartService(s)
+			service.Control(s, "stop")
+			service.Control(s, "uninstall")
+			install.InstallNpc()
+			err := service.Control(s, os.Args[1])
+			if err != nil {
+				logs.Error("Valid actions: %q\n%s", service.ControlAction, err.Error())
+			}
+			if service.Platform() == "unix-systemv" {
+				logs.Info("unix-systemv service")
+				confPath := "/etc/init.d/" + svcConfig.Name
+				os.Symlink(confPath, "/etc/rc.d/S90"+svcConfig.Name)
+				os.Symlink(confPath, "/etc/rc.d/K02"+svcConfig.Name)
+			}
+			return
 		case "uninstall":
-			uninstallService(s)
+			err := service.Control(s, os.Args[1])
+			if err != nil {
+				logs.Error("Valid actions: %q\n%s", service.ControlAction, err.Error())
+			}
+			if service.Platform() == "unix-systemv" {
+				logs.Info("unix-systemv service")
+				os.Remove("/etc/rc.d/S90" + svcConfig.Name)
+				os.Remove("/etc/rc.d/K02" + svcConfig.Name)
+			}
+			return
 		}
 	}
+	s.Run()
 }
 
-// NAT 处理
-func handleNAT() {
-	c := stun.NewClient()
-	flag.CommandLine.Parse(os.Args[2:])
-	c.SetServerAddr(*stunAddr)
-	nat, host, err := c.Discover()
-	if err != nil || host == nil {
-		logs.Error("get nat type error", err)
+// 配置日志记录
+func configureLogging() {
+	// 关闭日志输出
+	if strings.EqualFold(*logType, "off") || strings.EqualFold(*logType, "false") {
 		return
 	}
-	fmt.Printf("nat type: %s \npublic address: %s\n", nat.String(), host.String())
-	os.Exit(0)
-}
 
-// Unix 服务命令
-func handleUnixServiceCommands(s service.Service) {
-	if service.Platform() == "unix-systemv" {
-		logs.Info("unix-systemv service")
-		cmd := exec.Command("/etc/init.d/"+s.String(), os.Args[1])
-		if err := cmd.Run(); err != nil {
-			logs.Error(err)
-		}
-		return
+	// 控制台日志
+	if *debug {
+		logs.SetLogger(logs.AdapterConsole, `{"level":7,"color":true}`)
+	} else if strings.EqualFold(*logType, "stdout") || strings.EqualFold(*logType, "both") {
+		logs.SetLogger(logs.AdapterConsole, `{"level":`+*logLevel+`,"color":true}`)
 	}
-	if err := service.Control(s, os.Args[1]); err != nil {
-		logs.Error("Valid actions: %q\n%s", service.ControlAction, err.Error())
-	}
-}
 
-// 安装并启动服务
-func installAndStartService(s service.Service) {
-	service.Control(s, "stop")
-	service.Control(s, "uninstall")
-	install.InstallNpc()
-	if err := service.Control(s, os.Args[1]); err != nil {
-		logs.Error("Valid actions: %q\n%s", service.ControlAction, err.Error())
+	// 处理日志路径默认值
+	if *logPath == "" {
+		*logPath = common.GetNpcLogPath() // 使用默认路径
+	} else if strings.EqualFold(*logPath, "off") || strings.EqualFold(*logPath, "false") || strings.EqualFold(*logPath, "/dev/null") {
+		return // 禁用文件日志输出
 	}
-	if service.Platform() == "unix-systemv" {
-		logs.Info("unix-systemv service")
-		confPath := "/etc/init.d/" + s.String()
-		os.Symlink(confPath, "/etc/rc.d/S90"+s.String())
-		os.Symlink(confPath, "/etc/rc.d/K02"+s.String())
-	}
-}
 
-// 卸载服务
-func uninstallService(s service.Service) {
-	if err := service.Control(s, os.Args[1]); err != nil {
-		logs.Error("Valid actions: %q\n%s", service.ControlAction, err.Error())
+	// 针对 Windows 系统调整日志路径中的反斜杠
+	if common.IsWindows() {
+		*logPath = strings.Replace(*logPath, "\\", "\\\\", -1)
 	}
-	if service.Platform() == "unix-systemv" {
-		logs.Info("unix-systemv service")
-		os.Remove("/etc/rc.d/S90" + s.String())
-		os.Remove("/etc/rc.d/K02" + s.String())
-	}
+
+	// 设置文件日志，按大小、天数和文件数量滚动
+	if strings.EqualFold(*logType, "file") || strings.EqualFold(*logType, "both") {
+		logs.SetLogger(logs.AdapterFile, `{"level":`+*logLevel+`,"filename":"`+*logPath+`","daily":`+*logDaily+`,"maxfiles":`+*logMaxFiles+`,"maxdays":`+*logMaxDays+`,"maxsize":`+fmt.Sprintf("%d", *logMaxSize*1024*1024)+`,"maxlines":100000,"rotate":true,"color":true}`)
+        }
 }
 
 type npc struct {
