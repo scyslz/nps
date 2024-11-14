@@ -92,8 +92,10 @@ func main() {
 	}
 
 	svcConfig.Arguments = append(svcConfig.Arguments, "service")
-	if len(os.Args) > 1 && os.Args[1] == "service" {
-		_ = logs.SetLogger(logs.AdapterFile, `{"level":`+level+`,"filename":"`+logPath+`","daily":false,"maxlines":100000,"color":true}`)
+	if len(os.Args) > 1 && os.Args[1] == "service" && !strings.EqualFold(logPath, "docker") {
+		if !strings.EqualFold(logPath, "off") {
+			_ = logs.SetLogger(logs.AdapterFile, `{"level":`+level+`,"filename":"`+logPath+`","daily":false,"maxlines":100000,"color":true}`)
+		}
 	} else {
 		_ = logs.SetLogger(logs.AdapterConsole, `{"level":`+level+`,"color":true}`)
 	}
