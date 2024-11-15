@@ -62,6 +62,29 @@ func (s *TunnelModeServer) Start() error {
 
 			logs.Trace("new tcp connection, local port %d, client %d, remote address %s", s.task.Port, s.task.Client.Id, c.RemoteAddr())
 
+			// 如果启用了 Proxy Protocol，构造并发送 Proxy Protocol 头部
+			if s.task.ProxyProtocol == 1 {
+				// 生成并发送 Proxy Protocol v1 头部
+				proxyHeader := buildProxyProtocolV1Header(c)
+				logs.Debug("Sending Proxy Protocol v1 header: %s", proxyHeader)
+				_, err := c.Write([]byte(proxyHeader))
+				if err != nil {
+					logs.Error("Failed to send Proxy Protocol v1 header:", err)
+					c.Close()
+					return
+				}
+			} else if s.task.ProxyProtocol == 2 {
+				// 生成并发送 Proxy Protocol v2 头部
+				proxyHeader := buildProxyProtocolV2Header(c)
+				logs.Debug("Sending Proxy Protocol v2 header: %v", proxyHeader)
+				_, err := c.Write(proxyHeader)
+				if err != nil {
+					logs.Error("Failed to send Proxy Protocol v2 header:", err)
+					c.Close()
+					return
+				}
+			}
+
 			err := s.process(conn.NewConn(c), s)
 			if err == nil {
 				s.task.Client.AddConn()
@@ -138,25 +161,6 @@ func ProcessTunnel(c *conn.Conn, s *TunnelModeServer) error {
 		c.Close()
 		logs.Warn("tcp port %d ,client id %d,task id %d connect error %s", s.task.Port, s.task.Client.Id, s.task.Id, err.Error())
 		return err
-	}
-
-	// 检查是否启用 Proxy Protocol
-	if s.task.ProxyProtocol == 1 {
-		// 生成并写入 Proxy Protocol v1 头部
-		proxyHeader := buildProxyProtocolV1Header(c)
-		logs.Debug("Sending Proxy Protocol v1 header: %s", proxyHeader)
-		_, err := c.Write([]byte(proxyHeader))
-		if err != nil {
-			logs.Error("Failed to send Proxy Protocol v1 header:", err)
-		}
-	} else if s.task.ProxyProtocol == 2 {
-		// 生成并写入 Proxy Protocol v2 头部
-		proxyHeader := buildProxyProtocolV2Header(c)
-		logs.Debug("Sending Proxy Protocol v2 header: %v", proxyHeader)
-		_, err := c.Write(proxyHeader)
-		if err != nil {
-			logs.Error("Failed to send Proxy Protocol v2 header:", err)
-		}
 	}
 
 	return s.DealClient(c, s.task.Client, targetAddr, nil, common.CONN_TCP, nil, s.task.Client.Flow, s.task.Target.LocalProxy, s.task)
