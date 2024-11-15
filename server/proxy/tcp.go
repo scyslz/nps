@@ -5,6 +5,7 @@ import (
 	"net"
 	"net/http"
 	"path/filepath"
+	"encoding/binary"
 	"strconv"
 
 	"ehang.io/nps/bridge"
@@ -23,7 +24,7 @@ type TunnelModeServer struct {
 	stopChan chan struct{} // 新增停止通道
 }
 
-//tcp|http|host
+// tcp|http|host
 func NewTunnelModeServer(process process, bridge NetBridge, task *file.Tunnel) *TunnelModeServer {
 	s := new(TunnelModeServer)
 	s.bridge = bridge
@@ -33,7 +34,7 @@ func NewTunnelModeServer(process process, bridge NetBridge, task *file.Tunnel) *
 	return s
 }
 
-//开始
+// 开始
 func (s *TunnelModeServer) Start() error {
 	return conn.NewTcpListenerAndProcess(s.task.ServerIp+":"+strconv.Itoa(s.task.Port), func(c net.Conn) {
 		select {
@@ -58,18 +59,18 @@ func (s *TunnelModeServer) Start() error {
 	}, &s.listener)
 }
 
-//close
+// close
 func (s *TunnelModeServer) Close() error {
 	close(s.stopChan) // 关闭 stopChan 通道，触发所有监听的连接关闭
 	return s.listener.Close()
 }
 
-//web管理方式
+// web管理方式
 type WebServer struct {
 	BaseServer
 }
 
-//开始
+// 开始
 func (s *WebServer) Start() error {
 	p, _ := beego.AppConfig.Int("web_port")
 	if p == 0 {
@@ -100,7 +101,7 @@ func (s *WebServer) Close() error {
 	return nil
 }
 
-//new
+// new
 func NewWebServer(bridge *bridge.Bridge) *WebServer {
 	s := new(WebServer)
 	s.bridge = bridge
@@ -109,7 +110,7 @@ func NewWebServer(bridge *bridge.Bridge) *WebServer {
 
 type process func(c *conn.Conn, s *TunnelModeServer) error
 
-//tcp proxy
+// tcp proxy
 func ProcessTunnel(c *conn.Conn, s *TunnelModeServer) error {
 	targetAddr, err := s.task.Target.GetRandomTarget()
 	if err != nil {
@@ -118,10 +119,29 @@ func ProcessTunnel(c *conn.Conn, s *TunnelModeServer) error {
 		return err
 	}
 
+	// 检查是否启用 Proxy Protocol
+	if s.task.ProxyProtocol == 1 {
+		// 生成并写入 Proxy Protocol v1 头部
+		proxyHeader := buildProxyProtocolV1Header(c)
+		logs.Debug("Sending Proxy Protocol v1 header: %s", proxyHeader)
+		_, err := c.Write([]byte(proxyHeader))
+		if err != nil {
+			logs.Error("Failed to send Proxy Protocol v1 header:", err)
+		}
+	} else if s.task.ProxyProtocol == 2 {
+		// 生成并写入 Proxy Protocol v2 头部
+		proxyHeader := buildProxyProtocolV2Header(c)
+		logs.Debug("Sending Proxy Protocol v2 header: %v", proxyHeader)
+		_, err := c.Write(proxyHeader)
+		if err != nil {
+			logs.Error("Failed to send Proxy Protocol v2 header:", err)
+		}
+	}
+
 	return s.DealClient(c, s.task.Client, targetAddr, nil, common.CONN_TCP, nil, s.task.Client.Flow, s.task.Target.LocalProxy, s.task)
 }
 
-//http proxy
+// http proxy
 func ProcessHttp(c *conn.Conn, s *TunnelModeServer) error {
 	_, addr, rb, err, r := c.GetHost()
 	if err != nil {
@@ -140,5 +160,58 @@ func ProcessHttp(c *conn.Conn, s *TunnelModeServer) error {
 	}
 
 	return s.DealClient(c, s.task.Client, addr, rb, common.CONN_TCP, nil, s.task.Client.Flow, s.task.Target.LocalProxy, nil)
+}
 
+// 构造 Proxy Protocol v1 头部
+func buildProxyProtocolV1Header(c *conn.Conn) string {
+	clientAddr := c.RemoteAddr().(*net.TCPAddr)
+	targetAddr := c.LocalAddr().(*net.TCPAddr)
+
+	var protocol, clientIP, targetIP string
+	if clientAddr.IP.To4() != nil {
+		protocol = "TCP4"
+		clientIP = clientAddr.IP.String()
+		targetIP = targetAddr.IP.String()
+	} else {
+		protocol = "TCP6"
+		clientIP = "[" + clientAddr.IP.String() + "]"
+		targetIP = "[" + targetAddr.IP.String() + "]"
+	}
+
+	header := "PROXY " + protocol + " " + clientIP + " " + targetIP + " " +
+		strconv.Itoa(clientAddr.Port) + " " + strconv.Itoa(targetAddr.Port) + "\r\n"
+	return header
+}
+
+// 构造 Proxy Protocol v2 头部
+func buildProxyProtocolV2Header(c *conn.Conn) []byte {
+	clientAddr := c.RemoteAddr().(*net.TCPAddr)
+	targetAddr := c.LocalAddr().(*net.TCPAddr)
+
+	var header []byte
+	if clientAddr.IP.To4() != nil {
+		// IPv4
+		header = make([]byte, 16+12) // v2 头部长度为 16 字节固定头 + 12 字节的 IPv4 地址信息
+		copy(header[0:12], []byte{0x0d, 0x0a, 0x0d, 0x0a, 0x00, 0x0d, 0x0a, 0x51, 0x55, 0x49, 0x54, 0x0a})
+		header[12] = 0x21 // Proxy Protocol v2 的版本和命令
+		header[13] = 0x11 // 地址族和传输协议 (TCP over IPv4)
+		binary.BigEndian.PutUint16(header[14:16], 12) // 地址信息长度
+		copy(header[16:20], clientAddr.IP.To4())
+		copy(header[20:24], targetAddr.IP.To4())
+		binary.BigEndian.PutUint16(header[24:26], uint16(clientAddr.Port))
+		binary.BigEndian.PutUint16(header[26:28], uint16(targetAddr.Port))
+	} else {
+		// IPv6
+		header = make([]byte, 16+36) // v2 头部长度为 16 字节固定头 + 36 字节的 IPv6 地址信息
+		copy(header[0:12], []byte{0x0d, 0x0a, 0x0d, 0x0a, 0x00, 0x0d, 0x0a, 0x51, 0x55, 0x49, 0x54, 0x0a})
+		header[12] = 0x21 // Proxy Protocol v2 的版本和命令
+		header[13] = 0x21 // 地址族和传输协议 (TCP over IPv6)
+		binary.BigEndian.PutUint16(header[14:16], 36) // 地址信息长度
+		copy(header[16:32], clientAddr.IP.To16())
+		copy(header[32:48], targetAddr.IP.To16())
+		binary.BigEndian.PutUint16(header[48:50], uint16(clientAddr.Port))
+		binary.BigEndian.PutUint16(header[50:52], uint16(targetAddr.Port))
+	}
+
+	return header
 }

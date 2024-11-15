@@ -390,6 +390,22 @@
 		<zh-CN>端口</zh-CN>
 		<en-US>Port</en-US>
 	</lang>
+	<lang id="word-proxyprotocol">
+		<zh-CN>Proxy Protocol</zh-CN>
+		<en-US>Proxy Protocol</en-US>
+	</lang>
+	<lang id="word-disable">
+		<zh-CN>关闭</zh-CN>
+		<en-US>Disable</en-US>
+	</lang>
+	<lang id="word-proxyprotocolv1">
+		<zh-CN>Proxy Protocol v1</zh-CN>
+		<en-US>Proxy Protocol v1</en-US>
+	</lang>
+	<lang id="word-proxyprotocolv2">
+		<zh-CN>Proxy Protocol v2</zh-CN>
+		<en-US>Proxy Protocol v2</en-US>
+	</lang>	
 	<lang id="word-proxytolocal">
 		<zh-CN>代理到服务器本地</zh-CN>
 		<en-US>Proxy to server local</en-US>
