@@ -20,6 +20,7 @@ type TunnelModeServer struct {
 	BaseServer
 	process  process
 	listener net.Listener
+	stopChan chan struct{} // 新增停止通道
 }
 
 //tcp|http|host
@@ -28,31 +29,38 @@ func NewTunnelModeServer(process process, bridge NetBridge, task *file.Tunnel) *
 	s.bridge = bridge
 	s.process = process
 	s.task = task
+	s.stopChan = make(chan struct{}) // 初始化停止通道
 	return s
 }
 
 //开始
 func (s *TunnelModeServer) Start() error {
 	return conn.NewTcpListenerAndProcess(s.task.ServerIp+":"+strconv.Itoa(s.task.Port), func(c net.Conn) {
-
-		if err := s.CheckFlowAndConnNum(s.task.Client); err != nil {
-			logs.Warn("client id %d, task id %d,error %s, when tcp connection", s.task.Client.Id, s.task.Id, err.Error())
+		select {
+		case <-s.stopChan: // 如果接收到停止信号，立即关闭连接
+			logs.Info("Connection closed due to configuration change")
 			c.Close()
 			return
+		default:
+			if err := s.CheckFlowAndConnNum(s.task.Client); err != nil {
+				logs.Warn("client id %d, task id %d, error %s, when tcp connection", s.task.Client.Id, s.task.Id, err.Error())
+				c.Close()
+				return
+			}
+
+			logs.Trace("new tcp connection, local port %d, client %d, remote address %s", s.task.Port, s.task.Client.Id, c.RemoteAddr())
+
+			err := s.process(conn.NewConn(c), s)
+			if err == nil {
+				s.task.Client.AddConn()
+			}
 		}
-
-		logs.Trace("new tcp connection,local port %d,client %d,remote address %s", s.task.Port, s.task.Client.Id, c.RemoteAddr())
-
-		err := s.process(conn.NewConn(c), s)
-		if err == nil {
-			s.task.Client.AddConn()
-		}
-
 	}, &s.listener)
 }
 
 //close
 func (s *TunnelModeServer) Close() error {
+	close(s.stopChan) // 关闭 stopChan 通道，触发所有监听的连接关闭
 	return s.listener.Close()
 }
 
