@@ -115,17 +115,47 @@ func (s *BaseServer) DealClient(c *conn.Conn, client *file.Client, addr string,
 		return nil
 	}
 
+	// 创建连接链接
 	link := conn.NewLink(tp, addr, client.Cnf.Crypt, client.Cnf.Compress, c.Conn.RemoteAddr().String(), localProxy)
-	if target, err := s.bridge.SendLinkInfo(client.Id, link, s.task); err != nil {
+
+	// 获取目标连接
+	target, err := s.bridge.SendLinkInfo(client.Id, link, s.task)
+	if err != nil {
 		logs.Warn("get connection from client id %d  error %s", client.Id, err.Error())
 		c.Close()
 		return err
-	} else {
-		if f != nil {
-			f()
-		}
-		conn.CopyWaitGroup(target, c.Conn, link.Crypt, link.Compress, client.Rate, flow, true, rb, task)
 	}
+
+	// 在连接后端之前，发送 Proxy Protocol 头部
+	if task.ProxyProtocol == 1 {
+		proxyHeader := conn.BuildProxyProtocolV1Header(c)
+		logs.Debug("Sending Proxy Protocol v1 header to backend: %s", proxyHeader)
+		// 将 Proxy Protocol 头部发送到后端
+		_, err := target.Write([]byte(proxyHeader))
+		if err != nil {
+			logs.Error("Failed to send Proxy Protocol v1 header to backend:", err)
+			c.Close()
+			return err
+		}
+	} else if task.ProxyProtocol == 2 {
+		proxyHeader := conn.BuildProxyProtocolV2Header(c)
+		logs.Debug("Sending Proxy Protocol v2 header to backend: %v", proxyHeader)
+		// 将 Proxy Protocol 头部发送到后端
+		_, err := target.Write(proxyHeader)
+		if err != nil {
+			logs.Error("Failed to send Proxy Protocol v2 header to backend:", err)
+			c.Close()
+			return err
+		}
+	}
+
+	// 如果有回调函数，执行它
+	if f != nil {
+		f()
+	}
+
+	// 继续进行客户端和后端服务器之间的数据转发
+	conn.CopyWaitGroup(target, c.Conn, link.Crypt, link.Compress, client.Rate, flow, true, rb, task)
 	return nil
 }
 

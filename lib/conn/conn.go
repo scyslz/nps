@@ -407,6 +407,60 @@ func CopyWaitGroup(conn1, conn2 net.Conn, crypt bool, snappy bool, rate *rate.Ra
 	}
 }
 
+// 构造 Proxy Protocol v1 头部
+func BuildProxyProtocolV1Header(c *Conn) string {
+	clientAddr := c.RemoteAddr().(*net.TCPAddr)
+	targetAddr := c.LocalAddr().(*net.TCPAddr)
+
+	var protocol, clientIP, targetIP string
+	if clientAddr.IP.To4() != nil {
+		protocol = "TCP4"
+		clientIP = clientAddr.IP.String()
+		targetIP = targetAddr.IP.String()
+	} else {
+		protocol = "TCP6"
+		clientIP = "[" + clientAddr.IP.String() + "]"
+		targetIP = "[" + targetAddr.IP.String() + "]"
+	}
+
+	header := "PROXY " + protocol + " " + clientIP + " " + targetIP + " " +
+		strconv.Itoa(clientAddr.Port) + " " + strconv.Itoa(targetAddr.Port) + "\r\n"
+	return header
+}
+
+// 构造 Proxy Protocol v2 头部
+func BuildProxyProtocolV2Header(c *Conn) []byte {
+	clientAddr := c.RemoteAddr().(*net.TCPAddr)
+	targetAddr := c.LocalAddr().(*net.TCPAddr)
+
+	var header []byte
+	if clientAddr.IP.To4() != nil {
+		// IPv4
+		header = make([]byte, 16+12) // v2 头部长度为 16 字节固定头 + 12 字节的 IPv4 地址信息
+		copy(header[0:12], []byte{0x0d, 0x0a, 0x0d, 0x0a, 0x00, 0x0d, 0x0a, 0x51, 0x55, 0x49, 0x54, 0x0a})
+		header[12] = 0x21 // Proxy Protocol v2 的版本和命令
+		header[13] = 0x11 // 地址族和传输协议 (TCP over IPv4)
+		binary.BigEndian.PutUint16(header[14:16], 12) // 地址信息长度
+		copy(header[16:20], clientAddr.IP.To4())
+		copy(header[20:24], targetAddr.IP.To4())
+		binary.BigEndian.PutUint16(header[24:26], uint16(clientAddr.Port))
+		binary.BigEndian.PutUint16(header[26:28], uint16(targetAddr.Port))
+	} else {
+		// IPv6
+		header = make([]byte, 16+36) // v2 头部长度为 16 字节固定头 + 36 字节的 IPv6 地址信息
+		copy(header[0:12], []byte{0x0d, 0x0a, 0x0d, 0x0a, 0x00, 0x0d, 0x0a, 0x51, 0x55, 0x49, 0x54, 0x0a})
+		header[12] = 0x21 // Proxy Protocol v2 的版本和命令
+		header[13] = 0x21 // 地址族和传输协议 (TCP over IPv6)
+		binary.BigEndian.PutUint16(header[14:16], 36) // 地址信息长度
+		copy(header[16:32], clientAddr.IP.To16())
+		copy(header[32:48], targetAddr.IP.To16())
+		binary.BigEndian.PutUint16(header[48:50], uint16(clientAddr.Port))
+		binary.BigEndian.PutUint16(header[50:52], uint16(targetAddr.Port))
+	}
+
+	return header
+}
+
 //get crypt or snappy conn
 func GetConn(conn net.Conn, cpt, snappy bool, rt *rate.Rate, isServer bool) io.ReadWriteCloser {
 	if cpt {
