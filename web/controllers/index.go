@@ -95,17 +95,18 @@ func (s *IndexController) Add() {
 	} else {
 		id := int(file.GetDb().JsonDb.GetTaskId())
 		t := &file.Tunnel{
-			Port:      s.GetIntNoErr("port"),
-			ServerIp:  s.getEscapeString("server_ip"),
-			Mode:      s.getEscapeString("type"),
-			Target:    &file.Target{TargetStr: strings.ReplaceAll(s.getEscapeString("target"), "\r\n", "\n"), LocalProxy: s.GetBoolNoErr("local_proxy")},
-			Id:        id,
-			Status:    true,
-			Remark:    s.getEscapeString("remark"),
-			Password:  s.getEscapeString("password"),
-			LocalPath: s.getEscapeString("local_path"),
-			StripPre:  s.getEscapeString("strip_pre"),
-			Flow:      &file.Flow{},
+			Port:           s.GetIntNoErr("port"),
+			ServerIp:       s.getEscapeString("server_ip"),
+			Mode:           s.getEscapeString("type"),
+			Target:         &file.Target{TargetStr: strings.ReplaceAll(s.getEscapeString("target"), "\r\n", "\n"), LocalProxy: s.GetBoolNoErr("local_proxy")},
+			Id:             id,
+			Status:         true,
+			Remark:         s.getEscapeString("remark"),
+			Password:       s.getEscapeString("password"),
+			LocalPath:      s.getEscapeString("local_path"),
+			StripPre:       s.getEscapeString("strip_pre"),
+			ProxyProtocol:  s.GetIntNoErr("proxy_protocol"),
+			Flow:           &file.Flow{},
 		}
 
 		if t.Port <= 0 {
@@ -184,6 +185,7 @@ func (s *IndexController) Edit() {
 			t.LocalPath = s.getEscapeString("local_path")
 			t.StripPre = s.getEscapeString("strip_pre")
 			t.Remark = s.getEscapeString("remark")
+			t.ProxyProtocol = s.GetIntNoErr("proxy_protocol")
 			t.Target.LocalProxy = s.GetBoolNoErr("local_proxy")
 			file.GetDb().UpdateTask(t)
 			server.StopServer(t.Id)
