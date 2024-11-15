@@ -5,6 +5,7 @@ import (
 	"ehang.io/nps/lib/daemon"
 	"flag"
 	"log"
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -72,6 +73,23 @@ func main() {
 	if common.IsWindows() {
 		logPath = strings.Replace(logPath, "\\", "\\\\", -1)
 	}
+	logDaily := beego.AppConfig.String("log_daily")
+	if logDaily == "" {
+		logDaily = "false"
+	}
+	logMaxFiles := beego.AppConfig.String("log_max_files")
+	if logMaxFiles == "" {
+		logMaxFiles = "30"
+	}
+	logMaxDays := beego.AppConfig.String("log_max_days")
+	if logMaxDays == "" {
+		logMaxDays = "30"
+	}
+	logMaxSize, err := beego.AppConfig.Int("log_max_size")
+	if err != nil {
+	    logMaxSize = 5
+	}
+
 	// init service
 	options := make(service.KeyValue)
 	svcConfig := &service.Config{
@@ -94,7 +112,7 @@ func main() {
 	svcConfig.Arguments = append(svcConfig.Arguments, "service")
 	if len(os.Args) > 1 && os.Args[1] == "service" && !strings.EqualFold(logPath, "docker") {
 		if !strings.EqualFold(logPath, "off") {
-			_ = logs.SetLogger(logs.AdapterFile, `{"level":`+level+`,"filename":"`+logPath+`","daily":false,"maxlines":100000,"color":true}`)
+			_ = logs.SetLogger(logs.AdapterFile, `{"level":`+level+`,"filename":"`+logPath+`","daily":`+logDaily+`,"maxfiles":`+logMaxFiles+`,"maxdays":`+logMaxDays+`,"maxsize":`+fmt.Sprintf("%d", logMaxSize*1024*1024)+`,"maxlines":100000,"rotate":true,"color":true}`)
 		}
 	} else {
 		_ = logs.SetLogger(logs.AdapterConsole, `{"level":`+level+`,"color":true}`)
