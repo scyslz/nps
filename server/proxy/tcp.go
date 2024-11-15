@@ -22,6 +22,7 @@ type TunnelModeServer struct {
 	process  process
 	listener net.Listener
 	stopChan chan struct{} // 新增停止通道
+	activeConnections map[net.Conn]struct{} // 新增连接池
 }
 
 // tcp|http|host
@@ -31,12 +32,22 @@ func NewTunnelModeServer(process process, bridge NetBridge, task *file.Tunnel) *
 	s.process = process
 	s.task = task
 	s.stopChan = make(chan struct{}) // 初始化停止通道
+	s.activeConnections = make(map[net.Conn]struct{}) // 初始化连接池
 	return s
 }
 
 // 开始
 func (s *TunnelModeServer) Start() error {
 	return conn.NewTcpListenerAndProcess(s.task.ServerIp+":"+strconv.Itoa(s.task.Port), func(c net.Conn) {
+		// 将新连接加入到连接池中
+		s.activeConnections[c] = struct{}{}
+		defer func() {
+			// 确保连接关闭时从连接池中移除
+			delete(s.activeConnections, c)
+			if c != nil {
+				c.Close()
+			}
+		}()
 		select {
 		case <-s.stopChan: // 如果接收到停止信号，立即关闭连接
 			logs.Info("Connection closed due to configuration change")
@@ -59,9 +70,19 @@ func (s *TunnelModeServer) Start() error {
 	}, &s.listener)
 }
 
-// close
+// Close 停止服务器并关闭所有连接
 func (s *TunnelModeServer) Close() error {
-	close(s.stopChan) // 关闭 stopChan 通道，触发所有监听的连接关闭
+	// 发送停止信号，通知所有连接断开
+	close(s.stopChan)
+
+	// 关闭所有活跃连接
+	for conn := range s.activeConnections {
+		if conn != nil {
+			conn.Close()
+		}
+	}
+
+	// 关闭监听器
 	return s.listener.Close()
 }
 
