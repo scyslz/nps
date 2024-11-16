@@ -438,55 +438,30 @@ func BuildProxyProtocolV2Header(c *Conn) []byte {
 	clientAddr := c.RemoteAddr().(*net.TCPAddr)
 	targetAddr := c.LocalAddr().(*net.TCPAddr)
 
-	var protocolByte, famByte byte
-	var addressLength uint16
 	var header []byte
-
-	// 判断是 IPv4 还是 IPv6 并设置协议和地址族字段
 	if clientAddr.IP.To4() != nil {
-		protocolByte = 0x11  // TCP over IPv4
-		famByte = 0x01	   // AF_INET
-		addressLength = 12   // IPv4 地址长度 (src_addr + dst_addr + src_port + dst_port)
+		// IPv4
+		header = make([]byte, 16+12) // v2 头部长度为 16 字节固定头 + 12 字节的 IPv4 地址信息
+		copy(header[0:12], []byte{0x0d, 0x0a, 0x0d, 0x0a, 0x00, 0x0d, 0x0a, 0x51, 0x55, 0x49, 0x54, 0x0a})
+		header[12] = 0x21 // Proxy Protocol v2 的版本和命令
+		header[13] = 0x11 // 地址族和传输协议 (TCP over IPv4)
+		binary.BigEndian.PutUint16(header[14:16], 12) // 地址信息长度
+		copy(header[16:20], clientAddr.IP.To4())
+		copy(header[20:24], targetAddr.IP.To4())
+		binary.BigEndian.PutUint16(header[24:26], uint16(clientAddr.Port))
+		binary.BigEndian.PutUint16(header[26:28], uint16(targetAddr.Port))
 	} else {
-		protocolByte = 0x21  // TCP over IPv6
-		famByte = 0x02	   // AF_INET6
-		addressLength = 36   // IPv6 地址长度 (src_addr + dst_addr + src_port + dst_port)
+		// IPv6
+		header = make([]byte, 16+36) // v2 头部长度为 16 字节固定头 + 36 字节的 IPv6 地址信息
+		copy(header[0:12], []byte{0x0d, 0x0a, 0x0d, 0x0a, 0x00, 0x0d, 0x0a, 0x51, 0x55, 0x49, 0x54, 0x0a})
+		header[12] = 0x21 // Proxy Protocol v2 的版本和命令
+		header[13] = 0x21 // 地址族和传输协议 (TCP over IPv6)
+		binary.BigEndian.PutUint16(header[14:16], 36) // 地址信息长度
+		copy(header[16:32], clientAddr.IP.To16())
+		copy(header[32:48], targetAddr.IP.To16())
+		binary.BigEndian.PutUint16(header[48:50], uint16(clientAddr.Port))
+		binary.BigEndian.PutUint16(header[50:52], uint16(targetAddr.Port))
 	}
-
-	// 版本与命令字段：v2 协议与 PROXY 命令
-	versionCmd := byte(0x20)  // version = 2, cmd = PROXY (0x01)
-
-	// 构建头部签名
-	sig := []byte{0x0D, 0x0A, 0x0D, 0x0A, 0x00, 0x0D, 0x0A, 0x51, 0x55, 0x49, 0x54, 0x0A}
-
-	// 构建 v2 头部
-	header = append(header, sig...)		   // 添加协议签名
-	header = append(header, versionCmd)	   // 添加版本与命令
-	header = append(header, famByte)		  // 添加地址族
-	header = append(header, protocolByte)	 // 添加协议
-	header = append(header, byte(0), byte(0)) // 预留 CRC32c 字段（0值）
-
-	// 添加地址长度（16-bit）
-	lengthBuf := make([]byte, 2)
-	binary.BigEndian.PutUint16(lengthBuf, addressLength)
-	header = append(header, lengthBuf...)
-
-	// 构建地址块
-	var addrBlock []byte
-	if protocolByte == 0x11 { // IPv4
-		addrBlock = append(addrBlock, clientAddr.IP.To4()...)   // 添加源地址
-		addrBlock = append(addrBlock, targetAddr.IP.To4()...)   // 添加目标地址
-		addrBlock = append(addrBlock, byte(clientAddr.Port>>8), byte(clientAddr.Port&0xFF)) // 源端口
-		addrBlock = append(addrBlock, byte(targetAddr.Port>>8), byte(targetAddr.Port&0xFF)) // 目标端口
-	} else if protocolByte == 0x21 { // IPv6
-		addrBlock = append(addrBlock, clientAddr.IP.To16()...) // 添加源地址
-		addrBlock = append(addrBlock, targetAddr.IP.To16()...) // 添加目标地址
-		addrBlock = append(addrBlock, byte(clientAddr.Port>>8), byte(clientAddr.Port&0xFF)) // 源端口
-		addrBlock = append(addrBlock, byte(targetAddr.Port>>8), byte(targetAddr.Port&0xFF)) // 目标端口
-	}
-
-	// 将地址块加入到头部
-	header = append(header, addrBlock...)
 
 	return header
 }
