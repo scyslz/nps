@@ -99,7 +99,27 @@ func in(target string, str_array []string) bool {
 	return false
 }
 
-//create a new connection and start bytes copying
+// 发送代理协议头
+func sendProxyProtocolHeader(target net.Conn, c *conn.Conn, task *file.Tunnel) error {
+	var proxyHeader []byte
+	if task.ProxyProtocol == 1 {
+		proxyHeader = conn.BuildProxyProtocolV1Header(c)
+	} else if task.ProxyProtocol == 2 {
+		proxyHeader = conn.BuildProxyProtocolV2Header(c)
+	} else {
+		return nil
+	}
+
+	logs.Debug("Sending Proxy Protocol v%d header to backend: %v", task.ProxyProtocol, proxyHeader)
+	_, err := target.Write(proxyHeader)  // 先发送代理头
+	if err != nil {
+		logs.Error("Failed to send Proxy Protocol header:", err)
+		return err
+	}
+	return nil
+}
+
+// 处理客户端连接
 func (s *BaseServer) DealClient(c *conn.Conn, client *file.Client, addr string,
 	rb []byte, tp string, f func(), flow *file.Flow, localProxy bool, task *file.Tunnel) error {
 
@@ -126,35 +146,18 @@ func (s *BaseServer) DealClient(c *conn.Conn, client *file.Client, addr string,
 		return err
 	}
 
-	// 在连接后端之前，发送 Proxy Protocol 头部
-	if task.ProxyProtocol == 1 {
-		proxyHeader := conn.BuildProxyProtocolV1Header(c)
-		logs.Debug("Sending Proxy Protocol v1 header to backend: %s", proxyHeader)
-		// 将 Proxy Protocol 头部发送到后端
-		_, err := target.Write([]byte(proxyHeader))
-		if err != nil {
-			logs.Error("Failed to send Proxy Protocol v1 header to backend:", err)
-			c.Close()
-			return err
-		}
-	} else if task.ProxyProtocol == 2 {
-		proxyHeader := conn.BuildProxyProtocolV2Header(c)
-		logs.Debug("Sending Proxy Protocol v2 header to backend: %v", proxyHeader)
-		// 将 Proxy Protocol 头部发送到后端
-		_, err := target.Write(proxyHeader)
-		if err != nil {
-			logs.Error("Failed to send Proxy Protocol v2 header to backend:", err)
-			c.Close()
-			return err
-		}
+	// 发送 Proxy Protocol 头部
+	if err := sendProxyProtocolHeader(target, c, task); err != nil {
+		c.Close()
+		return err
 	}
 
-	// 如果有回调函数，执行它
+	// 执行回调函数
 	if f != nil {
 		f()
 	}
 
-	// 继续进行客户端和后端服务器之间的数据转发
+	// 开始数据转发
 	conn.CopyWaitGroup(target, c.Conn, link.Crypt, link.Compress, client.Rate, flow, true, rb, task)
 	return nil
 }
