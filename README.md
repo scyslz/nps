@@ -76,9 +76,11 @@ npc -h
 
 ## 更新日志
 ### DEV
-- 2024-11-16 v0.26.27
+- 2024-11-19 v0.26.27
   - 完善界面翻译和提示内容
-  - 域名转发也支持Proxy Protocol (仅用于代理后端HTTPS时传递真实IP，正常情况下请直接使用 X-Forwarded-For 或 X-Real-IP 获取真实IP)
+  - 域名转发也支持Proxy Protocol
+
+     (仅用于代理后端HTTPS时传递真实IP，正常情况下请直接使用 X-Forwarded-For 或 X-Real-IP 获取真实IP)
 
 ### Stable
 - 2024-11-16 v0.26.26
