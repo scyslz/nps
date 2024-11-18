@@ -16,6 +16,52 @@ nps是一款轻量级、高性能、功能强大的**内网穿透**代理服务�
 
 ***DockerHub***： [NPS](https://hub.docker.com/r/duan2001/nps) [NPC](https://hub.docker.com/r/duan2001/npc)
 
+## 简单使用说明 (具体还是参考 [官方文档](https://ehang-io.github.io/nps/) ，虽然已经过时了但也能凑合用)
+### NPS 命令行支持 
+下载后解压到文件夹（注意Windows不要删除该文件夹）
+```
+# Linux (配置安装路径：/etc/nps/) (二进制安装路径：/usr/bin/)
+./nps install
+nps start|stop|restart|uninstall
+# 更新
+nps stop
+nps-update update
+nps start
+
+# Windows (配置路径 C:\Program Files\nps\) (二进制路径：当前文件夹)
+.\nps.exe install
+.\nps.exe start|stop|restart|uninstall
+# 更新
+.\nps.exe stop
+.\nps-update.exe update
+.\nps.exe start
+```
+
+### NPC
+下载后解压到文件夹（注意Windows不要删除该文件夹）
+```
+# Linux (二进制安装路径：/usr/bin/)
+./npc install
+/usr/bin/npc install -server=xxx:123 -vkey=xxx -type=tcp -tls_enable=true -log=off
+npc start|stop|restart|uninstall
+# 更新
+npc stop
+/usr/bin/npc-update update
+npc start
+# 查看参数说明
+npc -h
+
+# Windows (二进制路径：当前文件夹)
+.\npc.exe install -server="xxx:123" -vkey="xxx" -type="tcp" -tls_enable="true" -log="off"
+.\npc.exe start|stop|restart|uninstall
+# 更新
+.\npc.exe stop
+.\npc-update.exe update
+.\npc.exe start
+# 查看参数说明
+.\npc.exe -h
+```
+
 ## 更新日志
 ### DEV
 - 2024-11-16 v0.26.27
