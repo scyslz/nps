@@ -17,7 +17,7 @@ nps是一款轻量级、高性能、功能强大的**内网穿透**代理服务�
 ***DockerHub***： [NPS](https://hub.docker.com/r/duan2001/nps) [NPC](https://hub.docker.com/r/duan2001/npc)
 
 ## 简单使用说明 (具体还是参考 [官方文档](https://ehang-io.github.io/nps/) ，虽然已经过时了但也能凑合用)
-### NPS 命令行支持 
+### NPS
 下载后解压到文件夹（注意Windows不要删除该文件夹）
 ```
 # Linux (配置安装路径：/etc/nps/) (二进制安装路径：/usr/bin/)
