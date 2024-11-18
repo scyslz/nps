@@ -721,6 +721,14 @@
 		<zh-CN>代理到本地可以只填写端口号，只有TCP模式支持负载均衡</zh-CN>
 		<en-US>Can only fill in ports if it is local machine proxy, only tcp supports load balancing</en-US>
 	</lang>
+	<lang id="info-pemtext">
+		<zh-CN>支持填写证书路径或证书文本内容（支持拖拽填写），证书文件格式为：xxxx.pem</zh-CN>
+		<en-US>Supports entering the certificate path or certificate text content (drag-and-drop supported). The certificate file format should be: xxxx.pem</en-US>
+	</lang>
+	<lang id="info-pemkey">
+		<zh-CN>支持填写私钥路径或私钥文本内容（支持拖拽填写），证书秘钥格式为：xxxx.key</zh-CN>
+		<en-US>Supports entering the private key path or private key text content (drag-and-drop supported). The private key file format should be: xxxx.key</en-US>
+	</lang>
 	<lang id="info-unrestricted">
 		<zh-CN>留空表示不受限制</zh-CN>
 		<en-US>Empty means to be unrestricted</en-US>
