@@ -219,6 +219,13 @@ reset:
 		logs.Notice("connect to target %s error %s", lk.Host, err)
 		return
 	}
+
+	// 发送 Proxy Protocol 头部
+	if err := conn.SendProxyProtocolHeader(target, c, host.Target.ProxyProtocol); err != nil {
+		c.Close()
+		return
+	}
+
 	connClient = conn.GetConn(target, lk.Crypt, lk.Compress, host.Client.Rate, true)
 
 	//read from inc-client

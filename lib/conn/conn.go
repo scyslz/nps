@@ -466,6 +466,26 @@ func BuildProxyProtocolV2Header(c *Conn) []byte {
 	return header
 }
 
+// 发送代理协议头
+func SendProxyProtocolHeader(target net.Conn, c *Conn, proxyProtocol int) error {
+	var proxyHeader []byte
+	if proxyProtocol == 1 {
+		proxyHeader = BuildProxyProtocolV1Header(c)
+	} else if proxyProtocol == 2 {
+		proxyHeader = BuildProxyProtocolV2Header(c)
+	} else {
+		return nil
+	}
+
+	logs.Debug("Sending Proxy Protocol v%d header to backend: %v", proxyProtocol, proxyHeader)
+	_, err := target.Write(proxyHeader)  // 先发送代理头
+	if err != nil {
+		logs.Error("Failed to send Proxy Protocol header:", err)
+		return err
+	}
+	return nil
+}
+
 //get crypt or snappy conn
 func GetConn(conn net.Conn, cpt, snappy bool, rt *rate.Rate, isServer bool) io.ReadWriteCloser {
 	if cpt {

@@ -99,26 +99,6 @@ func in(target string, str_array []string) bool {
 	return false
 }
 
-// 发送代理协议头
-func sendProxyProtocolHeader(target net.Conn, c *conn.Conn, proxyProtocol int) error {
-	var proxyHeader []byte
-	if proxyProtocol == 1 {
-		proxyHeader = conn.BuildProxyProtocolV1Header(c)
-	} else if proxyProtocol == 2 {
-		proxyHeader = conn.BuildProxyProtocolV2Header(c)
-	} else {
-		return nil
-	}
-
-	logs.Debug("Sending Proxy Protocol v%d header to backend: %v", proxyProtocol, proxyHeader)
-	_, err := target.Write(proxyHeader)  // 先发送代理头
-	if err != nil {
-		logs.Error("Failed to send Proxy Protocol header:", err)
-		return err
-	}
-	return nil
-}
-
 // 处理客户端连接
 func (s *BaseServer) DealClient(c *conn.Conn, client *file.Client, addr string,
 	rb []byte, tp string, f func(), flow *file.Flow, proxyProtocol int, localProxy bool, task *file.Tunnel) error {
@@ -147,7 +127,7 @@ func (s *BaseServer) DealClient(c *conn.Conn, client *file.Client, addr string,
 	}
 
 	// 发送 Proxy Protocol 头部
-	if err := sendProxyProtocolHeader(target, c, proxyProtocol); err != nil {
+	if err := conn.SendProxyProtocolHeader(target, c, proxyProtocol); err != nil {
 		c.Close()
 		return err
 	}
