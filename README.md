@@ -70,11 +70,15 @@ npc -h
   此外docker映射的文件夹内文件不支持软链接，有需要请使用硬链接。
 - 客户端命令行方式启动支持多个隧道ID，使用逗号拼接，示例：`npc -server=xxx:8024 -vkey=ytkpyr0er676m0r7,iwnbjfbvygvzyzzt`
 - 当需要在NPS前添加反向代理时可以通过插入头（X-NPS-Http-Only: password）来避免301重定向和插入真实IP
+- 域名转发的模式指的是访问NPS的模式而不是后端服务器模式，正常情况下应该填写后端HTTP端口，另外不要使用Proxy Protocol(Websocket兼容存在问题)，通过 X-Forwarded-For 或 X-Real-IP 获取真实IP
+
+  如果后端只有HTTPS的话可以通过将模式配置为HTTPS，同时NPS证书位置留空则即可，注意后端证书要配置正确，如果后端支持可以通过Proxy Protocol获取真实IP
 
 ## 更新日志
 ### DEV
 - 2024-11-16 v0.26.27
-  - 待更新
+  - 完善界面翻译和提示内容
+  - 域名转发也支持Proxy Protocol (仅用于代理后端HTTPS时传递真实IP，正常情况下请直接使用 X-Forwarded-For 或 X-Real-IP 获取真实IP)
 
 ### Stable
 - 2024-11-16 v0.26.26
