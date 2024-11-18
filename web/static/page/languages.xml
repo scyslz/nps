@@ -284,6 +284,10 @@
 	</lang>
 	<lang id="word-https">HTTPS
 	</lang>
+	<lang id="word-autohttps">
+		<zh-CN>自动HTTPS (301)</zh-CN>
+		<en-US>Auto HTTPS (301)</en-US>
+	</lang>
 	<lang id="word-httpskey">
 		<zh-CN>HTTPS 密钥（key格式）</zh-CN>
 		<en-US>HTTPS key</en-US>
