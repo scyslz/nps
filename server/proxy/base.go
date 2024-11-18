@@ -100,17 +100,17 @@ func in(target string, str_array []string) bool {
 }
 
 // 发送代理协议头
-func sendProxyProtocolHeader(target net.Conn, c *conn.Conn, task *file.Tunnel) error {
+func sendProxyProtocolHeader(target net.Conn, c *conn.Conn, proxyProtocol int) error {
 	var proxyHeader []byte
-	if task.ProxyProtocol == 1 {
+	if proxyProtocol == 1 {
 		proxyHeader = conn.BuildProxyProtocolV1Header(c)
-	} else if task.ProxyProtocol == 2 {
+	} else if proxyProtocol == 2 {
 		proxyHeader = conn.BuildProxyProtocolV2Header(c)
 	} else {
 		return nil
 	}
 
-	logs.Debug("Sending Proxy Protocol v%d header to backend: %v", task.ProxyProtocol, proxyHeader)
+	logs.Debug("Sending Proxy Protocol v%d header to backend: %v", proxyProtocol, proxyHeader)
 	_, err := target.Write(proxyHeader)  // 先发送代理头
 	if err != nil {
 		logs.Error("Failed to send Proxy Protocol header:", err)
@@ -121,7 +121,7 @@ func sendProxyProtocolHeader(target net.Conn, c *conn.Conn, task *file.Tunnel) e
 
 // 处理客户端连接
 func (s *BaseServer) DealClient(c *conn.Conn, client *file.Client, addr string,
-	rb []byte, tp string, f func(), flow *file.Flow, localProxy bool, task *file.Tunnel) error {
+	rb []byte, tp string, f func(), flow *file.Flow, proxyProtocol int, localProxy bool, task *file.Tunnel) error {
 
 	// 判断访问地址是否在全局黑名单内
 	if IsGlobalBlackIp(c.RemoteAddr().String()) {
@@ -147,7 +147,7 @@ func (s *BaseServer) DealClient(c *conn.Conn, client *file.Client, addr string,
 	}
 
 	// 发送 Proxy Protocol 头部
-	if err := sendProxyProtocolHeader(target, c, task); err != nil {
+	if err := sendProxyProtocolHeader(target, c, proxyProtocol); err != nil {
 		c.Close()
 		return err
 	}

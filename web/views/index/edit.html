@@ -61,9 +61,9 @@
                         <label class="col-sm-2 control-label font-bold" langtag="word-proxyprotocol"></label>
                         <div class="col-sm-10">
                             <select class="form-control" name="proxy_protocol">
-                                <option value="0" {{if eq .t.ProxyProtocol 0}}selected{{end}} langtag="word-disable"></option>
-                                <option value="1" {{if eq .t.ProxyProtocol 1}}selected{{end}} langtag="word-proxyprotocolv1"></option>
-                                <option value="2" {{if eq .t.ProxyProtocol 2}}selected{{end}} langtag="word-proxyprotocolv2"></option>
+                                <option value="0" {{if eq .t.Target.ProxyProtocol 0}}selected{{end}} langtag="word-disable"></option>
+                                <option value="1" {{if eq .t.Target.ProxyProtocol 1}}selected{{end}} langtag="word-proxyprotocolv1"></option>
+                                <option value="2" {{if eq .t.Target.ProxyProtocol 2}}selected{{end}} langtag="word-proxyprotocolv2"></option>
                             </select>
                         </div>
                     </div>
