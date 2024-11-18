@@ -16,7 +16,7 @@ nps是一款轻量级、高性能、功能强大的**内网穿透**代理服务�
 
 ***DockerHub***： [NPS](https://hub.docker.com/r/duan2001/nps) [NPC](https://hub.docker.com/r/duan2001/npc)
 
-## 简单使用说明 (具体还是参考 [官方文档](https://ehang-io.github.io/nps/) ，虽然已经过时了但也能凑合用)
+## 简单安装说明 (具体还是参考 [官方文档](https://ehang-io.github.io/nps/) ，虽然已经过时了但也能凑合用)
 ### NPS
 下载后解压到文件夹（注意Windows不要删除该文件夹）
 ```
@@ -61,6 +61,17 @@ npc -h
 # 查看参数说明
 .\npc.exe -h
 ```
+
+## 补充说明
+1.域名转发的HTTPS证书和密钥位置支持填写路径或证书文本内容
+
+其中路径支持绝对路径和相对路径，不过最好填写绝对路径，相对路径是以nps二进制文件所在路径为基准。
+
+此外docker映射的文件夹内文件不支持软链接，有需要请使用硬链接。
+
+2.客户端命令行方式启动支持多个隧道ID，使用逗号拼接，示例：`npc -server=xxx:8024 -vkey=ytkpyr0er676m0r7,iwnbjfbvygvzyzzt`
+
+3.当需要在NPS前添加反向代理时可以通过插入头（X-NPS-Http-Only: password）来避免301重定向和插入真实IP
 
 ## 更新日志
 ### DEV
