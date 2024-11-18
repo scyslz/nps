@@ -265,7 +265,7 @@ func (s *IndexController) AddHost() {
 		h := &file.Host{
 			Id:           id,
 			Host:         s.getEscapeString("host"),
-			Target:       &file.Target{TargetStr: strings.ReplaceAll(s.getEscapeString("target"), "\r\n", "\n"), LocalProxy: s.GetBoolNoErr("local_proxy")},
+			Target:       &file.Target{TargetStr: strings.ReplaceAll(s.getEscapeString("target"), "\r\n", "\n"), ProxyProtocol: s.GetIntNoErr("proxy_protocol"), LocalProxy: s.GetBoolNoErr("local_proxy")},
 			HeaderChange: s.getEscapeString("header"),
 			HostChange:   s.getEscapeString("hostchange"),
 			Remark:       s.getEscapeString("remark"),
@@ -330,6 +330,7 @@ func (s *IndexController) EditHost() {
 			h.Scheme = s.getEscapeString("scheme")
 			h.KeyFilePath = s.getEscapeString("key_file_path")
 			h.CertFilePath = s.getEscapeString("cert_file_path")
+			h.Target.ProxyProtocol = s.GetIntNoErr("proxy_protocol")
 			h.Target.LocalProxy = s.GetBoolNoErr("local_proxy")
 			h.AutoHttps = s.GetBoolNoErr("AutoHttps")
 			file.GetDb().JsonDb.StoreHostToJsonFile()
