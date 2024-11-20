@@ -94,18 +94,22 @@ log_max_size=2
 
 ## 更新日志
 ### DEV
-- 2024-11-19 v0.26.28
+- 2024-11-20 v0.26.29
   - 待定，优先修BUG
 
 ### Stable
+- 2024-11-20 v0.26.28
+  - 修复NPC在docker环境下使用配置文件启动失败问题
+  - 应用户要求使用旧版Web页面风格
+
+<details>
+
 - 2024-11-19 v0.26.27
   - 完善界面翻译和提示内容
   - 修复https just proxy
   - 域名转发也支持Proxy Protocol
 
      (仅用于代理后端HTTPS时传递真实IP，正常情况下请直接使用 X-Forwarded-For 或 X-Real-IP 获取真实IP)
-
-<details>
 
 - 2024-11-16 v0.26.26
   - 增强服务端日志控制
