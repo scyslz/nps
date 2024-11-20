@@ -157,19 +157,23 @@
     })
 
     function getClientList() {
+        const clientId = "{{if .t.Client.Id}}{{.t.Client.Id}}{{else}}{{.client_id}}{{end}}"; // 根据优先级选择
         $("select[name='client_id']").empty();
         $.ajax({
             type: "POST",
             url: "{{.web_base_url}}/client/list", // 服务器数据的加载地址
-            data: {order:"asc",offset:0,limit:999},
-            dataType : "json",
-            success : function(data) {
+            data: {order: "asc", offset: 0, limit: 999},
+            dataType: "json",
+            success: function (data) {
                 if (data && data.rows.length > 0) {
-                    for(var i=0; i<data.rows.length; i++){
-                        var option="<option value=\""+data.rows[i].Id+"\"";
-                        option += ">"+data.rows[i].Id + '-' +data.rows[i].Remark+"</option>"; //动态添加数据
+                    for (var i = 0; i < data.rows.length; i++) {
+                        var option = "<option value=\"" + data.rows[i].Id + "\"";
+                        option += ">" + data.rows[i].Id + '-' + data.rows[i].Remark + "</option>"; // 动态添加数据
                         $("select[name='client_id']").append(option);
-                        $("select[name='client_id']").find("option[value='{{.t.Client.Id}}']").attr("selected",true);
+                    }
+                    // 设置选中项
+                    if (clientId) {
+                        $("select[name='client_id']").val(clientId);
                     }
                 }
             }
