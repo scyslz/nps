@@ -151,8 +151,8 @@ func StartFromFile(path string) {
 		}
 
 		if err := ioutil.WriteFile(filepath.Join(common.GetTmpPath(), "npc_vkey.txt"), []byte(vkey), 0600); err != nil {
-			logs.Error("Failed to write vkey file:", err)
-			continue
+			logs.Debug("Failed to write vkey file:", err)
+			//continue
 		}
 
 		//send hosts to server
