@@ -65,6 +65,18 @@ npc -h
 .\npc.exe -h
 ```
 
+### Docker
+***DockerHub***： [NPS](https://hub.docker.com/r/duan2001/nps) [NPC](https://hub.docker.com/r/duan2001/npc)
+```
+# NPS
+docker pull duan2001/nps
+docker run -d --restart=always --name nps --net=host -v <本机conf目录>:/conf duan2001/nps
+
+# NPC
+docker pull duan2001/npc
+docker run -d --restart=always --name npc --net=host duan2001/npc -server=xxxx:123 -vkey=xxxx,xxxx -tls_enable=true -log=off
+```
+
 ## 补充说明
 - 域名转发的HTTPS证书和密钥位置支持填写路径或证书文本内容
   
