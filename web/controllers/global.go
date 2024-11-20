@@ -14,6 +14,9 @@ func (s *GlobalController) Index() {
 	//
 	//	return
 	//}
+        if !s.GetSession("isAdmin").(bool) {
+		return
+	}
 	s.Data["menu"] = "global"
 	s.SetInfo("global")
 	s.display("global/index")
@@ -31,6 +34,9 @@ func (s *GlobalController) Save() {
 	//if err != nil {
 	//	return
 	//}
+        if !s.GetSession("isAdmin").(bool) {
+		return
+	}
 	if s.Ctx.Request.Method == "GET" {
 		s.Data["menu"] = "global"
 		s.SetInfo("save global")

@@ -1,11 +1,19 @@
 package routers
 
 import (
+	"net/http"
+
 	"ehang.io/nps/web/controllers"
 	"github.com/astaxie/beego"
 )
 
 func Init() {
+	// 配置 404 错误处理
+	beego.ErrorHandler("404", func(rw http.ResponseWriter, r *http.Request) {
+		rw.WriteHeader(http.StatusNotFound)
+		// 返回空内容
+	})
+
 	web_base_url := beego.AppConfig.String("web_base_url")
 	if len(web_base_url) > 0 {
 		ns := beego.NewNamespace(web_base_url,

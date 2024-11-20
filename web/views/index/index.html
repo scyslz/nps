@@ -10,6 +10,7 @@
                 </div>
             </div>
         </div>
+        {{if eq true .isAdmin}}
         <div class="col-lg-3">
             <div class="ibox float-e-margins">
                 <div class="ibox-title">
@@ -43,6 +44,7 @@
                 </div>
             </div>
         </div>
+        {{end}}
     </div>
 
 
@@ -157,6 +159,7 @@
                 </div>
             </div>
         </div>
+        {{if eq true .isAdmin}}
         <div class="col-lg-6">
             <div class="ibox float-e-margins">
                 <div class="ibox-title">
@@ -252,9 +255,10 @@
                 </div>
             </div>
         </div>
+        {{end}}
     </div>
-
-{{if eq true .system_info_display}}
+    {{if eq true .isAdmin}}
+    {{if eq true .system_info_display}}
     <div class="row">
         <div class="col-lg-6">
             <div class="ibox float-e-margins">
@@ -352,7 +356,7 @@
             </div>
         </div>
     </div>
-{{end}}
+    {{end}}
 
     <div class="row">
         <div class="col-lg-6">
@@ -394,8 +398,9 @@
 
 
     </div>
+    {{end}}
 </div>
-
+{{if eq true .isAdmin}}
 <script>
     $("#overview_cpu").text("{{.data.cpu}}%")
     $("#overview_cpu_bar").width("{{.data.cpu}}%")
@@ -739,3 +744,4 @@
         }
     });
 </script>
+{{end}}
