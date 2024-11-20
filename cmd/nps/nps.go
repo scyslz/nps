@@ -67,7 +67,7 @@ func main() {
 	logs.EnableFuncCallDepth(true)
 	logs.SetLogFuncCallDepth(3)
 	logPath := beego.AppConfig.String("log_path")
-	if logPath == "" {
+	if logPath == "" || strings.EqualFold(logPath, "on") {
 		logPath = common.GetLogPath()
 	}
 	if common.IsWindows() {
