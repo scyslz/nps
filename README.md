@@ -142,7 +142,7 @@ log_max_size=2
 ### Stable
 - 2024-11-21 v0.26.29
   - 修复编辑界面证书显示和详情页面排版
-  - 普通用户登录时隐藏服务器相关信息[#7](https://github.com/djylb/nps/issues/7)
+  - 普通用户登录时隐藏服务器相关信息 [#7](https://github.com/djylb/nps/issues/7)
   - 隐藏NPS Web管理界面特征 (通过配置web_base_url可避免特征扫描)
 
 <details>
