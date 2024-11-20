@@ -67,7 +67,7 @@ func main() {
 	logs.EnableFuncCallDepth(true)
 	logs.SetLogFuncCallDepth(3)
 	logPath := beego.AppConfig.String("log_path")
-	if logPath == "" || strings.EqualFold(logPath, "on") {
+	if logPath == "" || strings.EqualFold(logPath, "on") || strings.EqualFold(logPath, "true") {
 		logPath = common.GetLogPath()
 	}
 	if common.IsWindows() {
@@ -111,7 +111,7 @@ func main() {
 
 	svcConfig.Arguments = append(svcConfig.Arguments, "service")
 	if len(os.Args) > 1 && os.Args[1] == "service" && !strings.EqualFold(logPath, "docker") {
-		if !strings.EqualFold(logPath, "off") {
+		if !strings.EqualFold(logPath, "off") && !strings.EqualFold(logPath, "false") {
 			_ = logs.SetLogger(logs.AdapterFile, `{"level":`+level+`,"filename":"`+logPath+`","daily":`+logDaily+`,"maxfiles":`+logMaxFiles+`,"maxdays":`+logMaxDays+`,"maxsize":`+fmt.Sprintf("%d", logMaxSize*1024*1024)+`,"maxlines":100000,"rotate":true,"color":true}`)
 		}
 	} else {
