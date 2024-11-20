@@ -92,10 +92,8 @@ docker run -d --restart=always --name npc --net=host duan2001/npc -server=xxxx:1
 ```
 # 日志级别 (0-7) LevelEmergency->0  LevelAlert->1 LevelCritical->2 LevelError->3 LevelWarning->4 LevelNotice->5 LevelInformational->6 LevelDebug->7
 log_level=6
-# 日志路径，留空则使用默认路径(下面配置三选一)
-# 填路径输出到路径；填off关闭日志文件输出；填docker输出到docker控制台
-#log_path=conf/nps.log
-#log_path=docker
+# 日志路径，留空则使用默认路径(路径|off|docker)
+# 填路径输出到路径 填off关闭日志文件输出 填docker输出到docker控制台日志
 log_path=off
 # 是否按日期保存日志(true|false)
 log_daily=false
