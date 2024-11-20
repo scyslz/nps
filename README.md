@@ -64,6 +64,31 @@ npc -h
 # 查看参数说明
 .\npc.exe -h
 ```
+- 手动安装多开指南 （需要手动停止所有运行的服务才能正常更新，最好直接用Docker多开）
+
+Windows （看懂下面命令再操作 [微软SC命令指南](https://learn.microsoft.com/zh-cn/windows-server/administration/windows-commands/sc-create)）
+```
+cmd /c 'sc create Npc1 binPath= "D:\tools\npc.exe -server=xxx:123 -vkey=xxx -type=tcp -tls_enable=true -log=off -debug=false" DisplayName= "nps内网穿透客户端1" start= auto'
+```
+
+Linux (根据下面示例编写systemd配置) (/etc/systemd/system/服务名称.service)
+```
+[Unit]
+Description=一款轻量级、功能强大的内网穿透代理服务器。支持tcp、udp流量转发，支持内网http代理、内网socks5代理，同时支持snappy压缩、站点保护、加密传输、多路复用、header修改等。支持web图形化管理，集成多用户模式。
+ConditionFileIsExecutable=/usr/bin/npc
+ 
+Requires=network.target  
+After=network-online.target syslog.target 
+[Service]
+LimitNOFILE=65536
+StartLimitInterval=5
+StartLimitBurst=10
+ExecStart=/usr/bin/npc "-server=xxx:123" "-vkey=xxx "-type=tcp" "-debug=false" "-log=off"
+Restart=always
+RestartSec=120
+[Install]
+WantedBy=multi-user.target
+```
 
 ### Docker
 ***DockerHub***： [NPS](https://hub.docker.com/r/duan2001/nps) [NPC](https://hub.docker.com/r/duan2001/npc)
