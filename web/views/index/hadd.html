@@ -172,6 +172,7 @@
     })
 
     function getClientList() {
+        const clientId = "{{.client_id}}"; // 获取模板中传入的 client_id 值
         $("select[name='client_id']").empty();
         $.ajax({
             type: "POST",
@@ -182,8 +183,13 @@
                 if (data && data.rows.length > 0) {
                     for (var i = 0; i < data.rows.length; i++) {
                         var option = "<option value=\"" + data.rows[i].Id + "\"";
-                        option += ">" + data.rows[i].Id + '-' + data.rows[i].Remark + "</option>"; //动态添加数据
+                        // 动态添加数据
+                        option += ">" + data.rows[i].Id + '-' + data.rows[i].Remark + "</option>";
                         $("select[name='client_id']").append(option);
+                    }
+                    // 如果 clientId 存在，则设置选中项
+                    if (clientId) {
+                        $("select[name='client_id']").val(clientId);
                     }
                 }
             }
