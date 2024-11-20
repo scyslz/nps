@@ -64,6 +64,34 @@ npc -h
 # 查看参数说明
 .\npc.exe -h
 ```
+- 手动安装多开指南 （需要手动停止所有运行的服务才能正常更新，最好直接用Docker多开）[#9](https://github.com/djylb/nps/issues/9)
+
+Windows （看懂下面命令再操作 [微软SC命令指南](https://learn.microsoft.com/zh-cn/windows-server/administration/windows-commands/sc-create)）
+```
+cmd /c 'sc create Npc1 binPath= "D:\tools\npc.exe -server=xxx:123 -vkey=xxx -type=tcp -tls_enable=true -log=off -debug=false" DisplayName= "nps内网穿透客户端1" start= auto'
+```
+
+Linux (根据下面示例编写systemd配置) (/etc/systemd/system/服务名称.service) 
+```
+[Unit]
+Description=一款轻量级、功能强大的内网穿透代理服务器。支持tcp、udp流量转发，支持内网http代理、内网socks5代理，同时支持snappy压缩、站点保护、加密传输、多路复用、header修改等。支持web图形化管理，集成多用户模式。
+ConditionFileIsExecutable=/usr/bin/npc
+ 
+Requires=network.target  
+After=network-online.target syslog.target 
+[Service]
+LimitNOFILE=65536
+StartLimitInterval=5
+StartLimitBurst=10
+ExecStart=/usr/bin/npc "-server=xxx:123" "-vkey=xxx "-type=tcp" "-debug=false" "-log=off"
+Restart=always
+RestartSec=120
+[Install]
+WantedBy=multi-user.target
+```
+开启自启：```systemctl enable Npc``` 启动服务：```systemctl start Npc```
+
+注：需要会使用systemctl指令，不会请自行学习 [Systemd](https://docs.redhat.com/zh-cn/documentation/red_hat_enterprise_linux/9/html/configuring_basic_system_settings/managing-system-services-with-systemctl_managing-systemd#starting-a-system-service_managing-system-services-with-systemctl) 。 
 
 ### Docker
 ***DockerHub***： [NPS](https://hub.docker.com/r/duan2001/nps) [NPC](https://hub.docker.com/r/duan2001/npc)
@@ -115,6 +143,7 @@ log_max_size=2
 - 2024-11-20 v0.26.28
   - 修复NPC在docker环境下使用配置文件启动失败问题
   - 应用户要求使用旧版Web页面风格
+  - 完善配置文件说明
 
 <details>
 
