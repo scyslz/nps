@@ -64,7 +64,7 @@ npc -h
 # 查看参数说明
 .\npc.exe -h
 ```
-- 手动安装多开指南 （需要手动停止所有运行的服务才能正常更新，最好直接用Docker多开）
+- 手动安装多开指南 （需要手动停止所有运行的服务才能正常更新，最好直接用Docker多开）[#9](https://github.com/djylb/nps/issues/9)
 
 Windows （看懂下面命令再操作 [微软SC命令指南](https://learn.microsoft.com/zh-cn/windows-server/administration/windows-commands/sc-create)）
 ```
