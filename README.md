@@ -73,6 +73,24 @@ npc -h
 - 域名转发的模式指的是访问NPS的模式而不是后端服务器模式，正常情况下目标应该填写后端HTTP端口，另外不要使用Proxy Protocol(Websocket兼容存在问题)，通过 X-Forwarded-For 或 X-Real-IP 获取真实IP
 
   如果后端只有HTTPS的话可以通过将模式配置为HTTPS，同时NPS证书位置留空则即可，注意后端证书要配置正确，如果后端支持可以通过Proxy Protocol获取真实IP
+- NPS日志配置 nps.conf
+```
+# 日志级别 (0-7) LevelEmergency->0  LevelAlert->1 LevelCritical->2 LevelError->3 LevelWarning->4 LevelNotice->5 LevelInformational->6 LevelDebug->7
+log_level=6
+# 日志路径，留空则使用默认路径
+#log_path=conf/nps.log
+#log_path=docker
+log_path=off
+# 是否按日期保存日志(true|false)
+log_daily=false
+# 允许存在的日志总文件个数
+log_max_files=10
+# 允许保存日志的最大天数
+log_max_days=7
+# 单个日志文件的最大大小MB，超过大小或日志超过100000行则新增日志文件
+log_max_size=2
+```
+  NPC使用 ```npc -h``` 查看用法
 
 ## 更新日志
 ### DEV
