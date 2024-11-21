@@ -1,8 +1,6 @@
 package main
 
 import (
-	"ehang.io/nps/bridge"
-	"ehang.io/nps/lib/daemon"
 	"flag"
 	"log"
 	"fmt"
@@ -12,6 +10,9 @@ import (
 	"runtime"
 	"strings"
 	"sync"
+
+	"ehang.io/nps/bridge"
+	"ehang.io/nps/lib/daemon"
 
 	"ehang.io/nps/lib/file"
 	"ehang.io/nps/lib/install"
