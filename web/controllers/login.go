@@ -88,11 +88,11 @@ func (self *LoginController) doLogin(username, password string, explicit bool) b
 	if err == nil && b && !auth {
 		file.GetDb().JsonDb.Clients.Range(func(key, value interface{}) bool {
 			v := value.(*file.Client)
-			if !v.Status || v.NoDisplay || v.Id <= 0 {
+			if !v.Status || v.NoDisplay {
 				return true
 			}
 			if v.WebUserName == "" && v.WebPassword == "" {
-				if username != "user" || v.VerifyKey != password {
+				if v.Id <= 0 || username != "user" || v.VerifyKey != password {
 					return true
 				} else {
 					auth = true
