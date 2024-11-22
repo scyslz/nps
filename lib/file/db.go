@@ -78,7 +78,7 @@ func (s *DbUtils) GetIdByVerifyKey(vKey string, addr string) (id int, err error)
 	var exist bool
 	s.JsonDb.Clients.Range(func(key, value interface{}) bool {
 		v := value.(*Client)
-		if common.Getverifyval(v.VerifyKey) == vKey && v.Status {
+		if common.Getverifyval(v.VerifyKey) == vKey && v.Status && v.Id > 0 {
 			v.Addr = common.GetIpByAddr(addr)
 			id = v.Id
 			exist = true

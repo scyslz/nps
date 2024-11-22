@@ -1,7 +1,6 @@
 package server
 
 import (
-	"ehang.io/nps/lib/version"
 	"errors"
 	"math"
 	"os"
@@ -10,6 +9,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"ehang.io/nps/lib/version"
 
 	"ehang.io/nps/bridge"
 	"ehang.io/nps/lib/common"
@@ -338,6 +339,13 @@ func dealClientData() {
 			v.IsConnect = true
 			v.LastOnlineTime = time.Now().Format("2006-01-02 15:04:05")
 			v.Version = vv.(*bridge.Client).Version
+		} else if v.Id <= 0 {
+			if allowLocalProxy, _ := beego.AppConfig.Bool("allow_local_proxy"); allowLocalProxy {
+				v.IsConnect = true
+				v.Version = version.VERSION
+			} else {
+				v.IsConnect = false
+			}
 		} else {
 			v.IsConnect = false
 		}
