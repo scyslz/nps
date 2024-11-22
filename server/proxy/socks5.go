@@ -11,6 +11,7 @@ import (
 	"ehang.io/nps/lib/common"
 	"ehang.io/nps/lib/conn"
 	"ehang.io/nps/lib/file"
+	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
 )
 
@@ -220,7 +221,7 @@ func (s *Sock5ModeServer) handleUDP(c net.Conn) {
 	s.sendUdpReply(c, reply, succeeded, common.GetServerIpByClientIp(c.RemoteAddr().(*net.TCPAddr).IP))
 	defer reply.Close()
 	// new a tunnel to client
-	link := conn.NewLink("udp5", "", s.task.Client.Cnf.Crypt, s.task.Client.Cnf.Compress, c.RemoteAddr().String(), false)
+	link := conn.NewLink("udp5", "", s.task.Client.Cnf.Crypt, s.task.Client.Cnf.Compress, c.RemoteAddr().String(), s.allowLocalProxy && s.task.Target.LocalProxy)
 	target, err := s.bridge.SendLinkInfo(s.task.Client.Id, link, s.task)
 	if err != nil {
 		logs.Warn("get connection from client id %d  error %s", s.task.Client.Id, err.Error())
@@ -378,9 +379,11 @@ func (s *Sock5ModeServer) Start() error {
 
 //new
 func NewSock5ModeServer(bridge NetBridge, task *file.Tunnel) *Sock5ModeServer {
+	allowLocalProxy, _ := beego.AppConfig.Bool("allow_local_proxy")
 	s := new(Sock5ModeServer)
 	s.bridge = bridge
 	s.task = task
+	s.allowLocalProxy = allowLocalProxy
 	return s
 }
 

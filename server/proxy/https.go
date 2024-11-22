@@ -12,6 +12,7 @@ import (
 	"ehang.io/nps/lib/conn"
 	"ehang.io/nps/lib/crypt"
 	"ehang.io/nps/lib/file"
+	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
 	"github.com/pkg/errors"
 )
@@ -24,13 +25,15 @@ type HttpsServer struct {
 }
 
 func NewHttpsServer(l net.Listener, bridge NetBridge, useCache bool, cacheLen int, task *file.Tunnel) *HttpsServer {
+	allowLocalProxy, _ := beego.AppConfig.Bool("allow_local_proxy")
 	https := &HttpsServer{
 	listener: l,
 	httpServer: httpServer{
 		BaseServer: BaseServer{
-				task:   task,   // 初始化 task 确保其不为空
-				bridge: bridge,
-				Mutex:  sync.Mutex{},
+				task:            task,
+				bridge:          bridge,
+				allowLocalProxy: allowLocalProxy,
+				Mutex:           sync.Mutex{},
 			},
 		},
 	}

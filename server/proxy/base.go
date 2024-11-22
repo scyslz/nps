@@ -11,6 +11,7 @@ import (
 	"ehang.io/nps/lib/common"
 	"ehang.io/nps/lib/conn"
 	"ehang.io/nps/lib/file"
+	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
 )
 
@@ -25,19 +26,22 @@ type NetBridge interface {
 
 //BaseServer struct
 type BaseServer struct {
-	id           int
-	bridge       NetBridge
-	task         *file.Tunnel
-	errorContent []byte
+	id              int
+	bridge          NetBridge
+	task            *file.Tunnel
+	errorContent    []byte
+	allowLocalProxy bool
 	sync.Mutex
 }
 
 func NewBaseServer(bridge *bridge.Bridge, task *file.Tunnel) *BaseServer {
+	allowLocalProxy, _ := beego.AppConfig.Bool("allow_local_proxy")
 	return &BaseServer{
-		bridge:       bridge,
-		task:         task,
-		errorContent: nil,
-		Mutex:        sync.Mutex{},
+		bridge:          bridge,
+		task:            task,
+		errorContent:    nil,
+		allowLocalProxy: allowLocalProxy,
+		Mutex:           sync.Mutex{},
 	}
 }
 
@@ -116,7 +120,7 @@ func (s *BaseServer) DealClient(c *conn.Conn, client *file.Client, addr string,
 	}
 
 	// 创建连接链接
-	link := conn.NewLink(tp, addr, client.Cnf.Crypt, client.Cnf.Compress, c.Conn.RemoteAddr().String(), localProxy)
+	link := conn.NewLink(tp, addr, client.Cnf.Crypt, client.Cnf.Compress, c.Conn.RemoteAddr().String(), s.allowLocalProxy && localProxy)
 
 	// 获取目标连接
 	target, err := s.bridge.SendLinkInfo(client.Id, link, s.task)

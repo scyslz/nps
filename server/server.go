@@ -347,8 +347,7 @@ func dealClientData() {
 				if _, exists := Bridge.Client.Load(v.Id); !exists {
 					// 创建虚拟客户端并插入
 					Bridge.Client.Store(v.Id, bridge.NewClient(nil, nil, nil, version.VERSION))
-
-					logs.Info("Inserted virtual client for ID %d", v.Id)
+					logs.Debug("Inserted virtual client for ID %d", v.Id)
 				}
 			} else {
 				v.IsConnect = false

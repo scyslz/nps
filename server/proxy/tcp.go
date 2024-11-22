@@ -26,10 +26,12 @@ type TunnelModeServer struct {
 
 // tcp|http|host
 func NewTunnelModeServer(process process, bridge NetBridge, task *file.Tunnel) *TunnelModeServer {
+	allowLocalProxy, _ := beego.AppConfig.Bool("allow_local_proxy")
 	s := new(TunnelModeServer)
 	s.bridge = bridge
 	s.process = process
 	s.task = task
+	s.allowLocalProxy = allowLocalProxy
 	s.stopChan = make(chan struct{}) // 初始化停止通道
 	s.activeConnections = make(map[net.Conn]struct{}) // 初始化连接池
 	return s

@@ -11,6 +11,7 @@ import (
 	"ehang.io/nps/lib/common"
 	"ehang.io/nps/lib/conn"
 	"ehang.io/nps/lib/file"
+	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
 )
 
@@ -21,9 +22,11 @@ type UdpModeServer struct {
 }
 
 func NewUdpModeServer(bridge *bridge.Bridge, task *file.Tunnel) *UdpModeServer {
+	allowLocalProxy, _ := beego.AppConfig.Bool("allow_local_proxy")
 	s := new(UdpModeServer)
 	s.bridge = bridge
 	s.task = task
+	s.allowLocalProxy = allowLocalProxy
 	return s
 }
 
@@ -80,7 +83,7 @@ func (s *UdpModeServer) process(addr *net.UDPAddr, data []byte) {
 			return
 		}
 		defer s.task.Client.AddConn()
-		link := conn.NewLink(common.CONN_UDP, s.task.Target.TargetStr, s.task.Client.Cnf.Crypt, s.task.Client.Cnf.Compress, addr.String(), s.task.Target.LocalProxy)
+		link := conn.NewLink(common.CONN_UDP, s.task.Target.TargetStr, s.task.Client.Cnf.Crypt, s.task.Client.Cnf.Compress, addr.String(), s.allowLocalProxy && s.task.Target.LocalProxy)
 		if clientConn, err := s.bridge.SendLinkInfo(s.task.Client.Id, link, s.task); err != nil {
 			return
 		} else {

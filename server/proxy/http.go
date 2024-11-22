@@ -19,6 +19,7 @@ import (
 	"ehang.io/nps/lib/file"
 	"ehang.io/nps/lib/goroutine"
 	"ehang.io/nps/server/connection"
+	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
 )
 
@@ -37,10 +38,12 @@ type httpServer struct {
 }
 
 func NewHttp(bridge *bridge.Bridge, c *file.Tunnel, httpPort, httpsPort int, useCache bool, cacheLen int, httpOnlyPass string, addOrigin bool) *httpServer {
+	allowLocalProxy, _ := beego.AppConfig.Bool("allow_local_proxy")
 	httpServer := &httpServer{
 		BaseServer: BaseServer{
 			task:   c,
 			bridge: bridge,
+			allowLocalProxy: allowLocalProxy,
 			Mutex:  sync.Mutex{},
 		},
 		httpPort:      httpPort,
@@ -214,7 +217,7 @@ reset:
 		return
 	}
 
-	lk = conn.NewLink("http", targetAddr, host.Client.Cnf.Crypt, host.Client.Cnf.Compress, r.RemoteAddr, host.Target.LocalProxy)
+	lk = conn.NewLink("http", targetAddr, host.Client.Cnf.Crypt, host.Client.Cnf.Compress, r.RemoteAddr, s.allowLocalProxy && host.Target.LocalProxy)
 	if target, err = s.bridge.SendLinkInfo(host.Client.Id, lk, nil); err != nil {
 		logs.Notice("connect to target %s error %s", lk.Host, err)
 		return
