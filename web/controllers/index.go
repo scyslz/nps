@@ -94,6 +94,7 @@ func (s *IndexController) Add() {
 		s.display()
 	} else {
 		id := int(file.GetDb().JsonDb.GetTaskId())
+		clientId := s.GetIntNoErr("client_id")
 		t := &file.Tunnel{
 			Port:      s.GetIntNoErr("port"),
 			ServerIp:  s.getEscapeString("server_ip"),
@@ -101,7 +102,7 @@ func (s *IndexController) Add() {
 			Target:    &file.Target{
 				TargetStr: strings.ReplaceAll(s.getEscapeString("target"), "\r\n", "\n"),
 				ProxyProtocol: s.GetIntNoErr("proxy_protocol"),
-				LocalProxy: (id > 0 && s.GetBoolNoErr("local_proxy")) || id <= 0,
+				LocalProxy: (clientId > 0 && s.GetBoolNoErr("local_proxy")) || clientId <= 0,
 			},
 			Id:        id,
 			Status:    true,
@@ -120,7 +121,7 @@ func (s *IndexController) Add() {
 			s.AjaxErr("The port cannot be opened because it may has been occupied or is no longer allowed.")
 		}
 		var err error
-		if t.Client, err = file.GetDb().GetClient(s.GetIntNoErr("client_id")); err != nil {
+		if t.Client, err = file.GetDb().GetClient(clientId); err != nil {
 			s.AjaxErr(err.Error())
 		}
 		if t.Client.MaxTunnelNum != 0 && t.Client.GetTunnelNum() >= t.Client.MaxTunnelNum {
@@ -162,7 +163,8 @@ func (s *IndexController) Edit() {
 		if t, err := file.GetDb().GetTask(id); err != nil {
 			s.error()
 		} else {
-			if client, err := file.GetDb().GetClient(s.GetIntNoErr("client_id")); err != nil {
+			clientId := s.GetIntNoErr("client_id")
+			if client, err := file.GetDb().GetClient(clientId); err != nil {
 				s.AjaxErr("modified error,the client is not exist")
 				return
 			} else {
@@ -189,7 +191,7 @@ func (s *IndexController) Edit() {
 			t.StripPre = s.getEscapeString("strip_pre")
 			t.Remark = s.getEscapeString("remark")
 			t.Target.ProxyProtocol = s.GetIntNoErr("proxy_protocol")
-			t.Target.LocalProxy = (id > 0 && s.GetBoolNoErr("local_proxy")) || id <= 0
+			t.Target.LocalProxy = (clientId > 0 && s.GetBoolNoErr("local_proxy")) || clientId <= 0
 			file.GetDb().UpdateTask(t)
 			server.StopServer(t.Id)
 			server.StartTask(t.Id)
@@ -266,13 +268,14 @@ func (s *IndexController) AddHost() {
 		s.display("index/hadd")
 	} else {
 		id := int(file.GetDb().JsonDb.GetHostId())
+		clientId := s.GetIntNoErr("client_id")
 		h := &file.Host{
 			Id:           id,
 			Host:         s.getEscapeString("host"),
 			Target:       &file.Target{
 				TargetStr: strings.ReplaceAll(s.getEscapeString("target"), "\r\n", "\n"),
 				ProxyProtocol: s.GetIntNoErr("proxy_protocol"),
-				LocalProxy: (id > 0 && s.GetBoolNoErr("local_proxy")) || id <= 0,
+				LocalProxy: (clientId > 0 && s.GetBoolNoErr("local_proxy")) || clientId <= 0,
 			},
 			HeaderChange: s.getEscapeString("header"),
 			HostChange:   s.getEscapeString("hostchange"),
@@ -324,7 +327,8 @@ func (s *IndexController) EditHost() {
 					return
 				}
 			}
-			if client, err := file.GetDb().GetClient(s.GetIntNoErr("client_id")); err != nil {
+			clientId := s.GetIntNoErr("client_id")
+			if client, err := file.GetDb().GetClient(clientId); err != nil {
 				s.AjaxErr("modified error, the client is not exist")
 			} else {
 				h.Client = client
@@ -339,7 +343,7 @@ func (s *IndexController) EditHost() {
 			h.KeyFilePath = s.getEscapeString("key_file_path")
 			h.CertFilePath = s.getEscapeString("cert_file_path")
 			h.Target.ProxyProtocol = s.GetIntNoErr("proxy_protocol")
-			h.Target.LocalProxy = (id > 0 && s.GetBoolNoErr("local_proxy")) || id <= 0
+			h.Target.LocalProxy = (clientId > 0 && s.GetBoolNoErr("local_proxy")) || clientId <= 0
 			h.AutoHttps = s.GetBoolNoErr("AutoHttps")
 			file.GetDb().JsonDb.StoreHostToJsonFile()
 		}
