@@ -138,8 +138,17 @@ function langreply(langstr) {
     return langobj
 }
 
+function goback() {
+	history.back();
+}
+
 function submitform(action, url, postdata) {
     postsubmit = false;
+    $.each(postdata, function(i, v){
+      if (v['value']) {
+        v['value'] = v['value'].trim();
+      }
+    });
     switch (action) {
         case 'start':
         case 'stop':

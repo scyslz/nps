@@ -128,6 +128,10 @@
 		<zh-CN>新增</zh-CN>
 		<en-US>Add</en-US>
 	</lang>
+	<lang id="word-cancel">
+		<zh-CN>取消</zh-CN>
+		<en-US>Cancel</en-US>
+	</lang>
 	<lang id="word-admin">
 		<zh-CN>管理员</zh-CN>
 		<en-US>Admin</en-US>
@@ -409,7 +413,7 @@
 	<lang id="word-proxyprotocolv2">
 		<zh-CN>Proxy Protocol v2</zh-CN>
 		<en-US>Proxy Protocol v2</en-US>
-	</lang>	
+	</lang>
 	<lang id="word-proxytolocal">
 		<zh-CN>代理到服务器本地</zh-CN>
 		<en-US>Proxy to server local</en-US>
