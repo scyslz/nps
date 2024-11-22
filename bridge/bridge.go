@@ -3,7 +3,6 @@ package bridge
 import (
 	"crypto/tls"
 	_ "crypto/tls"
-	"ehang.io/nps/lib/nps_mux"
 	"encoding/binary"
 	"errors"
 	"fmt"
@@ -13,6 +12,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"ehang.io/nps/lib/nps_mux"
 
 	"ehang.io/nps/lib/common"
 	"ehang.io/nps/lib/conn"
@@ -122,6 +123,11 @@ func (s *Bridge) StartTunnel() error {
 
 // get health information form client
 func (s *Bridge) GetHealthFromClient(id int, c *conn.Conn) {
+	// 跳过虚拟客户端
+	if id <= 0 {
+		return
+	}
+
 	for {
 		if info, status, err := c.GetHealthInfo(); err != nil {
 			break
@@ -433,11 +439,19 @@ func (s *Bridge) ping() {
 			closedClients := make([]int, 0)
 
 			s.Client.Range(func(key, value interface{}) bool {
+				clientID := key.(int)
 				client := value.(*Client)
+				
+				// 跳过虚拟客户端的健康检查
+				if clientID <= 0 {
+					return true
+				}
+				
+				// 处理正常客户端
 				if client == nil || client.tunnel == nil || client.signal == nil || client.tunnel.IsClose {
 					client.retryTime++
 					if client.retryTime >= 3 {
-						closedClients = append(closedClients, key.(int))
+						closedClients = append(closedClients, clientID)
 					}
 				} else {
 					client.retryTime = 0 // Reset retry count when the state is normal
