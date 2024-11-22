@@ -143,7 +143,7 @@ log_max_size=2
 - 2024-11-22 v0.26.30
   - 开启allow_local_proxy后将自动生成虚拟客户端配置用于实现本机代理
   - Web编辑页面增加返回按钮
-  - 在客户端编辑页面添加清空流量统计功能
+  - 在客户端编辑页面添加清空流量统计功能 [#5](https://github.com/djylb/nps/issues/5)
 
 <details>
 
