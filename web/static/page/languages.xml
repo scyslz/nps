@@ -342,6 +342,10 @@
 		<zh-CN>退出</zh-CN>
 		<en-US>Logout</en-US>
 	</lang>
+	<lang id="word-flowreset">
+		<zh-CN>清空流量统计</zh-CN>
+		<en-US>Reset Traffic Statistics</en-US>
+	</lang>
 	<lang id="word-maxconnections">
 		<zh-CN>最大连接数</zh-CN>
 		<en-US>Maximum connections</en-US>
@@ -684,6 +688,10 @@
 	<lang id="info-noaccount">
 		<zh-CN>还没有有帐号？</zh-CN>
 		<en-US>Do not have an account?</en-US>
+	</lang>
+	<lang id="info-flowreset">
+		<zh-CN>选中时清空当前流量统计信息</zh-CN>
+		<en-US>Clear current traffic statistics when selected</en-US>
 	</lang>
 	<lang id="info-onlyproxy">
 		<zh-CN>仅限Socks5、Web、HTTP转发代理</zh-CN>

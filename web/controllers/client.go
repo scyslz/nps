@@ -127,6 +127,10 @@ func (s *ClientController) Edit() {
 				c.RateLimit = s.GetIntNoErr("rate_limit")
 				c.MaxConn = s.GetIntNoErr("max_conn")
 				c.MaxTunnelNum = s.GetIntNoErr("max_tunnel")
+				if s.GetBoolNoErr("flow_reset") {
+					c.Flow.ExportFlow = 0
+					c.Flow.InletFlow = 0
+				}
 			}
 			c.Remark = s.getEscapeString("remark")
 			c.Cnf.U = s.getEscapeString("u")
