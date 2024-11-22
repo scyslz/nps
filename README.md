@@ -134,6 +134,15 @@ log_max_size=2
 ```
   NPC使用 ```npc -h``` 查看用法
 
+- X-NPS-Http-Only功能NGINX配置示例
+```
+# 这里填NPS的http_proxy_port端口
+proxy_pass http://127.0.0.1:80;
+proxy_set_header X-NPS-Http-Only "password";
+proxy_set_header X-Real-IP $remote_addr;
+proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+```
+
 ## 更新日志
 ### DEV
 - 2024-11-22 v0.26.31
