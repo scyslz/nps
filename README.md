@@ -14,6 +14,8 @@ nps是一款轻量级、高性能、功能强大的**内网穿透**代理服务�
 
 [Telegram](https://t.me/npsdev)
 
+提问说明：看完本页说明和官方文档后再提问，优先在 [issues](https://github.com/djylb/nps/issues) 提问，不要提重复问题。
+
 ***DockerHub***： [NPS](https://hub.docker.com/r/duan2001/nps) [NPC](https://hub.docker.com/r/duan2001/npc)
 
 ## 简单安装说明 (具体还是参考 [官方文档](https://ehang-io.github.io/nps/) ，虽然已经过时了但也能凑合用)
