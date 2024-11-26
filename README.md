@@ -113,6 +113,7 @@ docker run -d --restart=always --name npc --net=host duan2001/npc -server=xxxx:1
 ```
 
 ## 补充说明
+- 关于ipv6问题，不需要修改任何配置，默认配置就已经在双栈协议上监听了
 - 域名转发的HTTPS证书和密钥位置支持填写路径或证书文本内容
   
   其中路径支持绝对路径和相对路径，不过最好填写绝对路径，相对路径是以nps二进制文件所在路径为基准。
