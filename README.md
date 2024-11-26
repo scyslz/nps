@@ -102,8 +102,10 @@ WantedBy=multi-user.target
 ***DockerHub***： [NPS](https://hub.docker.com/r/duan2001/nps) [NPC](https://hub.docker.com/r/duan2001/npc)
 ```
 # NPS
+# 根据下面链接创建 nps.conf 配置文件
+# https://github.com/djylb/nps/blob/master/conf/nps.conf
 docker pull duan2001/nps
-docker run -d --restart=always --name nps --net=host -v <本机conf目录>:/conf duan2001/nps
+docker run -d --restart=always --name nps --net=host -v <本机conf目录>:/conf -v /etc/localtime:/etc/localtime:ro duan2001/nps
 
 # NPC
 docker pull duan2001/npc
