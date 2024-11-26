@@ -179,26 +179,63 @@ func (s *JsonDb) GetHostId() int32 {
 }
 
 func loadSyncMapFromFile(filePath string, f func(value string)) {
+	// 如果文件不存在，则创建空文件
+	if !common.FileExists(filePath) {
+		if err := createEmptyFile(filePath); err != nil {
+			panic(err)
+		}
+	}
+
+	// 读取文件内容
 	b, err := common.ReadAllFromFile(filePath)
 	if err != nil {
 		panic(err)
 	}
+
+	// 根据分隔符处理内容
 	for _, v := range strings.Split(string(b), "\n"+common.CONN_DATA_SEQ) {
 		f(v)
 	}
 }
 
 func loadSyncMapFromFileWithSingleJson(filePath string, f func(value string)) {
+	// 如果文件不存在，则创建空文件
 	if !common.FileExists(filePath) {
+		if err := createEmptyFile(filePath); err != nil {
+			panic(err)
+		}
 		return
 	}
 
+	// 读取文件内容
 	b, err := common.ReadAllFromFile(filePath)
 	if err != nil {
 		panic(err)
 	}
 
 	f(string(b))
+}
+
+// 创建空文件的辅助函数
+func createEmptyFile(filePath string) error {
+	// 确保目录存在
+	dir := filepath.Dir(filePath)
+	if !common.FileExists(dir) {
+		if err := os.MkdirAll(dir, os.ModePerm); err != nil {
+			return err
+		}
+	}
+
+	// 如果文件不存在，则创建空文件
+	if !common.FileExists(filePath) {
+		file, err := os.Create(filePath)
+		if err != nil {
+			return err
+		}
+		defer file.Close() // 创建后立即关闭
+	}
+
+	return nil
 }
 
 func storeSyncMapToFile(m sync.Map, filePath string) {
