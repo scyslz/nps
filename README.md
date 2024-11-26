@@ -153,7 +153,8 @@ proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
 
 ## 更新日志
 ### DEV
-- 2024-11-22 v0.26.31
+- 2024-11-26 v0.26.31
+  - 自动创建空json配置，避免启动失败
   - 待定，优先修BUG，新功能随缘更新
 
 ### Stable
