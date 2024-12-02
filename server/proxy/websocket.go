@@ -193,14 +193,14 @@ func NewHttpReverseProxy(s *httpServer) *HttpReverseProxy {
 				}
 				connClient = conn.GetConn(target, lk.Crypt, lk.Compress, host.Client.Rate, true)
 				// 发送 Proxy Protocol 头部
-				if host.Target.ProxyProtocol != 0 {
-					clientAddr, _ := GetClientAddr(r)
-					proxyHeader := conn.BuildProxyProtocolHeaderByAddr(clientAddr, clientAddr, host.Target.ProxyProtocol)
-					if proxyHeader != nil {
-						logs.Debug("Sending Proxy Protocol v%d header to backend: %v", host.Target.ProxyProtocol, proxyHeader)
-						connClient.Write(proxyHeader)
-					}
-				}
+				//if host.Target.ProxyProtocol != 0 {
+				//	clientAddr, _ := GetClientAddr(r)
+				//	proxyHeader := conn.BuildProxyProtocolHeaderByAddr(clientAddr, clientAddr, host.Target.ProxyProtocol)
+				//	if proxyHeader != nil {
+				//		logs.Debug("Sending Proxy Protocol v%d header to backend: %v", host.Target.ProxyProtocol, proxyHeader)
+				//		connClient.Write(proxyHeader)
+				//	}
+				//}
 				return &flowConn{
 					ReadWriteCloser: connClient,
 					fakeAddr:        local,
@@ -233,14 +233,14 @@ func NewHttpReverseProxy(s *httpServer) *HttpReverseProxy {
 		}
 		connClient = conn.GetConn(target, lk.Crypt, lk.Compress, host.Client.Rate, true)
 		// 发送 Proxy Protocol 头部
-		if host.Target.ProxyProtocol != 0 {
-			clientAddr, _ := GetClientAddr(r)
-			proxyHeader := conn.BuildProxyProtocolHeaderByAddr(clientAddr, clientAddr, host.Target.ProxyProtocol)
-			if proxyHeader != nil {
-				logs.Debug("Sending Proxy Protocol v%d header to backend: %v", host.Target.ProxyProtocol, proxyHeader)
-				connClient.Write(proxyHeader)
-			}
-		}
+		//if host.Target.ProxyProtocol != 0 {
+		//	clientAddr, _ := GetClientAddr(r)
+		//	proxyHeader := conn.BuildProxyProtocolHeaderByAddr(clientAddr, clientAddr, host.Target.ProxyProtocol)
+		//	if proxyHeader != nil {
+		//		logs.Debug("Sending Proxy Protocol v%d header to backend: %v", host.Target.ProxyProtocol, proxyHeader)
+		//		connClient.Write(proxyHeader)
+		//	}
+		//}
 		return &flowConn{
 			ReadWriteCloser: connClient,
 			fakeAddr:        local,

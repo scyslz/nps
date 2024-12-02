@@ -34,7 +34,7 @@ func NewTunnelModeServer(process process, bridge NetBridge, task *file.Tunnel) *
 	s.task = task
 	s.allowLocalProxy = allowLocalProxy
 	s.stopChan = make(chan struct{}) // 初始化停止通道
-	s.activeConnections = make(map[net.Conn]struct{}) // 初始化连接池
+	s.activeConnections = sync.Map{} // 初始化连接池
 	return s
 }
 

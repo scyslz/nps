@@ -226,11 +226,13 @@ reset:
 	connClient = conn.GetConn(target, lk.Crypt, lk.Compress, host.Client.Rate, true)
 
 	// 发送 Proxy Protocol 头部
-	proxyHeader := conn.BuildProxyProtocolHeader(c.Conn, host.Target.ProxyProtocol)
-	if proxyHeader != nil {
-		logs.Debug("Sending Proxy Protocol v%d header to backend: %v", host.Target.ProxyProtocol, proxyHeader)
-		connClient.Write(proxyHeader)
-	}
+	//if host.Target.ProxyProtocol != 0 {
+	//	proxyHeader := conn.BuildProxyProtocolHeader(c.Conn, host.Target.ProxyProtocol)
+	//	if proxyHeader != nil {
+	//		logs.Debug("Sending Proxy Protocol v%d header to backend: %v", host.Target.ProxyProtocol, proxyHeader)
+	//		connClient.Write(proxyHeader)
+	//	}
+	//}
 
 	//read from inc-client
 	go func() {
