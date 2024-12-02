@@ -130,19 +130,13 @@ func (s *BaseServer) DealClient(c *conn.Conn, client *file.Client, addr string,
 		return err
 	}
 
-	// 发送 Proxy Protocol 头部
-	if err := conn.SendProxyProtocolHeader(target, c, proxyProtocol); err != nil {
-		c.Close()
-		return err
-	}
-
 	// 执行回调函数
 	if f != nil {
 		f()
 	}
 
 	// 开始数据转发
-	conn.CopyWaitGroup(target, c.Conn, link.Crypt, link.Compress, client.Rate, flow, true, rb, task)
+	conn.CopyWaitGroup(target, c.Conn, link.Crypt, link.Compress, client.Rate, flow, true, proxyProtocol, rb, task)
 	return nil
 }
 

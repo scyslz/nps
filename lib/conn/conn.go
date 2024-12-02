@@ -377,10 +377,15 @@ func SetUdpSession(sess *kcp.UDPSession) {
 
 //conn1 mux conn
 func CopyWaitGroup(conn1, conn2 net.Conn, crypt bool, snappy bool, rate *rate.Rate,
-	flow *file.Flow, isServer bool, rb []byte, task *file.Tunnel) {
+	flow *file.Flow, isServer bool, proxyProtocol int, rb []byte, task *file.Tunnel) {
 	//var in, out int64
 	//var wg sync.WaitGroup
 	connHandle := GetConn(conn1, crypt, snappy, rate, isServer)
+	proxyHeader := BuildProxyProtocolHeader(conn2, proxyProtocol)
+	if proxyHeader != nil {
+		logs.Debug("Sending Proxy Protocol v%d header to backend: %v", proxyProtocol, proxyHeader)
+		connHandle.Write(proxyHeader)
+	}
 	if rb != nil {
 		connHandle.Write(rb)
 	}
@@ -468,24 +473,27 @@ func BuildProxyProtocolV2Header(c net.Conn) []byte {
 
 // 构造 Proxy Protocol 头部
 func BuildProxyProtocolHeader(c net.Conn, proxyProtocol int) []byte {
-	if proxyProtocol == 1 {
-		return BuildProxyProtocolV1Header(c)
+	if proxyProtocol == 0 {
+		return nil
 	}
 	if proxyProtocol == 2 {
 		return BuildProxyProtocolV2Header(c)
+	}
+	if proxyProtocol == 1 {
+		return BuildProxyProtocolV1Header(c)
 	}
 	return nil
 }
 
 // 发送代理协议头
-func SendProxyProtocolHeader(target net.Conn, c *Conn, proxyProtocol int) error {
+func SendProxyProtocolHeader(t, c *Conn, proxyProtocol int) error {
 	proxyHeader := BuildProxyProtocolHeader(c.Conn, proxyProtocol)
 	if proxyHeader == nil {
 		return nil
 	}
 
 	logs.Debug("Sending Proxy Protocol v%d header to backend: %v", proxyProtocol, proxyHeader)
-	_, err := target.Write(proxyHeader)  // 先发送代理头
+	_, err := t.Write(proxyHeader)
 	if err != nil {
 		logs.Error("Failed to send Proxy Protocol header:", err)
 		return err
