@@ -413,11 +413,7 @@ func CopyWaitGroup(conn1, conn2 net.Conn, crypt bool, snappy bool, rate *rate.Ra
 }
 
 // 构造 Proxy Protocol v1 头部
-func BuildProxyProtocolV1Header(c net.Conn) []byte {
-	// 获取客户端和目标地址信息
-	clientAddr := c.RemoteAddr().(*net.TCPAddr)
-	targetAddr := c.LocalAddr().(*net.TCPAddr)
-
+func BuildProxyProtocolV1Header(clientAddr, targetAddr *net.TCPAddr) []byte {
 	var protocol, clientIP, targetIP string
 	// 判断是否是 IPv4 地址
 	if clientAddr.IP.To4() != nil {
@@ -439,10 +435,7 @@ func BuildProxyProtocolV1Header(c net.Conn) []byte {
 }
 
 // 构造 Proxy Protocol v2 头部
-func BuildProxyProtocolV2Header(c net.Conn) []byte {
-	clientAddr := c.RemoteAddr().(*net.TCPAddr)
-	targetAddr := c.LocalAddr().(*net.TCPAddr)
-
+func BuildProxyProtocolV2Header(clientAddr, targetAddr *net.TCPAddr) []byte {
 	var header []byte
 	if clientAddr.IP.To4() != nil {
 		// IPv4
@@ -476,27 +469,16 @@ func BuildProxyProtocolHeader(c net.Conn, proxyProtocol int) []byte {
 	if proxyProtocol == 0 {
 		return nil
 	}
+
+	// 获取客户端和目标地址信息
+	clientAddr := c.RemoteAddr().(*net.TCPAddr)
+	targetAddr := c.LocalAddr().(*net.TCPAddr)
+
 	if proxyProtocol == 2 {
-		return BuildProxyProtocolV2Header(c)
+		return BuildProxyProtocolV2Header(clientAddr, targetAddr)
 	}
 	if proxyProtocol == 1 {
-		return BuildProxyProtocolV1Header(c)
-	}
-	return nil
-}
-
-// 发送代理协议头
-func SendProxyProtocolHeader(t, c *Conn, proxyProtocol int) error {
-	proxyHeader := BuildProxyProtocolHeader(c.Conn, proxyProtocol)
-	if proxyHeader == nil {
-		return nil
-	}
-
-	logs.Debug("Sending Proxy Protocol v%d header to backend: %v", proxyProtocol, proxyHeader)
-	_, err := t.Write(proxyHeader)
-	if err != nil {
-		logs.Error("Failed to send Proxy Protocol header:", err)
-		return err
+		return BuildProxyProtocolV1Header(clientAddr, targetAddr)
 	}
 	return nil
 }
