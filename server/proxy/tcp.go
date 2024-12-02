@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"path/filepath"
 	"strconv"
+	"sync"
 
 	"ehang.io/nps/bridge"
 	"ehang.io/nps/lib/common"
@@ -18,10 +19,10 @@ import (
 
 type TunnelModeServer struct {
 	BaseServer
-	process  process
-	listener net.Listener
-	stopChan chan struct{} // 新增停止通道
-	activeConnections map[net.Conn]struct{} // 新增连接池
+	process           process
+	listener          net.Listener
+	stopChan          chan struct{} // 停止通道
+	activeConnections sync.Map      // 连接池
 }
 
 // tcp|http|host
@@ -41,16 +42,19 @@ func NewTunnelModeServer(process process, bridge NetBridge, task *file.Tunnel) *
 func (s *TunnelModeServer) Start() error {
 	return conn.NewTcpListenerAndProcess(s.task.ServerIp+":"+strconv.Itoa(s.task.Port), func(c net.Conn) {
 		// 将新连接加入到连接池中
-		s.activeConnections[c] = struct{}{}
+		s.activeConnections.Store(c, struct{}{})
+
 		defer func() {
-			// 确保连接关闭时从连接池中移除
-			delete(s.activeConnections, c)
+			// 从连接池中移除连接
+			s.activeConnections.Delete(c)
+
 			if c != nil {
 				c.Close()
 			}
 		}()
+
 		select {
-		case <-s.stopChan: // 如果接收到停止信号，立即关闭连接
+		case <-s.stopChan: // 接收到停止信号时关闭连接
 			logs.Info("Connection closed due to configuration change")
 			c.Close()
 			return
@@ -76,12 +80,13 @@ func (s *TunnelModeServer) Close() error {
 	// 发送停止信号，通知所有连接断开
 	close(s.stopChan)
 
-	// 关闭所有活跃连接
-	for conn := range s.activeConnections {
-		if conn != nil {
+	// 遍历连接池中的所有连接并关闭它们
+	s.activeConnections.Range(func(key, value interface{}) bool {
+		if conn, ok := key.(net.Conn); ok {
 			conn.Close()
 		}
-	}
+		return true
+	})
 
 	// 关闭监听器
 	return s.listener.Close()
