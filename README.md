@@ -123,9 +123,11 @@ docker run -d --restart=always --name npc --net=host duan2001/npc -server=xxxx:1
   此外docker映射的文件夹内文件不支持软链接，有需要请使用硬链接。
 - 客户端命令行方式启动支持多个隧道ID，使用逗号拼接，示例：`npc -server=xxx:8024 -vkey=ytkpyr0er676m0r7,iwnbjfbvygvzyzzt`
 - 当需要在NPS前添加反向代理时可以通过插入头（X-NPS-Http-Only: password）来避免301重定向和插入真实IP
-- 域名转发的模式指的是访问NPS的模式而不是后端服务器模式，正常情况下目标应该填写后端HTTP端口，另外不要使用Proxy Protocol(Websocket兼容存在问题)，通过 X-Forwarded-For 或 X-Real-IP 获取真实IP
+- 域名转发的模式指的是访问NPS的模式而不是后端服务器模式，正常情况下目标应该填写后端HTTP端口，通过 X-Forwarded-For 或 X-Real-IP 获取真实IP
 
   如果后端只有HTTPS的话可以通过将模式配置为HTTPS，同时NPS证书位置留空则即可，注意后端证书要配置正确，如果后端支持可以通过Proxy Protocol获取真实IP
+
+  注意域名转发中的Proxy Protocol功能只在仅转发HTTPS情况下生效（NPS证书位置留空通过HTTPS访问，即由后端处理HTTPS）
 - NPS日志配置 nps.conf
 ```
 # 日志级别 (0-7) LevelEmergency->0  LevelAlert->1 LevelCritical->2 LevelError->3 LevelWarning->4 LevelNotice->5 LevelInformational->6 LevelDebug->7
@@ -162,18 +164,25 @@ proxy_buffering off;
 
 ## 更新日志
 ### DEV
-- 2024-11-26 v0.26.31
-  - 自动创建空json配置，避免启动失败
+- 2024-12-03 v0.26.32
   - 待定，优先修BUG，新功能随缘更新
 
 ### Stable
+- 2024-12-03 v0.26.32
+  - 修复Proxy Protocol在开启客户端加密压缩后不能正常工作问题 [#26](https://github.com/djylb/nps/issues/26)
+  - 修复TCP高并发下读写冲突问题
+  - 调整域名转发下Proxy Protocol功能仅在后端处理HTTPS时生效，避免用户错误配置
+  - 优化连接超时处理逻辑
+
+<details>
+- 2024-11-26 v0.26.31
+  - 自动创建空json配置，避免启动失败
+
 - 2024-11-22 v0.26.30
   - 开启allow_local_proxy后将自动生成虚拟客户端配置用于实现本机代理
   - Web编辑页面增加返回按钮
   - 在客户端编辑页面添加清空流量统计功能 [#5](https://github.com/djylb/nps/issues/5)
   - allow_local_proxy安全漏洞修复
-
-<details>
 
 - 2024-11-21 v0.26.29
   - 修复编辑界面证书显示和详情页面排版
