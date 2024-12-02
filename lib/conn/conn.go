@@ -483,6 +483,20 @@ func BuildProxyProtocolHeader(c net.Conn, proxyProtocol int) []byte {
 	return nil
 }
 
+func BuildProxyProtocolHeaderByAddr(clientAddr, targetAddr *net.TCPAddr, proxyProtocol int) []byte {
+	if proxyProtocol == 0 {
+		return nil
+	}
+
+	if proxyProtocol == 2 {
+		return BuildProxyProtocolV2Header(clientAddr, targetAddr)
+	}
+	if proxyProtocol == 1 {
+		return BuildProxyProtocolV1Header(clientAddr, targetAddr)
+	}
+	return nil
+}
+
 //get crypt or snappy conn
 func GetConn(conn net.Conn, cpt, snappy bool, rt *rate.Rate, isServer bool) io.ReadWriteCloser {
 	if cpt {

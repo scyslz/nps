@@ -107,6 +107,32 @@ func (*flowConn) SetReadDeadline(t time.Time) error { return nil }
 
 func (*flowConn) SetWriteDeadline(t time.Time) error { return nil }
 
+func GetClientAddr(r *http.Request) (*net.TCPAddr, error) {
+	// 从 RemoteAddr 提取 IP 和端口
+	host, portStr, err := net.SplitHostPort(r.RemoteAddr)
+	if err != nil {
+		return nil, err // 返回解析错误
+	}
+
+	// 解析 IP 地址
+	ip := net.ParseIP(host)
+	if ip == nil {
+		return nil, &net.AddrError{Err: "invalid IP address", Addr: host}
+	}
+
+	// 转换端口为整数
+	port, err := net.LookupPort("tcp", portStr)
+	if err != nil {
+		return nil, err // 返回端口解析错误
+	}
+
+	// 构造并返回 *net.TCPAddr
+	return &net.TCPAddr{
+		IP:   ip,
+		Port: port,
+	}, nil
+}
+
 func NewHttpReverseProxy(s *httpServer) *HttpReverseProxy {
 	rp := &HttpReverseProxy{
 		//BaseServer: BaseServer{
@@ -166,6 +192,15 @@ func NewHttpReverseProxy(s *httpServer) *HttpReverseProxy {
 					return nil, NewHTTPError(http.StatusBadGateway, "Cannot connect to the server")
 				}
 				connClient = conn.GetConn(target, lk.Crypt, lk.Compress, host.Client.Rate, true)
+				// 发送 Proxy Protocol 头部
+				if host.Target.ProxyProtocol != 0 {
+					clientAddr, _ := GetClientAddr(r)
+					proxyHeader := conn.BuildProxyProtocolHeaderByAddr(clientAddr, clientAddr, host.Target.ProxyProtocol)
+					if proxyHeader != nil {
+						logs.Debug("Sending Proxy Protocol v%d header to backend: %v", host.Target.ProxyProtocol, proxyHeader)
+						connClient.Write(proxyHeader)
+					}
+				}
 				return &flowConn{
 					ReadWriteCloser: connClient,
 					fakeAddr:        local,
@@ -197,6 +232,15 @@ func NewHttpReverseProxy(s *httpServer) *HttpReverseProxy {
 			return nil, NewHTTPError(http.StatusBadGateway, "Cannot connect to the target")
 		}
 		connClient = conn.GetConn(target, lk.Crypt, lk.Compress, host.Client.Rate, true)
+		// 发送 Proxy Protocol 头部
+		if host.Target.ProxyProtocol != 0 {
+			clientAddr, _ := GetClientAddr(r)
+			proxyHeader := conn.BuildProxyProtocolHeaderByAddr(clientAddr, clientAddr, host.Target.ProxyProtocol)
+			if proxyHeader != nil {
+				logs.Debug("Sending Proxy Protocol v%d header to backend: %v", host.Target.ProxyProtocol, proxyHeader)
+				connClient.Write(proxyHeader)
+			}
+		}
 		return &flowConn{
 			ReadWriteCloser: connClient,
 			fakeAddr:        local,
