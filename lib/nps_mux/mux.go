@@ -101,13 +101,14 @@ func (s *Mux) NewConn() (*conn, error) {
 	case <-conn.connStatusOkCh:
 		return conn, nil
 	case <-timer.C:
+		s.connMap.Delete(conn.connId) // 删除未成功的连接
 	}
-	return nil, errors.New("create connection fail，the server refused the connection")
+	return nil, errors.New("create connection fail, the server refused the connection")
 }
 
 func (s *Mux) Accept() (net.Conn, error) {
 	if s.IsClose {
-		return nil, errors.New("accpet error,the mux has closed")
+		return nil, errors.New("accept error, the mux has closed")
 	}
 	conn := <-s.newConnCh
 	if conn == nil {

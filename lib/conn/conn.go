@@ -408,7 +408,7 @@ func CopyWaitGroup(conn1, conn2 net.Conn, crypt bool, snappy bool, rate *rate.Ra
 }
 
 // 构造 Proxy Protocol v1 头部
-func BuildProxyProtocolV1Header(c *Conn) []byte {
+func BuildProxyProtocolV1Header(c net.Conn) []byte {
 	// 获取客户端和目标地址信息
 	clientAddr := c.RemoteAddr().(*net.TCPAddr)
 	targetAddr := c.LocalAddr().(*net.TCPAddr)
@@ -434,7 +434,7 @@ func BuildProxyProtocolV1Header(c *Conn) []byte {
 }
 
 // 构造 Proxy Protocol v2 头部
-func BuildProxyProtocolV2Header(c *Conn) []byte {
+func BuildProxyProtocolV2Header(c net.Conn) []byte {
 	clientAddr := c.RemoteAddr().(*net.TCPAddr)
 	targetAddr := c.LocalAddr().(*net.TCPAddr)
 
@@ -466,14 +466,21 @@ func BuildProxyProtocolV2Header(c *Conn) []byte {
 	return header
 }
 
+// 构造 Proxy Protocol 头部
+func BuildProxyProtocolHeader(c net.Conn, proxyProtocol int) []byte {
+	if proxyProtocol == 1 {
+		return BuildProxyProtocolV1Header(c)
+	}
+	if proxyProtocol == 2 {
+		return BuildProxyProtocolV2Header(c)
+	}
+	return nil
+}
+
 // 发送代理协议头
 func SendProxyProtocolHeader(target net.Conn, c *Conn, proxyProtocol int) error {
-	var proxyHeader []byte
-	if proxyProtocol == 1 {
-		proxyHeader = BuildProxyProtocolV1Header(c)
-	} else if proxyProtocol == 2 {
-		proxyHeader = BuildProxyProtocolV2Header(c)
-	} else {
+	proxyHeader := BuildProxyProtocolHeader(c.Conn, proxyProtocol)
+	if proxyHeader == nil {
 		return nil
 	}
 
