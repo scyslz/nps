@@ -164,17 +164,22 @@ proxy_buffering off;
 
 ## 更新日志
 ### DEV
-- 2024-12-03 v0.26.32
+- 2024-12-19 v0.26.33
   - 待定，优先修BUG，新功能随缘更新
 
 ### Stable
-- 2024-12-03 v0.26.32
+- 2024-12-19 v0.26.33
+  - 临时修复Socks5流量不计入客户端总流量问题 [#29](https://github.com/djylb/nps/issues/29)
+  - 更新相关依赖库（安全更新）
+
+<details>
+
+ - 2024-12-03 v0.26.32
   - 修复Proxy Protocol在开启客户端加密压缩后不能正常工作问题 [#26](https://github.com/djylb/nps/issues/26)
   - 修复TCP高并发下读写冲突问题
   - 调整域名转发下Proxy Protocol功能仅在后端处理HTTPS时生效，避免用户错误配置
   - 优化连接超时处理逻辑
 
-<details>
 - 2024-11-26 v0.26.31
   - 自动创建空json配置，避免启动失败
 
