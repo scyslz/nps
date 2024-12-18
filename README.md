@@ -174,7 +174,7 @@ proxy_buffering off;
 
 <details>
 
- - 2024-12-03 v0.26.32
+- 2024-12-03 v0.26.32
   - 修复Proxy Protocol在开启客户端加密压缩后不能正常工作问题 [#26](https://github.com/djylb/nps/issues/26)
   - 修复TCP高并发下读写冲突问题
   - 调整域名转发下Proxy Protocol功能仅在后端处理HTTPS时生效，避免用户错误配置
