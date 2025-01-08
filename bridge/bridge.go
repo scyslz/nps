@@ -194,6 +194,7 @@ func (s *Bridge) GetHealthFromClient(id int, c *conn.Conn) {
 // 验证失败，返回错误验证flag，并且关闭连接
 func (s *Bridge) verifyError(c *conn.Conn) {
 	c.Write([]byte(common.VERIFY_EER))
+	c.Close()
 }
 
 func (s *Bridge) verifySuccess(c *conn.Conn) {
@@ -201,6 +202,11 @@ func (s *Bridge) verifySuccess(c *conn.Conn) {
 }
 
 func (s *Bridge) cliProcess(c *conn.Conn) {
+	if c.Conn == nil || c.Conn.RemoteAddr() == nil {
+		logs.Warn("Invalid connection")
+		return
+	}
+
 	//read test flag
 	if _, err := c.GetShortContent(3); err != nil {
 		logs.Info("The client %s connect error: %s", c.Conn.RemoteAddr(), err.Error())
@@ -250,10 +256,21 @@ func (s *Bridge) cliProcess(c *conn.Conn) {
 func (s *Bridge) DelClient(id int) {
 	if v, ok := s.Client.Load(id); ok {
 		client := v.(*Client)
+
 		if client.signal != nil {
 			client.signal.Close()
 		}
+
+		if client.tunnel != nil {
+			client.tunnel.Close()
+		}
+
+		if client.file != nil {
+			client.file.Close()
+		}
+
 		s.Client.Delete(id)
+
 		if file.GetDb().IsPubClient(id) {
 			return
 		}
