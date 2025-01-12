@@ -210,6 +210,7 @@ func (s *Bridge) cliProcess(c *conn.Conn) {
 	//read test flag
 	if _, err := c.GetShortContent(3); err != nil {
 		logs.Info("The client %s connect error: %s", c.Conn.RemoteAddr(), err.Error())
+		c.Close()
 		return
 	}
 	//version check
