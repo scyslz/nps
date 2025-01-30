@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"sort"
 	"sync"
+	"time"
 
 	"ehang.io/nps/bridge"
 	"ehang.io/nps/lib/common"
@@ -85,6 +86,9 @@ func (s *BaseServer) auth(r *http.Request, c *conn.Conn, u, p string, task *file
 
 //check flow limit of the client ,and decrease the allow num of client
 func (s *BaseServer) CheckFlowAndConnNum(client *file.Client) error {
+	if !client.Flow.TimeLimit.IsZero() && client.Flow.TimeLimit.Before(time.Now()) {
+		return errors.New("Connection expired")
+	}
 	if client.Flow.FlowLimit > 0 && (client.Flow.FlowLimit<<20) < (client.Flow.ExportFlow+client.Flow.InletFlow) {
 		return errors.New("Traffic exceeded")
 	}

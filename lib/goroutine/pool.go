@@ -9,6 +9,7 @@ import (
 	"net"
 	"strings"
 	"sync"
+	"time"
 )
 
 type connGroup struct {
@@ -82,6 +83,10 @@ func CopyBuffer(dst io.Writer, src io.Reader, flow *file.Flow, task *file.Tunnel
 					// <<20 = 1024 * 1024
 					if flow.FlowLimit > 0 && (flow.FlowLimit<<20) < (flow.ExportFlow+flow.InletFlow) {
 						logs.Info("流量已经超出.........")
+						break
+					}
+					if !flow.TimeLimit.IsZero() && flow.TimeLimit.Before(time.Now()) {
+						logs.Info("时间已超出.........")
 						break
 					}
 				}

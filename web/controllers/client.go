@@ -67,6 +67,7 @@ func (s *ClientController) Add() {
 				ExportFlow: 0,
 				InletFlow:  0,
 				FlowLimit:  int64(s.GetIntNoErr("flow_limit")),
+				TimeLimit:  common.GetTimeNoErrByStr(s.getEscapeString("time_limit")),
 			},
 			BlackIpList: RemoveRepeatedElement(strings.Split(s.getEscapeString("blackiplist"), "\r\n")),
 			CreateTime:  time.Now().Format("2006-01-02 15:04:05"),
@@ -124,6 +125,7 @@ func (s *ClientController) Edit() {
 				}
 				c.VerifyKey = s.getEscapeString("vkey")
 				c.Flow.FlowLimit = int64(s.GetIntNoErr("flow_limit"))
+				c.Flow.TimeLimit = common.GetTimeNoErrByStr(s.getEscapeString("time_limit"))
 				c.RateLimit = s.GetIntNoErr("rate_limit")
 				c.MaxConn = s.GetIntNoErr("max_conn")
 				c.MaxTunnelNum = s.GetIntNoErr("max_tunnel")

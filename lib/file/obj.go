@@ -11,9 +11,10 @@ import (
 )
 
 type Flow struct {
-	ExportFlow int64
-	InletFlow  int64
-	FlowLimit  int64
+	ExportFlow int64     // 传出流量
+	InletFlow  int64     // 传入流量
+	FlowLimit  int64     // 流量限制
+	TimeLimit  time.Time // 连接到期时间
 	sync.RWMutex
 }
 

@@ -20,6 +20,8 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
+	"github.com/araddon/dateparse"
 
 	"ehang.io/nps/lib/crypt"
 )
@@ -133,6 +135,34 @@ func GetStrByBool(b bool) string {
 func GetIntNoErrByStr(str string) int {
 	i, _ := strconv.Atoi(strings.TrimSpace(str))
 	return i
+}
+
+// time
+func GetTimeNoErrByStr(str string) time.Time {
+	// 1. 去除前后空格
+	str = strings.TrimSpace(str)
+	if str == "" {
+		return time.Time{} // 为空时返回零时间
+	}
+
+	// 2. 先尝试解析为 Unix 时间戳（秒或毫秒）
+	if timestamp, err := strconv.ParseInt(str, 10, 64); err == nil {
+		// 处理毫秒级时间戳
+		if timestamp > 1_000_000_000_000 {
+			return time.UnixMilli(timestamp)
+		}
+		// 处理秒级时间戳
+		return time.Unix(timestamp, 0)
+	}
+
+	// 3. 使用 dateparse 库解析日期字符串
+	t, err := dateparse.ParseLocal(str)
+	if err == nil {
+		return t
+	}
+
+	// 解析失败，返回零时间
+	return time.Time{}
 }
 
 // Get verify value
