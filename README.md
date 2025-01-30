@@ -165,9 +165,14 @@ proxy_buffering off;
 ## 更新日志
 ### DEV
 - 2025-1-30 v0.26.36
-  - 添加客户端到期日期限制 [#15](https://github.com/djylb/nps/issues/15)
   - 待定，优先修BUG，新功能随缘更新
+  - 添加客户端到期日期限制 [#15](https://github.com/djylb/nps/issues/15)
 
+    需要在nps.conf文件中添加下面项目配置才能使用
+```
+#时间限制
+allow_time_limit=true
+```
 
 ### Stable
 - 2025-1-30 v0.26.35
