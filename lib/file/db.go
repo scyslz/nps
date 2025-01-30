@@ -218,7 +218,7 @@ func (s *DbUtils) NewClient(c *Client) error {
 reset:
 	if c.VerifyKey == "" || isNotSet {
 		isNotSet = true
-		c.VerifyKey = crypt.GetRandomString(16)
+		c.VerifyKey = crypt.GetRandomString(16, c.Id)
 	}
 	if c.RateLimit == 0 {
 		c.Rate = rate.NewRate(int64(2 << 23))

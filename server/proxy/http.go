@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"fmt"
 	"sync"
 
 	"ehang.io/nps/bridge"
@@ -123,7 +124,12 @@ func (s *httpServer) handleTunneling(w http.ResponseWriter, r *http.Request) {
 
 	// 自动 http 301 https
 	if !isHttpOnlyRequest && host.AutoHttps && r.TLS == nil {
-		http.Redirect(w, r, "https://"+r.Host+r.RequestURI, http.StatusMovedPermanently)
+		// 处理 httpsPort 是否为 443
+		redirectHost := r.Host
+		if s.httpsPort != 443 {
+			redirectHost = fmt.Sprintf("%s:%d", common.RemovePortFromHost(r.Host), s.httpsPort)
+		}
+		http.Redirect(w, r, "https://"+redirectHost+r.RequestURI, http.StatusMovedPermanently)
 		return
 	}
 
@@ -134,7 +140,7 @@ func (s *httpServer) handleTunneling(w http.ResponseWriter, r *http.Request) {
 			r.Header.Set("Host", host.HostChange)
 		}
 		rProxy := NewHttpReverseProxy(s)
-		rProxy.ServeHTTP(w, r)
+		rProxy.ServeHTTP(w, r, host)
 	} else {
 		hijacker, ok := w.(http.Hijacker)
 		if !ok {
@@ -146,13 +152,13 @@ func (s *httpServer) handleTunneling(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusServiceUnavailable)
 		}
 
-		s.handleHttp(conn.NewConn(c), r, isHttpOnlyRequest)
+		s.handleHttp(conn.NewConn(c), r, isHttpOnlyRequest, host)
 	}
 }
 
-func (s *httpServer) handleHttp(c *conn.Conn, r *http.Request, isHttpOnlyRequest bool) {
+func (s *httpServer) handleHttp(c *conn.Conn, r *http.Request, isHttpOnlyRequest bool, host *file.Host) {
 	var (
-		host       *file.Host
+		//host       *file.Host
 		target     net.Conn
 		err        error
 		connClient io.ReadWriteCloser
@@ -172,6 +178,7 @@ func (s *httpServer) handleHttp(c *conn.Conn, r *http.Request, isHttpOnlyRequest
 		}
 		c.Close()
 	}()
+
 reset:
 	if isReset {
 		host.Client.AddConn()
@@ -188,24 +195,30 @@ reset:
 		return
 	}
 
-	if host, err = file.GetDb().GetInfoByHost(r.Host, r); err != nil {
-		logs.Notice("the url %s %s %s can't be parsed!, host %s, url %s, remote address %s", r.URL.Scheme, r.Host, r.RequestURI, r.Host, r.URL.Path, remoteAddr)
-		c.Close()
-		return
-	}
+	//if host, err = file.GetDb().GetInfoByHost(r.Host, r); err != nil {
+	//	logs.Notice("the url %s %s %s can't be parsed!, host %s, url %s, remote address %s", r.URL.Scheme, r.Host, r.RequestURI, r.Host, r.URL.Path, remoteAddr)
+	//	c.Close()
+	//	return
+	//}
 
+	// 检查流量、连接数
 	if err := s.CheckFlowAndConnNum(host.Client); err != nil {
 		logs.Warn("client id %d, host id %d, error %s, when https connection", host.Client.Id, host.Id, err.Error())
 		c.Close()
 		return
 	}
+
 	if !isReset {
 		defer host.Client.AddConn()
 	}
+
+	// 认证
 	if err = s.auth(r, c, host.Client.Cnf.U, host.Client.Cnf.P, s.task); err != nil {
 		logs.Warn("auth error", err, r.RemoteAddr)
 		return
 	}
+
+	// 获取目标地址
 	if targetAddr, err = host.Target.GetRandomTarget(); err != nil {
 		logs.Warn(err.Error())
 		return

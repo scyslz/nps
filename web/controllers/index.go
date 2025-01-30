@@ -270,22 +270,23 @@ func (s *IndexController) AddHost() {
 		id := int(file.GetDb().JsonDb.GetHostId())
 		clientId := s.GetIntNoErr("client_id")
 		h := &file.Host{
-			Id:           id,
-			Host:         s.getEscapeString("host"),
-			Target:       &file.Target{
+			Id:             id,
+			Host:           s.getEscapeString("host"),
+			Target:         &file.Target{
 				TargetStr: strings.ReplaceAll(s.getEscapeString("target"), "\r\n", "\n"),
 				ProxyProtocol: s.GetIntNoErr("proxy_protocol"),
 				LocalProxy: (clientId > 0 && s.GetBoolNoErr("local_proxy")) || clientId <= 0,
 			},
-			HeaderChange: s.getEscapeString("header"),
-			HostChange:   s.getEscapeString("hostchange"),
-			Remark:       s.getEscapeString("remark"),
-			Location:     s.getEscapeString("location"),
-			Flow:         &file.Flow{},
-			Scheme:       s.getEscapeString("scheme"),
-			KeyFilePath:  s.getEscapeString("key_file_path"),
-			CertFilePath: s.getEscapeString("cert_file_path"),
-			AutoHttps:    s.GetBoolNoErr("AutoHttps"),
+			HeaderChange:   s.getEscapeString("header"),
+			HostChange:     s.getEscapeString("hostchange"),
+			Remark:         s.getEscapeString("remark"),
+			Location:       s.getEscapeString("location"),
+			Flow:           &file.Flow{},
+			Scheme:         s.getEscapeString("scheme"),
+			HttpsJustProxy: s.GetBoolNoErr("https_just_proxy"),
+			KeyFilePath:    s.getEscapeString("key_file_path"),
+			CertFilePath:   s.getEscapeString("cert_file_path"),
+			AutoHttps:      s.GetBoolNoErr("auto_https"),
 		}
 		var err error
 		if h.Client, err = file.GetDb().GetClient(s.GetIntNoErr("client_id")); err != nil {
@@ -340,11 +341,12 @@ func (s *IndexController) EditHost() {
 			h.Remark = s.getEscapeString("remark")
 			h.Location = s.getEscapeString("location")
 			h.Scheme = s.getEscapeString("scheme")
+			h.HttpsJustProxy = s.GetBoolNoErr("https_just_proxy")
 			h.KeyFilePath = s.getEscapeString("key_file_path")
 			h.CertFilePath = s.getEscapeString("cert_file_path")
 			h.Target.ProxyProtocol = s.GetIntNoErr("proxy_protocol")
 			h.Target.LocalProxy = (clientId > 0 && s.GetBoolNoErr("local_proxy")) || clientId <= 0
-			h.AutoHttps = s.GetBoolNoErr("AutoHttps")
+			h.AutoHttps = s.GetBoolNoErr("auto_https")
 			file.GetDb().JsonDb.StoreHostToJsonFile()
 		}
 		s.AjaxOk("modified success")

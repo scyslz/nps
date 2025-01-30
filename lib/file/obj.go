@@ -172,22 +172,23 @@ type Health struct {
 }
 
 type Host struct {
-	Id           int
-	Host         string //host
-	HeaderChange string //header change
-	HostChange   string //host change
-	Location     string //url router
-	Remark       string //remark
-	Scheme       string //http https all
-	CertFilePath string
-	KeyFilePath  string
-	NoStore      bool
-	IsClose      bool
-	AutoHttps    bool // 自动https
-	Flow         *Flow
-	Client       *Client
-	Target       *Target //目标
-	Health       `json:"-"`
+	Id             int
+	Host           string //host
+	HeaderChange   string //header change
+	HostChange     string //host change
+	Location       string //url router
+	Remark         string //remark
+	Scheme         string //http https all
+	HttpsJustProxy bool
+	CertFilePath   string
+	KeyFilePath    string
+	NoStore        bool
+	IsClose        bool
+	AutoHttps      bool // 自动https
+	Flow           *Flow
+	Client         *Client
+	Target         *Target //目标
+	Health         `json:"-"`
 	sync.RWMutex
 }
 

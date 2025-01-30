@@ -196,6 +196,10 @@
 		<zh-CN>访问端命令</zh-CN>
 		<en-US>Access command</en-US>
 	</lang>
+	<lang id="word-quicklycommand">
+		<zh-CN>快捷启动命令</zh-CN>
+		<en-US>Quickly command</en-US>
+	</lang>
 	<lang id="word-commandclient">
 		<zh-CN>客户端命令</zh-CN>
 		<en-US>Command</en-US>
@@ -284,9 +288,13 @@
 	</lang>
 	<lang id="word-httpscert">
 		<zh-CN>HTTPS 证书（pem格式）</zh-CN>
-		<en-US>HTTPS cert</en-US>
+		<en-US>HTTPS Cert</en-US>
 	</lang>
 	<lang id="word-https">HTTPS
+	</lang>
+	<lang id="word-httpsjustproxy">
+		<zh-CN>由后端处理HTTPS (仅转发)</zh-CN>
+		<en-US>Handle HTTPS by the backend (only forwarding)</en-US>
 	</lang>
 	<lang id="word-autohttps">
 		<zh-CN>自动HTTPS (301)</zh-CN>
@@ -294,7 +302,7 @@
 	</lang>
 	<lang id="word-httpskey">
 		<zh-CN>HTTPS 密钥（key格式）</zh-CN>
-		<en-US>HTTPS key</en-US>
+		<en-US>HTTPS Key</en-US>
 	</lang>
 	<lang id="word-httpsport">
 		<zh-CN>HTTPS 端口</zh-CN>
@@ -401,6 +409,10 @@
 	<lang id="word-port">
 		<zh-CN>端口</zh-CN>
 		<en-US>Port</en-US>
+	</lang>
+	<lang id="word-accessaddress">
+		<zh-CN>访问地址</zh-CN>
+		<en-US>Access address</en-US>
 	</lang>
 	<lang id="word-proxyprotocol">
 		<zh-CN>Proxy Protocol</zh-CN>

@@ -39,17 +39,17 @@ type flowConn struct {
 	once     sync.Once
 }
 
-func (rp *HttpReverseProxy) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
+func (rp *HttpReverseProxy) ServeHTTP(rw http.ResponseWriter, req *http.Request, host *file.Host) {
 	var (
-		host       *file.Host
+		//host       *file.Host
 		targetAddr string
 		err        error
 	)
-	if host, err = file.GetDb().GetInfoByHost(req.Host, req); err != nil {
-		rw.WriteHeader(http.StatusNotFound)
-		rw.Write([]byte(req.Host + " not found"))
-		return
-	}
+	//if host, err = file.GetDb().GetInfoByHost(req.Host, req); err != nil {
+	//	rw.WriteHeader(http.StatusNotFound)
+	//	rw.Write([]byte(req.Host + " not found"))
+	//	return
+	//}
 
 	// 删除对认证信息的检查，让后端服务器处理 WebSocket 认证
 	/*

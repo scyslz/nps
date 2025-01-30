@@ -54,27 +54,49 @@ func (https *HttpsServer) Start() error {
 			logs.Debug("the url %s can't be parsed!,remote addr %s", serverName, c.RemoteAddr().String())
 			return
 		} else {
-			var certContent, keyContent string
-			var certErr, keyErr error
-
-			// 检测是否是证书内容或路径，并读取内容
-			certContent, certErr = getCertOrKeyContent(host.CertFilePath, "CERTIFICATE")
-			if certErr != nil {
-				certContent = ""
-			}
-
-			keyContent, keyErr = getCertOrKeyContent(host.KeyFilePath, "PRIVATE")
-			if keyErr != nil {
-				keyContent = ""
-			}
-
-			// 如果证书内容为空字符串，则加载本地证书
-			if certContent == "" || keyContent == "" {
-				logs.Debug("由客户端处理证书")
+			if host.HttpsJustProxy {
+				logs.Debug("由后端处理证书")
 				https.handleHttps2(c, serverName, rb, r)
 			} else {
-				logs.Debug("使用上传证书")
-				https.cert(host, c, rb, certContent, keyContent)
+				var certContent, keyContent string
+				var certErr, keyErr error
+
+				// 检测是否是证书内容或路径，并读取内容
+				certContent, certErr = getCertOrKeyContent(host.CertFilePath, "CERTIFICATE")
+				if certErr != nil {
+					certContent = ""
+				}
+
+				keyContent, keyErr = getCertOrKeyContent(host.KeyFilePath, "PRIVATE")
+				if keyErr != nil {
+					keyContent = ""
+				}
+
+				// 如果证书内容为空字符串，则加载默认证书
+				if certContent == "" || keyContent == "" {
+					logs.Debug("加载默认证书")
+					certFile := beego.AppConfig.String("https_default_cert_file")
+					keyFile := beego.AppConfig.String("https_default_key_file")
+
+					certContent, certErr = getCertOrKeyContent(certFile, "CERTIFICATE")
+					if certErr != nil {
+						certContent = ""
+					}
+
+					keyContent, keyErr = getCertOrKeyContent(keyFile, "PRIVATE")
+					if keyErr != nil {
+						keyContent = ""
+					}
+				}
+		
+				// 如果证书内容还为空字符串，则由后端处理证书
+				if certContent == "" || keyContent == "" {
+					logs.Debug("由后端处理证书")
+					https.handleHttps2(c, serverName, rb, r)
+				} else {
+					logs.Debug("使用上传或默认证书")
+					https.cert(host, c, rb, certContent, keyContent)
+				}
 			}
 		}
 	})

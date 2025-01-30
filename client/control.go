@@ -263,8 +263,8 @@ func NewConn(tp string, vkey string, server string, connType string, proxyUrl st
 		return nil, err
 	}
 
-	defer connection.SetDeadline(time.Time{}) // 解除超时限制
 	connection.SetDeadline(time.Now().Add(timeout))
+	defer connection.SetDeadline(time.Time{}) // 解除超时限制
 
 	c := conn.NewConn(connection)
 	if _, err := c.Write([]byte(common.CONN_TEST)); err != nil {

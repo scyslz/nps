@@ -321,6 +321,26 @@ func FormatAddress(s string) string {
 	return "127.0.0.1:" + s
 }
 
+// RemovePortFromHost 移除主机名中的末尾端口号，不影响 IPv6 格式
+func RemovePortFromHost(host string) string {
+	// 如果是 IPv6 格式，例如 [2001:db8::1] 或 [2001:db8::1]:8000
+	if strings.HasPrefix(host, "[") && strings.Contains(host, "]") {
+		// 检查是否有端口号
+		if idx := strings.LastIndex(host, "]:"); idx != -1 {
+			return host[:idx+1] // 保留 [IPv6]
+		}
+		return host // 直接返回 [IPv6]，不修改
+	}
+
+	// 正则匹配 IPv4 或 域名 末尾的 `:port`
+	re := regexp.MustCompile(`^(.*):\d+$`)
+	matches := re.FindStringSubmatch(host)
+	if len(matches) == 2 {
+		return matches[1] // 移除端口号
+	}
+	return host // 无需修改
+}
+
 // get address from the complete address
 func GetIpByAddr(addr string) string {
 	// Handle IPv6 addresses properly

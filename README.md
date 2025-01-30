@@ -164,18 +164,28 @@ proxy_buffering off;
 
 ## 更新日志
 ### DEV
+- 2025-1-30 v0.26.35
+  - 待定，优先修BUG，新功能随缘更新
+
+### Stable
+- 2025-1-30 v0.26.35
+  - 优化密钥生成方式
+  - 优化web页面显示逻辑
+  - 优化域名转发速度 [#34](https://github.com/djylb/nps/issues/34)
+  - 默认证书支持 [#35](https://github.com/djylb/nps/issues/35)
+    
+    注意：本次更新后证书留空则使用默认证书如果默认证书仍不存在则使用仅转发由后端处理SSL，同时为后端处理HTTPS添加开关选项。
+
+<details>
+
 - 2025-1-12 v0.26.34
   - 调整连接处理逻辑
   - 更新相关依赖库
   - 调整npc默认配置
-  - 待定，优先修BUG，新功能随缘更新
 
-### Stable
 - 2024-12-19 v0.26.33
   - 临时修复Socks5流量不计入客户端总流量问题 [#29](https://github.com/djylb/nps/issues/29)
   - 更新相关依赖库（安全更新）
-
-<details>
 
 - 2024-12-03 v0.26.32
   - 修复Proxy Protocol在开启客户端加密压缩后不能正常工作问题 [#26](https://github.com/djylb/nps/issues/26)

@@ -63,14 +63,42 @@ func Md5(s string) string {
 	return hex.EncodeToString(h.Sum(nil))
 }
 
-// Generating Random Verification Key
-func GetRandomString(l int) string {
+// GetRandomString 生成指定长度的随机密钥，支持可选传入id
+func GetRandomString(l int, id ...int) string {
+	// 字符集
 	str := "0123456789abcdefghijklmnopqrstuvwxyz"
 	bytes := []byte(str)
-	result := []byte{}
-	r := rand.New(rand.NewSource(time.Now().UnixNano()))
-	for i := 0; i < l; i++ {
-		result = append(result, bytes[r.Intn(len(bytes))])
+	var result []byte
+
+	// 如果传入id，则将id转换为字符集映射并倒序放在最前面
+	if len(id) > 0 {
+		// 将id转为字符集表示的字符串
+		idMapped := ""
+		for id[0] > 0 {
+			idMapped = string(str[id[0]%len(str)]) + idMapped
+			id[0] /= len(str)
+		}
+
+		// 如果倒序后的id长度超过指定长度l，则截断
+		//if len(idMapped) > l {
+		//	idMapped = idMapped[:l]
+		//}
+
+		// 将倒序后的id添加到结果中
+		result = append(result, []byte(idMapped)...)
 	}
+
+	// 计算剩余需要生成的随机字符的长度
+	remainingLength := l - len(result)
+	if remainingLength > 0 {
+		// 使用当前时间的UnixNano作为随机数种子
+		r := rand.New(rand.NewSource(time.Now().UnixNano()))
+		// 生成剩余的随机字符
+		for i := 0; i < remainingLength; i++ {
+			result = append(result, bytes[r.Intn(len(bytes))])
+		}
+	}
+
+	// 返回最终结果字符串
 	return string(result)
 }
