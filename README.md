@@ -125,9 +125,9 @@ docker run -d --restart=always --name npc --net=host duan2001/npc -server=xxxx:1
 - 当需要在NPS前添加反向代理时可以通过插入头（X-NPS-Http-Only: password）来避免301重定向和插入真实IP
 - 域名转发的模式指的是访问NPS的模式而不是后端服务器模式，正常情况下目标应该填写后端HTTP端口，通过 X-Forwarded-For 或 X-Real-IP 获取真实IP
 
-  如果后端只有HTTPS的话可以通过将模式配置为HTTPS，同时NPS证书位置留空则即可，注意后端证书要配置正确，如果后端支持可以通过Proxy Protocol获取真实IP
+  如果后端只有HTTPS的话可以通过将模式配置为HTTPS，由后端处理HTTPS (仅转发)开启即可，注意后端证书要配置正确，如果后端支持可以通过Proxy Protocol获取真实IP
 
-  注意域名转发中的Proxy Protocol功能只在仅转发HTTPS情况下生效（NPS证书位置留空通过HTTPS访问，即由后端处理HTTPS）
+  注意域名转发中的Proxy Protocol功能只在仅转发HTTPS情况下生效
 - NPS日志配置 nps.conf
 ```
 # 日志级别 (0-7) LevelEmergency->0  LevelAlert->1 LevelCritical->2 LevelError->3 LevelWarning->4 LevelNotice->5 LevelInformational->6 LevelDebug->7
