@@ -174,7 +174,9 @@ proxy_buffering off;
   - 优化域名转发速度 [#34](https://github.com/djylb/nps/issues/34)
   - 默认证书支持 [#35](https://github.com/djylb/nps/issues/35)
     
-    注意：本次更新后证书留空则使用默认证书如果默认证书仍不存在则使用仅转发由后端处理SSL，同时为后端处理HTTPS添加开关选项。
+    注意：本次更新后原有的由后端处理HTTPS需在网页上重新配置把开关打开。
+    
+    证书留空则使用默认证书如果默认证书仍不存在则使用仅转发由后端处理SSL，同时为后端处理HTTPS添加开关选项。
 
 <details>
 
