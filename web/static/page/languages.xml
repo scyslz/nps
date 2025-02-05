@@ -622,8 +622,8 @@
 		<en-US>Unique, non-filling will be generated automatically</en-US>
 	</lang>
 	<lang id="info-timelimit">
-		<zh-CN>随便填，自动识别，留空关闭。例如：2025-01-01</zh-CN>
-		<en-US>Fill freely, automatically recognized. Leave empty to disable. For example: 2025-01-01</en-US>
+		<zh-CN>随便填，自动识别（支持时间戳、注意系统时区），留空关闭。例如：2025-01-01（指定东八时区：2025-01-01 00:00:00 +0800 CST）</zh-CN>
+		<en-US>Fill freely, automatically recognized. Leave empty to disable. For example: 2025-01-01 or 2025-01-01 00:00:00 +0800 CST</en-US>
 	</lang>
 	<lang id="info-casefile">
 		<zh-CN>通提供一个公网可访问的本地文件服务，此模式仅客户端使用配置文件模式方可启动。</zh-CN>
