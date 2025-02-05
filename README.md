@@ -128,6 +128,10 @@ docker run -d --restart=always --name npc --net=host duan2001/npc -server=xxxx:1
   如果后端只有HTTPS的话可以通过将模式配置为HTTPS，由后端处理HTTPS (仅转发)开启即可，注意后端证书要配置正确，如果后端支持可以通过Proxy Protocol获取真实IP
 
   注意域名转发中的Proxy Protocol功能只在仅转发HTTPS情况下生效
+
+  由后端处理HTTPS (仅转发)关闭时的处理优先级：用户自定义证书 > 默认证书 > 由后端处理HTTPS (仅转发)
+
+- 到期时间限制，在nps.conf里配置allow_time_limit=true后即可在网页使用。注意服务器时区，格式随便填即可，自动识别（支持时间戳），留空关闭。例如：2025-01-01（指定东八时区：2025-01-01 00:00:00 +0800 CST）
 - NPS日志配置 nps.conf
 ```
 # 日志级别 (0-7) LevelEmergency->0  LevelAlert->1 LevelCritical->2 LevelError->3 LevelWarning->4 LevelNotice->5 LevelInformational->6 LevelDebug->7
