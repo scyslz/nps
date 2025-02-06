@@ -109,7 +109,7 @@
                 halign: 'center',
                 visible: true,//false表示不显示
                 formatter: function (value, row, index) {
-                    hosturl = ((row.Scheme == 'http' ) ? 'http://' : 'https://') + row.Host + row.Location
+                    hosturl = ((row.Scheme == 'http' ) ? 'http://' : 'https://') + row.Host + ((row.Scheme == 'http' ) ? ":{{.data.httpProxyPort}}" : ":{{.data.httpsProxyPort}}") + row.Location
                     return '<a href="' + hosturl + '" target="_blank">' + row.Host + '</a>'
                 }
             },
