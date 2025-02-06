@@ -111,7 +111,7 @@ func (https *HttpsServer) startCacheCleaner(interval time.Duration) {
 				return true
 			})
 
-			logs.Info("当前 Listener 数量: ", i)
+			logs.Debug("当前 Listener 数量: ", i)
 		}
 	}()
 }
