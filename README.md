@@ -175,6 +175,7 @@ proxy_buffering off;
 ### Stable
 - 2025-02-06 v0.26.36
   - 重写HTTPS模块，提高响应速度
+  - 添加证书缓存功能
   - 修复潜在的连接数统计问题
   - 添加客户端到期日期限制 [#15](https://github.com/djylb/nps/issues/15)
 
