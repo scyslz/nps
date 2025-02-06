@@ -226,6 +226,7 @@ func (s *IndexController) Start() {
 
 func (s *IndexController) HostList() {
 	if s.Ctx.Request.Method == "GET" {
+        	s.Data["data"] = server.GetDashboardData()
 		s.Data["client_id"] = s.getEscapeString("client_id")
 		s.Data["menu"] = "host"
 		s.SetInfo("host list")

@@ -21,7 +21,6 @@ type TunnelModeServer struct {
 	BaseServer
 	process           process
 	listener          net.Listener
-	stopChan          chan struct{} // 停止通道
 	activeConnections sync.Map      // 连接池
 }
 
@@ -33,7 +32,6 @@ func NewTunnelModeServer(process process, bridge NetBridge, task *file.Tunnel) *
 	s.process = process
 	s.task = task
 	s.allowLocalProxy = allowLocalProxy
-	s.stopChan = make(chan struct{}) // 初始化停止通道
 	s.activeConnections = sync.Map{} // 初始化连接池
 	return s
 }
@@ -53,33 +51,21 @@ func (s *TunnelModeServer) Start() error {
 			}
 		}()
 
-		select {
-		case <-s.stopChan: // 接收到停止信号时关闭连接
-			logs.Info("Connection closed due to configuration change")
+		if err := s.CheckFlowAndConnNum(s.task.Client); err != nil {
+			logs.Warn("client id %d, task id %d,error %s, when tcp connection", s.task.Client.Id, s.task.Id, err.Error())
 			c.Close()
 			return
-		default:
-			if err := s.CheckFlowAndConnNum(s.task.Client); err != nil {
-				logs.Warn("client id %d, task id %d, error %s, when tcp connection", s.task.Client.Id, s.task.Id, err.Error())
-				c.Close()
-				return
-			}
-
-			logs.Trace("new tcp connection, local port %d, client %d, remote address %s", s.task.Port, s.task.Client.Id, c.RemoteAddr())
-
-			err := s.process(conn.NewConn(c), s)
-			if err == nil {
-				s.task.Client.AddConn()
-			}
 		}
+
+		logs.Trace("new tcp connection,local port %d,client %d,remote address %s", s.task.Port, s.task.Client.Id, c.RemoteAddr())
+
+		s.process(conn.NewConn(c), s)
+		s.task.Client.AddConn()
 	}, &s.listener)
 }
 
 // Close 停止服务器并关闭所有连接
 func (s *TunnelModeServer) Close() error {
-	// 发送停止信号，通知所有连接断开
-	close(s.stopChan)
-
 	// 遍历连接池中的所有连接并关闭它们
 	s.activeConnections.Range(func(key, value interface{}) bool {
 		if conn, ok := key.(net.Conn); ok {
@@ -142,7 +128,7 @@ func ProcessTunnel(c *conn.Conn, s *TunnelModeServer) error {
 	targetAddr, err := s.task.Target.GetRandomTarget()
 	if err != nil {
 		c.Close()
-		logs.Warn("tcp port %d ,client id %d,task id %d connect error %s", s.task.Port, s.task.Client.Id, s.task.Id, err.Error())
+		logs.Warn("tcp port %d, client id %d, task id %d connect error %s", s.task.Port, s.task.Client.Id, s.task.Id, err.Error())
 		return err
 	}
 
