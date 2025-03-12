@@ -1,5 +1,9 @@
 export GOPROXY=direct
 
+CURRENT_GO_VERSION=$(go version | awk '{print $3}' | sed 's/go//')
+go mod edit -go=$CURRENT_GO_VERSION
+echo "Updated go.mod to Go version: $CURRENT_GO_VERSION"
+
 sudo apt-get update
 sudo apt-get install gcc-mingw-w64-i686 gcc-multilib
 env GOOS=windows GOARCH=386 CGO_ENABLED=1 CC=i686-w64-mingw32-gcc go build -ldflags "-s -w -extldflags -static -extldflags -static" -buildmode=c-shared -o npc_sdk.dll cmd/npc/sdk.go
