@@ -2,6 +2,7 @@ export GOPROXY=direct
 
 CURRENT_GO_VERSION=$(go version | awk '{print $3}' | sed 's/go//')
 go mod edit -go=$CURRENT_GO_VERSION
+go mod tidy
 echo "Updated go.mod to Go version: $CURRENT_GO_VERSION"
 
 sudo apt-get update
