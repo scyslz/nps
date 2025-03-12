@@ -168,6 +168,29 @@ func (s *DbUtils) IsHostExist(h *Host) bool {
 	return exist
 }
 
+func (s *DbUtils) IsHostModify(h *Host) bool {
+	if h == nil {
+		return true
+	}
+
+	existingHost, err := s.GetHostById(h.Id)
+	if err != nil {
+		return true
+	}
+
+	if existingHost.IsClose != h.IsClose ||
+		existingHost.Host != h.Host ||
+		existingHost.Location != h.Location ||
+		existingHost.Scheme != h.Scheme ||
+		existingHost.HttpsJustProxy != h.HttpsJustProxy ||
+		existingHost.CertFilePath != h.CertFilePath ||
+		existingHost.KeyFilePath != h.KeyFilePath {
+		return true
+	}
+
+	return false
+}
+
 func (s *DbUtils) NewHost(t *Host) error {
 	if t.Location == "" {
 		t.Location = "/"

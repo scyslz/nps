@@ -205,6 +205,7 @@ func (s *httpServer) handleProxy(w http.ResponseWriter, r *http.Request) {
 	if r.Header.Get("Upgrade") == "" {
 		if err := s.auth(r, nil, host.Client.Cnf.U, host.Client.Cnf.P, s.task); err != nil {
 			logs.Warn("Unauthorized request from %s", r.RemoteAddr)
+    		w.Header().Set("WWW-Authenticate", `Basic realm="Restricted"`)
 			http.Error(w, "401 Unauthorized", http.StatusUnauthorized)
 			return
 		}
