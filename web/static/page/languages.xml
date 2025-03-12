@@ -304,6 +304,10 @@
 		<zh-CN>自动HTTPS (301)</zh-CN>
 		<en-US>Auto HTTPS (301)</en-US>
 	</lang>
+	<lang id="word-autocors">
+		<zh-CN>自动修复 CORS</zh-CN>
+		<en-US>Auto CORS</en-US>
+	</lang>
 	<lang id="word-httpskey">
 		<zh-CN>HTTPS 密钥（key格式）</zh-CN>
 		<en-US>HTTPS Key</en-US>
@@ -525,6 +529,10 @@
 	<lang id="word-target">
 		<zh-CN>目标 (IP:端口)</zh-CN>
 		<en-US>Target (IP:Port)</en-US>
+	</lang>
+	<lang id="word-targetishttps">
+		<zh-CN>目标类型 (HTTP/HTTPS)</zh-CN>
+		<en-US>Target Type (HTTP/HTTPS)</en-US>
 	</lang>
 	<lang id="word-tcpconnections_established">
 		<zh-CN>TCP 连接 (已建立)</zh-CN>

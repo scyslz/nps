@@ -185,9 +185,11 @@ type Host struct {
 	KeyFilePath    string
 	NoStore        bool
 	IsClose        bool
-	AutoHttps      bool // 自动https
+	AutoHttps      bool
+	AutoCORS       bool
 	Flow           *Flow
 	Client         *Client
+	TargetIsHttps  bool
 	Target         *Target //目标
 	Health         `json:"-"`
 	sync.RWMutex

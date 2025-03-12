@@ -171,10 +171,38 @@ func Getverifyval(vkey string) string {
 }
 
 // Change headers and host of request
-func ChangeHostAndHeader(r *http.Request, host string, header string, addr string, httpOnly bool) {
+func ChangeHostAndHeader(r *http.Request, host string, header string, httpOnly bool) {
 	// 设置 Host 头部信息
 	if host != "" {
 		r.Host = host
+	}
+
+	// 获取请求的客户端 IP
+	clientIP := AddrToIP(r.RemoteAddr)
+
+	//logs.Debug("get X-Remote-IP = " + clientIP)
+
+	// 获取 X-Forwarded-For 头部的先前值
+	xfwdFor := clientIP
+	if prior, ok := r.Header["X-Forwarded-For"]; ok {
+		xfwdFor = strings.Join(prior, ", ") + ", " + clientIP
+	}
+
+	//logs.Debug("get X-Forwarded-For = " + xfwdFor)
+
+	// 判断是否需要添加真实 IP 信息
+	var addOrigin bool
+	if !httpOnly {
+		addOrigin, _ = beego.AppConfig.Bool("http_add_origin_header")
+		r.Header.Set("X-Forwarded-For", xfwdFor)
+	} else {
+		addOrigin = false
+	}
+
+	// 添加 X-Forwarded-For 和 X-Real-IP 头部信息
+	if addOrigin {
+		r.Header.Set("X-Forwarded-For", clientIP)
+		r.Header.Set("X-Real-IP", clientIP)
 	}
 
 	// 设置自定义头部信息
@@ -187,35 +215,14 @@ func ChangeHostAndHeader(r *http.Request, host string, header string, addr strin
 			}
 		}
 	}
+}
 
-	logs.Debug("get X-Remote-Addr = " + addr)
-	// 处理 IPv6 地址
+// 获取 IP 地址
+func AddrToIP(addr string) string {
 	if strings.HasPrefix(addr, "[") && strings.Contains(addr, "]") {
-		addr = addr[1:strings.LastIndex(addr, "]")]
-	} else {
-		addr = strings.Split(addr, ":")[0]
+		return addr[1:strings.LastIndex(addr, "]")]
 	}
-	logs.Debug("get X-Remote-IP = " + addr)
-
-	// 获取 X-Forwarded-For 头部的先前值
-	if prior, ok := r.Header["X-Forwarded-For"]; ok {
-		addr = strings.Join(prior, ", ") + ", " + addr
-	}
-
-	// 判断是否需要添加真实 IP 信息
-	var addOrigin bool
-	if !httpOnly {
-		addOrigin, _ = beego.AppConfig.Bool("http_add_origin_header")
-	} else {
-		addOrigin = false
-	}
-
-	// 添加 X-Forwarded-For 和 X-Real-IP 头部信息
-	if addOrigin {
-		logs.Debug("set X-Forwarded-For X-Real-IP = " + addr)
-		r.Header.Set("X-Forwarded-For", addr)
-		r.Header.Set("X-Real-IP", addr)
-	}
+	return strings.Split(addr, ":")[0]
 }
 
 // Read file content by file path

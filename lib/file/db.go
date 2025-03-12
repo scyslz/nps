@@ -328,73 +328,114 @@ func (s *DbUtils) GetHostById(id int) (h *Host, err error) {
 
 // get key by host from x
 func (s *DbUtils) GetInfoByHost(host string, r *http.Request) (h *Host, err error) {
-	var hosts []*Host // 存储所有可能匹配的 Host 项
-	host = common.GetIpByAddr(host) // 处理带端口的主机名
+	host = common.GetIpByAddr(host)
 
-	// 遍历数据库中的所有 Host 项
+	requestPath := r.RequestURI
+	if requestPath == "" {
+		requestPath = "/"
+	}
+	scheme := r.URL.Scheme
+
+	var bestMatch *Host
 	s.JsonDb.Hosts.Range(func(key, value interface{}) bool {
 		v := value.(*Host)
 
-		// 过滤掉关闭的 Host 项和协议不匹配的项
-		if v.IsClose || (v.Scheme != "all" && v.Scheme != r.URL.Scheme) {
+		// 过滤掉关闭的 Host 项或协议不匹配的项
+		if v.IsClose || (v.Scheme != "all" && v.Scheme != scheme) {
 			return true
 		}
 
-		// 如果 Location 没有设置，默认匹配所有路径
-		if v.Location == "" {
-			v.Location = "/"
-		}
-
-		// 如果请求的路径为空（如使用 WebSocket 协议时），默认路径为 /
-		requestPath := r.RequestURI
-		if requestPath == "" {
-			requestPath = "/"
-		}
-
-		// 判断是否匹配域名和路径
-		if v.Host == host && strings.HasPrefix(requestPath, v.Location) {
-			hosts = append(hosts, v) // 完全匹配的域名，路径匹配
+		// 匹配域名
+		matched := false
+		if v.Host == host {
+			matched = true
 		} else if strings.HasPrefix(v.Host, "*") {
-			patternDomain := v.Host[1:] // 去掉 `*`
-			if strings.HasSuffix(host, patternDomain) && strings.HasPrefix(requestPath, v.Location) {
-				hosts = append(hosts, v) // 通配符匹配的域名，路径匹配
+			// 通配符匹配时去掉星号
+			if strings.HasSuffix(host, v.Host[1:]) {
+				matched = true
+			}
+		}
+		if !matched {
+			return true
+		}
+
+		// 匹配路径，空 Location 默认 "/"
+		location := v.Location
+		if location == "" {
+			location = "/"
+		}
+
+		// 请求路径不匹配则跳过
+		if !strings.HasPrefix(requestPath, location) {
+			return true
+		}
+
+		// 更新最佳匹配项：
+		// 1. 域名长度（去除通配符）越长优先级越高
+		// 2. 相同长度时，Location（路径）的长度越长优先级越高
+		// 3. 若相同，则优先匹配完全一致的域名
+		if bestMatch == nil {
+			bestMatch = v
+		} else {
+			curDomainLength := len(strings.TrimPrefix(v.Host, "*"))
+			bestDomainLength := len(strings.TrimPrefix(bestMatch.Host, "*"))
+			if curDomainLength > bestDomainLength {
+				bestMatch = v
+			} else if curDomainLength == bestDomainLength {
+				if len(location) > len(bestMatch.Location) {
+					bestMatch = v
+				} else if len(location) == len(bestMatch.Location) {
+					if !strings.HasPrefix(v.Host, "*") && strings.HasPrefix(bestMatch.Host, "*") {
+						bestMatch = v
+					}
+				}
 			}
 		}
 		return true
 	})
 
-	// 查找最合适的匹配项
+	if bestMatch != nil {
+		return bestMatch, nil
+	}
+	return nil, errors.New("The host could not be parsed")
+}
+
+func (s *DbUtils) FindCertByHost(host string) (*Host, error) {
+	if host == "" {
+		return nil, errors.New("invalid host")
+	}
+
 	var bestMatch *Host
-	for _, v := range hosts {
+	s.JsonDb.Hosts.Range(func(_, value interface{}) bool {
+		v := value.(*Host)
+		var matched bool
+		// 精确匹配
+		if v.Host == host {
+			matched = true
+		} else if strings.HasPrefix(v.Host, "*.") && strings.HasSuffix(host, v.Host[1:]) {
+			matched = true
+		}
+		if !matched {
+			return true
+		}
+		if v.Location == "/" || v.Location == "" {
+			bestMatch = v
+			return false
+		}
 		if bestMatch == nil {
 			bestMatch = v
-			continue
-		}
-
-		// 比较域名长度，去掉通配符后的长度越长优先级越高
-		iDomainLength := len(strings.TrimPrefix(v.Host, "*"))
-		bestDomainLength := len(strings.TrimPrefix(bestMatch.Host, "*"))
-		if iDomainLength > bestDomainLength {
-			bestMatch = v
-		} else if iDomainLength == bestDomainLength {
-			// 如果域名长度相同，则比较路径长度，路径越长优先级越高
-			if len(v.Location) > len(bestMatch.Location) {
+		} else {
+			curDomainLength := len(strings.TrimPrefix(v.Host, "*."))
+			bestDomainLength := len(strings.TrimPrefix(bestMatch.Host, "*."))
+			if curDomainLength > bestDomainLength {
 				bestMatch = v
-			} else if len(v.Location) == len(bestMatch.Location) {
-				// 如果域名长度和路径长度相同，优先匹配域名完全一致的项
-				if !strings.HasPrefix(v.Host, "*") && strings.HasPrefix(bestMatch.Host, "*") {
-					bestMatch = v
-				}
 			}
 		}
-	}
+		return true
+	})
 
-	// 如果找到匹配项，则返回；否则返回错误
 	if bestMatch != nil {
-		h = bestMatch
-		return
+		return bestMatch, nil
 	}
-
-	err = errors.New("The host could not be parsed")
-	return
+	return nil, errors.New("no matching certificate found")
 }

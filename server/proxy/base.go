@@ -77,8 +77,10 @@ func (s *BaseServer) auth(r *http.Request, c *conn.Conn, u, p string, task *file
 		accountMap = task.MultiAccount.AccountMap
 	}
 	if !common.CheckAuth(r, u, p, accountMap) {
-		c.Write([]byte(common.UnauthorizedBytes))
-		c.Close()
+		if c != nil {
+			c.Write([]byte(common.UnauthorizedBytes))
+			c.Close()
+		}
 		return errors.New("401 Unauthorized")
 	}
 	return nil
@@ -87,13 +89,13 @@ func (s *BaseServer) auth(r *http.Request, c *conn.Conn, u, p string, task *file
 //check flow limit of the client ,and decrease the allow num of client
 func (s *BaseServer) CheckFlowAndConnNum(client *file.Client) error {
 	if !client.Flow.TimeLimit.IsZero() && client.Flow.TimeLimit.Before(time.Now()) {
-		return errors.New("Connection expired")
+		return errors.New("Service access expired.")
 	}
 	if client.Flow.FlowLimit > 0 && (client.Flow.FlowLimit<<20) < (client.Flow.ExportFlow+client.Flow.InletFlow) {
-		return errors.New("Traffic exceeded")
+		return errors.New("Traffic limit exceeded.")
 	}
 	if !client.GetConn() {
-		return errors.New("Connections exceed the current client limit")
+		return errors.New("Connection limit exceeded.")
 	}
 	return nil
 }

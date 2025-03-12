@@ -8,7 +8,6 @@ import (
 	"sync"
 	"time"
 
-	"ehang.io/nps/lib/cache"
 	"ehang.io/nps/lib/common"
 	"ehang.io/nps/lib/conn"
 	"ehang.io/nps/lib/crypt"
@@ -37,7 +36,7 @@ type HttpsServer struct {
 	defaultKeyFile  string // 默认私钥文件路径
 }
 
-func NewHttpsServer(l net.Listener, bridge NetBridge, useCache bool, cacheLen int, task *file.Tunnel) *HttpsServer {
+func NewHttpsServer(l net.Listener, bridge NetBridge, task *file.Tunnel) *HttpsServer {
 	allowLocalProxy, _ := beego.AppConfig.Bool("allow_local_proxy")
 	https := &HttpsServer{
 		listener: l,
@@ -49,11 +48,6 @@ func NewHttpsServer(l net.Listener, bridge NetBridge, useCache bool, cacheLen in
 				Mutex:           sync.Mutex{},
 			},
 		},
-	}
-
-	https.useCache = useCache
-	if useCache {
-		https.cache = cache.New(cacheLen)
 	}
 
 	// 读取证书缓存超时时间配置，默认60秒
@@ -139,7 +133,8 @@ func (https *HttpsServer) Start() error {
 		}
 
 		r := buildHttpsRequest(serverName)
-		host, err := file.GetDb().GetInfoByHost(serverName, r)
+		//host, err := file.GetDb().GetInfoByHost(serverName, r)
+		host, err := file.GetDb().FindCertByHost(serverName)
 		if err != nil {
 			c.Close()
 			logs.Debug("The URL %s can't be parsed! Remote address: %s", serverName, c.RemoteAddr().String())
