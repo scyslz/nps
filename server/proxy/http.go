@@ -428,36 +428,3 @@ func (s *httpServer) NewServer(port int, scheme string) *http.Server {
 	}
 }
 
-func (s *httpServer) NewServerWithTls(port int, scheme string, l net.Listener, certFile string, keyFile string) error {
-	if certFile == "" || keyFile == "" {
-		logs.Error("证书文件为空")
-		return nil
-	}
-	certFileByte := []byte(certFile)
-	keyFileByte := []byte(keyFile)
-
-	config := &tls.Config{
-		// 设置支持 HTTP/2 与 HTTP/1.1
-		NextProtos: []string{"h2", "http/1.1"},
-	}
-	config.Certificates = make([]tls.Certificate, 1)
-
-	var err error
-	config.Certificates[0], err = tls.X509KeyPair(certFileByte, keyFileByte)
-	if err != nil {
-		return err
-	}
-
-	s2 := &http.Server{
-		Addr: ":" + strconv.Itoa(port),
-		Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			r.URL.Scheme = scheme
-			s.handleProxy(w, r)
-		}),
-		// Disable HTTP/2.
-		//TLSNextProto: make(map[string]func(*http.Server, *tls.Conn, http.Handler)),
-		TLSConfig:    config,
-	}
-
-	return s2.ServeTLS(l, "", "")
-}

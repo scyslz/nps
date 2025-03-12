@@ -1,6 +1,7 @@
 package proxy
 
 import (
+	"crypto/tls"
 	"net"
 	"sync"
 	"time"
@@ -58,7 +59,7 @@ func NewHttpsServer(l net.Listener, bridge NetBridge, task *file.Tunnel) *HttpsS
 	https.defaultKeyFile = beego.AppConfig.String("https_default_key_file")
 
 	// 启动异步清理任务
-	https.startCacheCleaner(30 * time.Second)
+	https.startCacheCleaner(time.Duration(https.sslCacheTimeout) * time.Second)
 
 	return https
 }
@@ -281,10 +282,19 @@ func (https *HttpsServer) Close() error {
 }
 
 // new https server by cert and key file
-func (https *HttpsServer) NewHttps(l net.Listener, certFile string, keyFile string) {
+func (https *HttpsServer) NewHttps(l net.Listener, certText string, keyText string) {
 	go func() {
-		//logs.Error(https.NewServer(0, "https").ServeTLS(l, certFile, keyFile))
-		logs.Error(https.NewServerWithTls(0, "https", l, certFile, keyFile))
+		cert, err := tls.X509KeyPair([]byte(certText), []byte(keyText))
+		if err != nil {
+			logs.Error("加载证书失败: %v", err)
+			return
+		}
+		tlsConfig := &tls.Config{
+			Certificates: []tls.Certificate{cert},
+		}
+		// 用 tls.NewListener 包装原始的 Listener
+		tlsListener := tls.NewListener(l, tlsConfig)
+		logs.Error(https.NewServer(0, "https").Serve(tlsListener))
 	}()
 }
 
