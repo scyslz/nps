@@ -124,7 +124,14 @@ func (https *HttpsServer) cleanupListener(hostId int) {
 // Start HTTPS 服务器
 func (https *HttpsServer) Start() error {
 	conn.Accept(https.listener, func(c net.Conn) {
-		serverName, rb := GetServerNameFromClientHello(c)
+		helloInfo, rb, err := crypt.ReadClientHello(c)
+		if err != nil || helloInfo == nil {
+			logs.Warn("Failed to read clientHello from %s, err=%v", c.RemoteAddr(), err)
+			c.Close()
+			return
+		}
+
+		serverName := helloInfo.ServerName
 		// 判断是否为纯 IP 访问（SNI 为空）
 		if serverName == "" {
 			logs.Debug("IP access to HTTPS port is not allowed. Remote address: %s", c.RemoteAddr().String())
@@ -288,34 +295,6 @@ func (https *HttpsServer) NewHttps(l net.Listener, certFile string, keyFile stri
 	}()
 }
 
-// handle the https which is just proxy to other client
-func (https *HttpsServer) handleHttps(c net.Conn) {
-	hostName, rb := GetServerNameFromClientHello(c)
-	var targetAddr string
-	r := buildHttpsRequest(hostName)
-	host, err := file.GetDb().GetInfoByHost(hostName, r)
-	if err != nil {
-		c.Close()
-		logs.Notice("the url %s can't be parsed!", hostName)
-		return
-	}
-	if err := https.CheckFlowAndConnNum(host.Client); err != nil {
-		logs.Warn("client id %d, host id %d, error %s, when https connection", host.Client.Id, host.Id, err.Error())
-		c.Close()
-		return
-	}
-	defer host.Client.AddConn()
-	if err = https.auth(r, conn.NewConn(c), host.Client.Cnf.U, host.Client.Cnf.P, https.task); err != nil {
-		logs.Warn("auth error", err, r.RemoteAddr)
-		return
-	}
-	if targetAddr, err = host.Target.GetRandomTarget(); err != nil {
-		logs.Warn(err.Error())
-	}
-	logs.Trace("new https connection, clientId %d, host %s, remote address %s", host.Client.Id, r.Host, c.RemoteAddr().String())
-	https.DealClient(conn.NewConn(c), host.Client, targetAddr, rb, common.CONN_TCP, nil, host.Client.Flow, host.Target.ProxyProtocol, host.Target.LocalProxy, nil)
-}
-
 type HttpsListener struct {
 	acceptConn     chan *conn.Conn
 	parentListener net.Listener
@@ -355,23 +334,6 @@ func getCertOrKeyContent(filePath string, header string) (string, error) {
 		return "", err
 	}
 	return string(fileBytes), nil
-}
-
-// get server name from connection by read client hello bytes
-func GetServerNameFromClientHello(c net.Conn) (string, []byte) {
-	buf := make([]byte, 4096)
-	data := make([]byte, 4096)
-	n, err := c.Read(buf)
-	if err != nil {
-		return "", nil
-	}
-	if n < 42 {
-		return "", nil
-	}
-	copy(data, buf[:n])
-	clientHello := new(crypt.ClientHelloMsg)
-	clientHello.Unmarshal(data[5:n])
-	return clientHello.GetServerName(), buf[:n]
 }
 
 // build https request
