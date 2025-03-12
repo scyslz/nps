@@ -214,16 +214,11 @@
                 $("#cert_file").css("display", "block")
                 $("#key_file").css("display", "block")
                 $("#auto_https").css("display", "block")
-                if ($("#scheme_select").val() == "https") {
-                    $("#https_just_proxy").css("display", "block")
-                    if ($("#https_just_proxy_select").val() == "1") {
-                        $("#proxy_protocol").css("display", "block")
-                    } else {
-                        $("#proxy_protocol").css("display", "none")
-                    }
+                $("#https_just_proxy").css("display", "block")
+                if ($("#https_just_proxy_select").val() == "1") {
+                    $("#proxy_protocol").css("display", "block")
                 } else {
                     $("#proxy_protocol").css("display", "none")
-                    $("#https_just_proxy").css("display", "none")
                 }
             } else {
                 $("#cert_file").css("display", "none")
