@@ -4,7 +4,6 @@ import (
 	"net"
 	"net/http"
 	"net/url"
-	"strings"
 	"sync"
 	"time"
 
@@ -201,12 +200,12 @@ func (https *HttpsServer) Start() error {
 
 func (https *HttpsServer) getCertAndKey(host *file.Host) (string, string) {
 	// 获取 host 配置的证书内容
-	certContent, certErr := getCertOrKeyContent(host.CertFilePath, "CERTIFICATE")
+	certContent, certErr := common.GetCertContent(host.CertFilePath, "CERTIFICATE")
 	if certErr != nil {
 		certContent = ""
 	}
 
-	keyContent, keyErr := getCertOrKeyContent(host.KeyFilePath, "PRIVATE")
+	keyContent, keyErr := common.GetCertContent(host.KeyFilePath, "PRIVATE")
 	if keyErr != nil {
 		keyContent = ""
 	}
@@ -214,11 +213,11 @@ func (https *HttpsServer) getCertAndKey(host *file.Host) (string, string) {
 	// 如果 host 配置的证书无效，则使用默认证书
 	if certContent == "" || keyContent == "" {
 		logs.Debug("加载默认证书")
-		certContent, certErr = getCertOrKeyContent(https.defaultCertFile, "CERTIFICATE")
+		certContent, certErr = common.GetCertContent(https.defaultCertFile, "CERTIFICATE")
 		if certErr != nil {
 			certContent = ""
 		}
-		keyContent, keyErr = getCertOrKeyContent(https.defaultKeyFile, "PRIVATE")
+		keyContent, keyErr = common.GetCertContent(https.defaultKeyFile, "PRIVATE")
 		if keyErr != nil {
 			keyContent = ""
 		}
@@ -271,10 +270,6 @@ func (https *HttpsServer) handleHttps2(host *file.Host, c net.Conn, rb []byte, r
 		return
 	}
 	defer host.Client.AddConn()
-	if err = https.auth(r, conn.NewConn(c), host.Client.Cnf.U, host.Client.Cnf.P, https.task); err != nil {
-		logs.Warn("auth error", err, r.RemoteAddr)
-		return
-	}
 	if targetAddr, err = host.Target.GetRandomTarget(); err != nil {
 		logs.Warn(err.Error())
 	}
@@ -322,18 +317,6 @@ func (httpsListener *HttpsListener) Close() error {
 // addr
 func (httpsListener *HttpsListener) Addr() net.Addr {
 	return httpsListener.parentListener.Addr()
-}
-
-// Read Cert
-func getCertOrKeyContent(filePath string, header string) (string, error) {
-	if filePath == "" || strings.Contains(filePath, header) {
-		return filePath, nil
-	}
-	fileBytes, err := common.ReadAllFromFile(filePath)
-	if err != nil || !strings.Contains(string(fileBytes), header) {
-		return "", err
-	}
-	return string(fileBytes), nil
 }
 
 // build https request

@@ -235,6 +235,18 @@ func ReadAllFromFile(filePath string) ([]byte, error) {
 	return ioutil.ReadAll(f)
 }
 
+// getCertContent 从文件读取证书/密钥文本
+func GetCertContent(filePath, header string) (string, error) {
+	if filePath == "" || strings.Contains(filePath, header) {
+		return filePath, nil
+	}
+	content, err := ReadAllFromFile(filePath)
+	if err != nil || !strings.Contains(string(content), header) {
+		return "", err
+	}
+	return string(content), nil
+}
+
 // FileExists reports whether the named file or directory exists.
 func FileExists(name string) bool {
 	if _, err := os.Stat(name); err != nil {
