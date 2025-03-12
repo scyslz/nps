@@ -122,10 +122,11 @@ docker run -d --restart=always --name npc --net=host duan2001/npc -server=xxxx:1
   
   此外docker映射的文件夹内文件不支持软链接，有需要请使用硬链接。
 - 客户端命令行方式启动支持多个隧道ID，使用逗号拼接，示例：`npc -server=xxx:8024 -vkey=ytkpyr0er676m0r7,iwnbjfbvygvzyzzt`
-- 当需要在NPS前添加反向代理时可以通过插入头（X-NPS-Http-Only: password）来避免301重定向和插入真实IP
+- 当需要在NPS前添加反向代理时可以通过插入头（X-NPS-Http-Only: password）来避免301重定向和插入真实IP。
+- Auto CORS功能是自动插入允许跨域头部，允许跨域访问，不过最好还是在后端实现。
 - 域名转发的模式指的是访问NPS的模式而不是后端服务器模式，正常情况下目标应该填写后端HTTP端口，通过 X-Forwarded-For 或 X-Real-IP 获取真实IP
 
-  如果后端只有HTTPS的话可以通过将模式配置为HTTPS，由后端处理HTTPS (仅转发)开启即可，注意后端证书要配置正确，如果后端支持可以通过Proxy Protocol获取真实IP
+  如果后端只有HTTPS的话，只需将后端类型选为HTTPS即可，如果不想在NPS配置证书只需要开启后端处理HTTPS (仅转发)即可，注意后端证书要配置正确。
 
   注意域名转发中的Proxy Protocol功能只在仅转发HTTPS情况下生效
 
@@ -168,15 +169,17 @@ proxy_buffering off;
 
 ## 更新日志
 ### DEV
-- 2025-03-12 v0.26.37
+- 2025-03-13 v0.26.37
   - 优化域名转发列表显示
   - 新增GHCR容器仓库
   - 重写整个域名转发模块
   - 优化域名匹配逻辑
   - 新增后端HTTPS支持
-  - 新增自动补全CORS头部功能
+  - 新增自动补全CORS头部功能 (自动插入允许跨域头)
   - 新增流量连接数到期限制状态返回
-  
+  - 更新Go版本至1.24
+  - 优化证书缓存逻辑
+    
   - 待定，优先修BUG，新功能随缘更新
 
 ### Stable
