@@ -2,8 +2,6 @@ package proxy
 
 import (
 	"net"
-	"net/http"
-	"net/url"
 	"sync"
 	"time"
 
@@ -138,8 +136,6 @@ func (https *HttpsServer) Start() error {
 			return
 		}
 
-		r := buildHttpsRequest(serverName)
-		//host, err := file.GetDb().GetInfoByHost(serverName, r)
 		host, err := file.GetDb().FindCertByHost(serverName)
 		if err != nil {
 			c.Close()
@@ -150,7 +146,7 @@ func (https *HttpsServer) Start() error {
 		// 处理仅代理模式
 		if host.HttpsJustProxy {
 			logs.Debug("由后端处理证书")
-			https.handleHttps2(host, c, rb, r)
+			https.handleHttpsProxy(host, c, rb, serverName)
 			return
 		}
 
@@ -188,7 +184,7 @@ func (https *HttpsServer) Start() error {
 		// 如果缓存中证书为空，则由后端处理
 		if certCache.CertContent == "" || certCache.KeyContent == "" {
 			logs.Debug("由后端处理证书")
-			https.handleHttps2(host, c, rb, r)
+			https.handleHttpsProxy(host, c, rb, serverName)
 		} else {
 			// 使用缓存的证书进入 cert 函数
 			logs.Debug("使用上传或默认证书")
@@ -261,7 +257,7 @@ func (https *HttpsServer) cert(host *file.Host, c net.Conn, rb []byte, certCache
 }
 
 // handle the https which is just proxy to other client
-func (https *HttpsServer) handleHttps2(host *file.Host, c net.Conn, rb []byte, r *http.Request) {
+func (https *HttpsServer) handleHttpsProxy(host *file.Host, c net.Conn, rb []byte, sni string) {
 	var targetAddr string
 	var err error
 	if err := https.CheckFlowAndConnNum(host.Client); err != nil {
@@ -272,8 +268,10 @@ func (https *HttpsServer) handleHttps2(host *file.Host, c net.Conn, rb []byte, r
 	defer host.Client.AddConn()
 	if targetAddr, err = host.Target.GetRandomTarget(); err != nil {
 		logs.Warn(err.Error())
+		c.Close()
+		return
 	}
-	logs.Info("new https connection, clientId %d, host %s, remote address %s", host.Client.Id, r.Host, c.RemoteAddr().String())
+	logs.Info("New HTTPS connection, clientId %d, host %s, remote address %s", host.Client.Id, sni, c.RemoteAddr().String())
 	https.DealClient(conn.NewConn(c), host.Client, targetAddr, rb, common.CONN_TCP, nil, host.Client.Flow, host.Target.ProxyProtocol, host.Target.LocalProxy, nil)
 }
 
@@ -319,12 +317,3 @@ func (httpsListener *HttpsListener) Addr() net.Addr {
 	return httpsListener.parentListener.Addr()
 }
 
-// build https request
-func buildHttpsRequest(hostName string) *http.Request {
-	r := new(http.Request)
-	r.RequestURI = "/"
-	r.URL = new(url.URL)
-	r.URL.Scheme = "https"
-	r.Host = hostName
-	return r
-}
