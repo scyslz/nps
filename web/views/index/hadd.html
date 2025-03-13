@@ -188,14 +188,16 @@
 
         $("#scheme_select").on("change", function () {
             if ($("#scheme_select").val() == "all" || $("#scheme_select").val() == "https") {
-                $("#cert_file").css("display", "block")
-                $("#key_file").css("display", "block")
                 $("#auto_https").css("display", "block")
                 $("#https_just_proxy").css("display", "block")
                 if ($("#https_just_proxy_select").val() == "1") {
                     $("#proxy_protocol").css("display", "block")
+                    $("#cert_file").css("display", "none")
+                    $("#key_file").css("display", "none")
                 } else {
                     $("#proxy_protocol").css("display", "none")
+                    $("#cert_file").css("display", "block")
+                    $("#key_file").css("display", "block")
                 }
             } else {
                 $("#cert_file").css("display", "none")
@@ -209,8 +211,12 @@
         $("#https_just_proxy_select").on("change", function () {
             if ($("#https_just_proxy_select").val() == "1") {
                 $("#proxy_protocol").css("display", "block")
+                $("#cert_file").css("display", "none")
+                $("#key_file").css("display", "none")
             } else {
                 $("#proxy_protocol").css("display", "none")
+                $("#cert_file").css("display", "block")
+                $("#key_file").css("display", "block")
             }
         })
 
