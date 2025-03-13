@@ -173,6 +173,8 @@ proxy_buffering off;
   - 域名转发支持HTTP/2
   - 当配置请求域名修时同时修改Origin头避免后端监测
   - 调整域名编辑页面逻辑
+  - 更新相关依赖，修复CVE-2025-22870
+  - 使用 [XTLS/go-win7](https://github.com/XTLS/go-win7) 编译旧版代码支持Win7
     
   - 待定，优先修BUG，新功能随缘更新
 
