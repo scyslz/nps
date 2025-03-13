@@ -29,7 +29,7 @@ type HttpsServer struct {
 	sslCacheTimeout int
 	defaultCertFile string
 	defaultKeyFile  string
-	exitChan chan struct{}
+	exitChan        chan struct{}
 }
 
 func NewHttpsServer(l net.Listener, bridge NetBridge, task *file.Tunnel) *HttpsServer {
@@ -229,6 +229,7 @@ func (https *HttpsServer) NewHttps(l net.Listener, certText string, keyText stri
 		}
 		tlsConfig := &tls.Config{
 			Certificates: []tls.Certificate{cert},
+			NextProtos:   []string{"h2", "http/1.1"},
 		}
 		tlsListener := tls.NewListener(l, tlsConfig)
 		err = https.NewServer(0, "https").Serve(tlsListener)

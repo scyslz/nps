@@ -175,6 +175,13 @@ func ChangeHostAndHeader(r *http.Request, host string, header string, httpOnly b
 	// 设置 Host 头部信息
 	if host != "" {
 		r.Host = host
+		if orig := r.Header.Get("Origin"); orig != "" {
+			scheme := "http"
+			if r.TLS != nil {
+				scheme = "https"
+			}
+			r.Header.Set("Origin", scheme+"://"+host)
+		}
 	}
 
 	// 获取请求的客户端 IP

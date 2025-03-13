@@ -205,7 +205,7 @@ func (s *httpServer) handleProxy(w http.ResponseWriter, r *http.Request) {
 	if r.Header.Get("Upgrade") == "" {
 		if err := s.auth(r, nil, host.Client.Cnf.U, host.Client.Cnf.P, s.task); err != nil {
 			logs.Warn("Unauthorized request from %s", r.RemoteAddr)
-    		w.Header().Set("WWW-Authenticate", `Basic realm="Restricted"`)
+			w.Header().Set("WWW-Authenticate", `Basic realm="Restricted"`)
 			http.Error(w, "401 Unauthorized", http.StatusUnauthorized)
 			return
 		}
@@ -222,7 +222,7 @@ func (s *httpServer) handleProxy(w http.ResponseWriter, r *http.Request) {
 	logs.Info("%s request, method %s, host %s, url %s, remote address %s, target %s", r.URL.Scheme, r.Method, r.Host, r.URL.Path, r.RemoteAddr, targetAddr)
 
 	// WebSocket 请求单独处理
-	if r.Header.Get("Upgrade") != "" {
+	if r.Method == "CONNECT" || r.Header.Get("Upgrade") != "" || r.Header.Get(":protocol") != "" {
 		s.handleWebsocket(w, r, host, targetAddr, isHttpOnlyRequest)
 		return
 	}
@@ -337,7 +337,7 @@ func (s *httpServer) handleWebsocket(w http.ResponseWriter, r *http.Request, hos
 		}
 		netConn = tls.Client(netConn, tlsConf)
 		if err := netConn.(*tls.Conn).Handshake(); err != nil {
-			logs.Error("handleWebsocket: TLS handshake failed: %v", err)
+			logs.Error("handleWebsocket: TLS handshake with backend failed: %v", err)
 			http.Error(w, "502 Bad Gateway", http.StatusBadGateway)
 			return
 		}
@@ -349,11 +349,13 @@ func (s *httpServer) handleWebsocket(w http.ResponseWriter, r *http.Request, hos
 	hijacker, ok := w.(http.Hijacker)
 	if !ok {
 		http.Error(w, "WebSocket hijacking not supported", http.StatusInternalServerError)
+		logs.Error("handleWebsocket: WebSocket hijacking not supported.")
 		return
 	}
 	clientConn, clientBuf, err := hijacker.Hijack()
 	if err != nil {
 		http.Error(w, "WebSocket hijacking failed", http.StatusInternalServerError)
+		logs.Error("handleWebsocket: WebSocket hijacking failed.")
 		return
 	}
 	//defer clientConn.Close()
