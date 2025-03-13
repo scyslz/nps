@@ -1,7 +1,6 @@
 package client
 
 import (
-	"ehang.io/nps/lib/nps_mux"
 	"errors"
 	"net"
 	"net/http"
@@ -14,8 +13,9 @@ import (
 	"ehang.io/nps/lib/conn"
 	"ehang.io/nps/lib/crypt"
 	"ehang.io/nps/lib/file"
+	"ehang.io/nps/lib/nps_mux"
 	"ehang.io/nps/server/proxy"
-	"github.com/astaxie/beego/logs"
+	"github.com/beego/beego/v2/core/logs"
 	"github.com/xtaci/kcp-go"
 )
 

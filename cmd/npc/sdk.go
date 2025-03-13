@@ -2,10 +2,11 @@ package main
 
 import (
 	"C"
+
 	"ehang.io/nps/client"
 	"ehang.io/nps/lib/common"
 	"ehang.io/nps/lib/version"
-	"github.com/astaxie/beego/logs"
+	"github.com/beego/beego/v2/core/logs"
 )
 
 var cl *client.TRPClient

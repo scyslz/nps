@@ -17,14 +17,16 @@
                                 <span id="casep2p" langtag="info-casep2p"></span>
                                 <span id="casefile" langtag="info-casefile"></span>
                             </span>
-                            <select class="form-control" name="type" id="type">
-                                <option value="tcp" langtag="scheme-tcp"></option>
-                                <option value="udp" langtag="scheme-udp"></option>
-                                <option value="httpProxy" langtag="scheme-httpProxy"></option>
-                                <option value="socks5" langtag="scheme-socks5"></option>
-                                <option value="secret" langtag="scheme-secret"></option>
-                                <option value="p2p" langtag="scheme-p2p"></option>
-                                {{/*<option value="file" langtag="scheme-file"></option>*/}}
+                            <select class="form-control" id="type" name="type">
+                                <option langtag="scheme-tcp" value="tcp"></option>
+                                <option langtag="scheme-udp" value="udp"></option>
+                                <option langtag="scheme-httpProxy" value="httpProxy"></option>
+                                <option langtag="scheme-socks5" value="socks5"></option>
+                                <option langtag="scheme-secret" value="secret"></option>
+                                <option langtag="scheme-p2p" value="p2p"></option>
+                                {{/*
+                                <option langtag="scheme-file" value="file"></option>
+                                */}}
                             </select>
                         </div>
                     </div>
@@ -32,7 +34,8 @@
                     <div class="form-group" id="client_id">
                         <label class="control-label font-bold" langtag="word-clientid"></label>
                         <div class="col-sm-10">
-                            <select class="form-control"  name="client_id" placeholder="" langtag="word-belongclient"></select>
+                            <select class="form-control" langtag="word-belongclient" name="client_id"
+                                    placeholder=""></select>
                             <!--<input value="{{.client_id}}" class="form-control" type="text" name="client_id" placeholder="" langtag="word-clientid">-->
                         </div>
                     </div>
@@ -40,49 +43,54 @@
                     <div class="form-group">
                         <label class="control-label font-bold" langtag="word-remark"></label>
                         <div class="col-sm-10">
-                            <input class="form-control" type="text" name="remark" placeholder="" langtag="info-unrestricted">
+                            <input class="form-control" langtag="info-unrestricted" name="remark" placeholder=""
+                                   type="text">
                         </div>
                     </div>
                     {{if eq true .allow_multi_ip}}
-                        <div class="form-group" id="server_ip">
-                            <label class="control-label font-bold" langtag="word-serverip"></label>
-                            <div class="col-sm-10">
-                                <input class="form-control" type="text" value="0.0.0.0" name="server_ip" placeholder="" langtag="info-suchasip">
-                            </div>
+                    <div class="form-group" id="server_ip">
+                        <label class="control-label font-bold" langtag="word-serverip"></label>
+                        <div class="col-sm-10">
+                            <input class="form-control" langtag="info-suchasip" name="server_ip" placeholder=""
+                                   type="text"
+                                   value="0.0.0.0">
                         </div>
+                    </div>
                     {{end}}
                     <div class="form-group" id="port">
                         <label class="control-label font-bold" langtag="word-serverport"></label>
                         <div class="col-sm-10">
-                            <input class="form-control" type="text" name="port" placeholder="" langtag="info-suchasport">
+                            <input class="form-control" langtag="info-suchasport" name="port" placeholder=""
+                                   type="text">
                         </div>
                     </div>
                     <div class="form-group" id="proxy_protocol">
                         <label class="control-label font-bold" langtag="word-proxyprotocol"></label>
                         <div class="col-sm-10">
                             <select class="form-control" name="proxy_protocol">
-                                <option value="0" langtag="word-disable"></option>
-                                <option value="1" langtag="word-proxyprotocolv1"></option>
-                                <option value="2" langtag="word-proxyprotocolv2"></option>
+                                <option langtag="word-disable" value="0"></option>
+                                <option langtag="word-proxyprotocolv1" value="1"></option>
+                                <option langtag="word-proxyprotocolv2" value="2"></option>
                             </select>
                         </div>
                     </div>
                     {{if eq true .allow_local_proxy}}
-                        <div class="form-group" id="local_proxy">
-                            <label class="control-label font-bold" langtag="word-proxytolocal"></label>
-                            <div class="col-sm-10">
-                                <select class="form-control" name="local_proxy">
-                                    <option value="0" langtag="word-no"></option>
-                                    <option value="1" langtag="word-yes"></option>
-                                </select>
-                            </div>
+                    <div class="form-group" id="local_proxy">
+                        <label class="control-label font-bold" langtag="word-proxytolocal"></label>
+                        <div class="col-sm-10">
+                            <select class="form-control" name="local_proxy">
+                                <option langtag="word-no" value="0"></option>
+                                <option langtag="word-yes" value="1"></option>
+                            </select>
                         </div>
+                    </div>
                     {{end}}
 
                     <div class="form-group" id="target">
                         <label class="control-label font-bold" langtag="word-target"></label>
                         <div class="col-sm-10">
-                            <textarea class="form-control" name="target" rows="4" placeholder="" langtag="info-suchasiplist"></textarea>
+                            <textarea class="form-control" langtag="info-suchasiplist" name="target" placeholder=""
+                                      rows="4"></textarea>
                             <span class="help-block m-b-none" langtag="info-targettunnel"></span>
                         </div>
                     </div>
@@ -90,31 +98,36 @@
                     <div class="form-group" id="local_path">
                         <label class="control-label font-bold" langtag="word-localpath"></label>
                         <div class="col-sm-10">
-                            <input class="form-control" type="text" name="local_path" placeholder="" langtag="info-suchaslocalpath">
+                            <input class="form-control" langtag="info-suchaslocalpath" name="local_path" placeholder=""
+                                   type="text">
                         </div>
                     </div>
 
                     <div class="form-group" id="strip_pre">
                         <label class="control-label font-bold" langtag="word-stripprefix"></label>
                         <div class="col-sm-10">
-                            <input class="form-control" type="text" name="strip_pre" placeholder="" langtag="info-suchasstripprefix">
+                            <input class="form-control" langtag="info-suchasstripprefix" name="strip_pre" placeholder=""
+                                   type="text">
                         </div>
                     </div>
 
                     <div class="form-group" id="password">
                         <label class="control-label font-bold" langtag="word-identificationkey"></label>
                         <div class="col-sm-10">
-                            <input class="form-control" type="text" name="password" placeholder="" langtag="word-identificationkey">
+                            <input class="form-control" langtag="word-identificationkey" name="password" placeholder=""
+                                   type="text">
                             <span class="help-block m-b-none" langtag="info-identificationkey"></span>
                         </div>
                     </div>
                     <div class="hr-line-dashed"></div>
                     <div class="form-group">
                         <div class="col-sm-4 col-sm-offset-2">
-                            <button class="btn btn-light" type="button" onclick="goback()">
+                            <button class="btn btn-light" onclick="goback()" type="button">
                                 <i class="fa fa-fw fa-lg fa-window-close"></i> <span langtag="word-cancel"></span>
                             </button>
-                            <button class="btn btn-success" type="button" onclick="submitform('add', '{{.web_base_url}}/index/add', $('form').serializeArray())">
+                            <button class="btn btn-success"
+                                    onclick="submitform('add', '{{.web_base_url}}/index/add', $('form').serializeArray())"
+                                    type="button">
                                 <i class="fa fa-fw fa-lg fa-check-circle"></i> <span langtag="word-add"></span>
                             </button>
                         </div>

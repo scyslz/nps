@@ -16,7 +16,7 @@ import (
 	"ehang.io/nps/lib/file"
 	"ehang.io/nps/lib/install"
 	"ehang.io/nps/lib/version"
-	"github.com/astaxie/beego/logs"
+	"github.com/beego/beego/v2/core/logs"
 	"github.com/ccding/go-stun/stun"
 	"github.com/kardianos/service"
 )
@@ -209,7 +209,7 @@ func configureLogging() {
 	// 设置文件日志，按大小、天数和文件数量滚动
 	if strings.EqualFold(*logType, "file") || strings.EqualFold(*logType, "both") {
 		logs.SetLogger(logs.AdapterFile, `{"level":`+*logLevel+`,"filename":"`+*logPath+`","daily":`+*logDaily+`,"maxfiles":`+*logMaxFiles+`,"maxdays":`+*logMaxDays+`,"maxsize":`+fmt.Sprintf("%d", *logMaxSize*1024*1024)+`,"maxlines":100000,"rotate":true,"color":true}`)
-        }
+	}
 }
 
 type npc struct {

@@ -1,29 +1,30 @@
 package controllers
 
 import (
-	"ehang.io/nps/bridge"
 	"html"
 	"math"
 	"strconv"
 	"strings"
 	"time"
 
+	"ehang.io/nps/bridge"
 	"ehang.io/nps/lib/common"
 	"ehang.io/nps/lib/crypt"
 	"ehang.io/nps/lib/file"
 	"ehang.io/nps/server"
-	"github.com/astaxie/beego"
+	"github.com/beego/beego/v2/server/web"
 )
 
 type BaseController struct {
-	beego.Controller
+	web.Controller
 	controllerName string
 	actionName     string
 }
 
-//初始化参数
+// 初始化参数
 func (s *BaseController) Prepare() {
-	s.Data["web_base_url"] = beego.AppConfig.String("web_base_url")
+	webBaseUrl, _ := web.AppConfig.String("web_base_url")
+	s.Data["web_base_url"] = webBaseUrl
 	controllerName, actionName := s.GetControllerAndAction()
 	s.controllerName = strings.ToLower(controllerName[0 : len(controllerName)-10])
 	s.actionName = strings.ToLower(actionName)
@@ -32,14 +33,14 @@ func (s *BaseController) Prepare() {
 	// param 2 is timestamp (It's limited to 20 seconds.)
 	md5Key := s.getEscapeString("auth_key")
 	timestamp := s.GetIntNoErr("timestamp")
-	configKey := beego.AppConfig.String("auth_key")
+	configKey, _ := web.AppConfig.String("auth_key")
 	if configKey == "" {
 		configKey = crypt.GetRandomString(64)
 	}
 	timeNowUnix := time.Now().Unix()
 	if !(md5Key != "" && (math.Abs(float64(timeNowUnix-int64(timestamp))) <= 20) && (crypt.Md5(configKey+strconv.Itoa(timestamp)) == md5Key)) {
 		if s.GetSession("auth") != true {
-			s.Redirect(beego.AppConfig.String("web_base_url")+"/login/index", 302)
+			s.Redirect(webBaseUrl+"/login/index", 302)
 		}
 	} else {
 		s.SetSession("isAdmin", true)
@@ -54,22 +55,22 @@ func (s *BaseController) Prepare() {
 	} else {
 		s.Data["isAdmin"] = true
 	}
-	//s.Data["https_just_proxy"], _ = beego.AppConfig.Bool("https_just_proxy")
-	s.Data["allow_user_login"], _ = beego.AppConfig.Bool("allow_user_login")
-	s.Data["allow_flow_limit"], _ = beego.AppConfig.Bool("allow_flow_limit")
-	s.Data["allow_rate_limit"], _ = beego.AppConfig.Bool("allow_rate_limit")
-	s.Data["allow_time_limit"], _ = beego.AppConfig.Bool("allow_time_limit")
-	s.Data["allow_connection_num_limit"], _ = beego.AppConfig.Bool("allow_connection_num_limit")
-	s.Data["allow_multi_ip"], _ = beego.AppConfig.Bool("allow_multi_ip")
-	s.Data["system_info_display"], _ = beego.AppConfig.Bool("system_info_display")
-	s.Data["allow_tunnel_num_limit"], _ = beego.AppConfig.Bool("allow_tunnel_num_limit")
-	s.Data["allow_local_proxy"], _ = beego.AppConfig.Bool("allow_local_proxy")
-	s.Data["allow_user_change_username"], _ = beego.AppConfig.Bool("allow_user_change_username")
+	//s.Data["https_just_proxy"], _ = web.AppConfig.Bool("https_just_proxy")
+	s.Data["allow_user_login"], _ = web.AppConfig.Bool("allow_user_login")
+	s.Data["allow_flow_limit"], _ = web.AppConfig.Bool("allow_flow_limit")
+	s.Data["allow_rate_limit"], _ = web.AppConfig.Bool("allow_rate_limit")
+	s.Data["allow_time_limit"], _ = web.AppConfig.Bool("allow_time_limit")
+	s.Data["allow_connection_num_limit"], _ = web.AppConfig.Bool("allow_connection_num_limit")
+	s.Data["allow_multi_ip"], _ = web.AppConfig.Bool("allow_multi_ip")
+	s.Data["system_info_display"], _ = web.AppConfig.Bool("system_info_display")
+	s.Data["allow_tunnel_num_limit"], _ = web.AppConfig.Bool("allow_tunnel_num_limit")
+	s.Data["allow_local_proxy"], _ = web.AppConfig.Bool("allow_local_proxy")
+	s.Data["allow_user_change_username"], _ = web.AppConfig.Bool("allow_user_change_username")
 }
 
-//加载模板
+// 加载模板
 func (s *BaseController) display(tpl ...string) {
-	s.Data["web_base_url"] = beego.AppConfig.String("web_base_url")
+	s.Data["web_base_url"], _ = web.AppConfig.String("web_base_url")
 	s.Data["version"] = server.GetVersion()
 	s.Data["year"] = server.GetCurrentYear()
 	var tplname string
@@ -83,7 +84,7 @@ func (s *BaseController) display(tpl ...string) {
 	}
 	ip := s.Ctx.Request.Host
 	s.Data["ip"] = common.GetIpByAddr(ip)
-	s.Data["bridgeType"] = beego.AppConfig.String("bridge_type")
+	s.Data["bridgeType"], _ = web.AppConfig.String("bridge_type")
 	if common.IsWindows() {
 		s.Data["win"] = ".exe"
 	}
@@ -91,33 +92,33 @@ func (s *BaseController) display(tpl ...string) {
 	s.Data["p"] = strconv.Itoa(server.Bridge.TunnelPort)
 
 	if bridge.ServerTlsEnable {
-		tlsPort := strconv.Itoa(beego.AppConfig.DefaultInt("tls_bridge_port", 8025))
+		tlsPort := strconv.Itoa(web.AppConfig.DefaultInt("tls_bridge_port", 8025))
 		s.Data["tls_p"] = tlsPort
 		s.Data["p1"] = strconv.Itoa(server.Bridge.TunnelPort) + " / " + tlsPort
 	} else {
 		s.Data["p1"] = strconv.Itoa(server.Bridge.TunnelPort)
 	}
 
-	s.Data["proxyPort"] = beego.AppConfig.String("hostPort")
+	s.Data["proxyPort"], _ = web.AppConfig.String("hostPort")
 	s.Layout = "public/layout.html"
 	s.TplName = tplname
 }
 
-//错误
+// 错误
 func (s *BaseController) error() {
-	s.Data["web_base_url"] = beego.AppConfig.String("web_base_url")
+	s.Data["web_base_url"], _ = web.AppConfig.String("web_base_url")
 	s.Data["version"] = server.GetVersion()
 	s.Data["year"] = server.GetCurrentYear()
 	s.Layout = "public/layout.html"
 	s.TplName = "public/error.html"
 }
 
-//getEscapeString
+// getEscapeString
 func (s *BaseController) getEscapeString(key string) string {
 	return html.EscapeString(s.GetString(key))
 }
 
-//去掉没有err返回值的int
+// 去掉没有err返回值的int
 func (s *BaseController) GetIntNoErr(key string, def ...int) int {
 	strv := s.Ctx.Input.Query(key)
 	if len(strv) == 0 && len(def) > 0 {
@@ -127,7 +128,7 @@ func (s *BaseController) GetIntNoErr(key string, def ...int) int {
 	return val
 }
 
-//获取去掉错误的bool值
+// 获取去掉错误的bool值
 func (s *BaseController) GetBoolNoErr(key string, def ...bool) bool {
 	strv := s.Ctx.Input.Query(key)
 	if len(strv) == 0 && len(def) > 0 {
@@ -137,28 +138,28 @@ func (s *BaseController) GetBoolNoErr(key string, def ...bool) bool {
 	return val
 }
 
-//ajax正确返回
+// ajax正确返回
 func (s *BaseController) AjaxOk(str string) {
 	s.Data["json"] = ajax(str, 1)
 	s.ServeJSON()
 	s.StopRun()
 }
 
-//ajax正确返回
+// ajax正确返回
 func (s *BaseController) AjaxOkWithId(str string, id int) {
 	s.Data["json"] = ajaxWithId(str, 1, id)
 	s.ServeJSON()
 	s.StopRun()
 }
 
-//ajax错误返回
+// ajax错误返回
 func (s *BaseController) AjaxErr(str string) {
 	s.Data["json"] = ajax(str, 0)
 	s.ServeJSON()
 	s.StopRun()
 }
 
-//组装ajax
+// 组装ajax
 func ajax(str string, status int) map[string]interface{} {
 	json := make(map[string]interface{})
 	json["status"] = status
@@ -166,7 +167,7 @@ func ajax(str string, status int) map[string]interface{} {
 	return json
 }
 
-//组装ajax
+// 组装ajax
 func ajaxWithId(str string, status int, id int) map[string]interface{} {
 	json := make(map[string]interface{})
 	json["status"] = status
@@ -175,7 +176,7 @@ func ajaxWithId(str string, status int, id int) map[string]interface{} {
 	return json
 }
 
-//ajax table返回
+// ajax table返回
 func (s *BaseController) AjaxTable(list interface{}, cnt int, recordsTotal int, kwargs map[string]interface{}) {
 	json := make(map[string]interface{})
 	json["rows"] = list
@@ -192,7 +193,7 @@ func (s *BaseController) AjaxTable(list interface{}, cnt int, recordsTotal int, 
 	s.StopRun()
 }
 
-//ajax table参数
+// ajax table参数
 func (s *BaseController) GetAjaxParams() (start, limit int) {
 	return s.GetIntNoErr("offset"), s.GetIntNoErr("limit")
 }

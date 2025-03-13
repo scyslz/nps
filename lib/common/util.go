@@ -2,13 +2,10 @@ package common
 
 import (
 	"bytes"
-	"ehang.io/nps/lib/version"
 	"encoding/base64"
 	"encoding/binary"
 	"errors"
 	"fmt"
-	"github.com/astaxie/beego"
-	"github.com/astaxie/beego/logs"
 	"html/template"
 	"io"
 	"io/ioutil"
@@ -21,9 +18,12 @@ import (
 	"strings"
 	"sync"
 	"time"
-	"github.com/araddon/dateparse"
 
 	"ehang.io/nps/lib/crypt"
+	"ehang.io/nps/lib/version"
+	"github.com/araddon/dateparse"
+	"github.com/beego/beego/v2/core/logs"
+	"github.com/beego/beego/v2/server/web"
 )
 
 // Get the corresponding IP address through domain name
@@ -74,7 +74,7 @@ func CheckAuthWithAccountMap(u, p, user, passwd string, accountMap map[string]st
 	if len(u) == 0 {
 		return false
 	}
-    
+
 	if u == user && p == passwd {
 		return true
 	}
@@ -200,7 +200,7 @@ func ChangeHostAndHeader(r *http.Request, host string, header string, httpOnly b
 	// 判断是否需要添加真实 IP 信息
 	var addOrigin bool
 	if !httpOnly {
-		addOrigin, _ = beego.AppConfig.Bool("http_add_origin_header")
+		addOrigin, _ = web.AppConfig.Bool("http_add_origin_header")
 		r.Header.Set("X-Forwarded-For", xfwdFor)
 	} else {
 		addOrigin = false

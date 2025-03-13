@@ -10,8 +10,8 @@ import (
 	"ehang.io/nps/lib/conn"
 	"ehang.io/nps/lib/crypt"
 	"ehang.io/nps/lib/file"
-	"github.com/astaxie/beego"
-	"github.com/astaxie/beego/logs"
+	"github.com/beego/beego/v2/core/logs"
+	"github.com/beego/beego/v2/server/web"
 	"github.com/pkg/errors"
 )
 
@@ -23,8 +23,8 @@ type HttpsEntry struct {
 
 type HttpsServer struct {
 	httpServer
-	listener         net.Listener
-	entryMap         sync.Map
+	listener net.Listener
+	entryMap sync.Map
 
 	sslCacheTimeout int
 	defaultCertFile string
@@ -33,7 +33,7 @@ type HttpsServer struct {
 }
 
 func NewHttpsServer(l net.Listener, bridge NetBridge, task *file.Tunnel) *HttpsServer {
-	allowLocalProxy, _ := beego.AppConfig.Bool("allow_local_proxy")
+	allowLocalProxy, _ := web.AppConfig.Bool("allow_local_proxy")
 	https := &HttpsServer{
 		listener: l,
 		httpServer: httpServer{
@@ -48,12 +48,12 @@ func NewHttpsServer(l net.Listener, bridge NetBridge, task *file.Tunnel) *HttpsS
 	}
 
 	https.sslCacheTimeout = 60
-	if cacheTime, err := beego.AppConfig.Int("ssl_cache_timeout"); err == nil {
+	if cacheTime, err := web.AppConfig.Int("ssl_cache_timeout"); err == nil {
 		https.sslCacheTimeout = cacheTime
 	}
 
-	https.defaultCertFile = beego.AppConfig.String("https_default_cert_file")
-	https.defaultKeyFile = beego.AppConfig.String("https_default_key_file")
+	https.defaultCertFile, _ = web.AppConfig.String("https_default_cert_file")
+	https.defaultKeyFile, _ = web.AppConfig.String("https_default_key_file")
 
 	https.startCacheCleaner(time.Duration(https.sslCacheTimeout) * time.Second)
 

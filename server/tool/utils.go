@@ -7,11 +7,11 @@ import (
 	"time"
 
 	"ehang.io/nps/lib/common"
-	"github.com/astaxie/beego"
-	"github.com/shirou/gopsutil/v3/cpu"
-	"github.com/shirou/gopsutil/v3/load"
-	"github.com/shirou/gopsutil/v3/mem"
-	"github.com/shirou/gopsutil/v3/net"
+	"github.com/beego/beego/v2/server/web"
+	"github.com/shirou/gopsutil/v4/cpu"
+	"github.com/shirou/gopsutil/v4/load"
+	"github.com/shirou/gopsutil/v4/mem"
+	"github.com/shirou/gopsutil/v4/net"
 )
 
 var (
@@ -20,14 +20,14 @@ var (
 )
 
 func StartSystemInfo() {
-	if b, err := beego.AppConfig.Bool("system_info_display"); err == nil && b {
+	if b, err := web.AppConfig.Bool("system_info_display"); err == nil && b {
 		ServerStatus = make([]map[string]interface{}, 0, 1500)
 		go getSeverStatus()
 	}
 }
 
 func InitAllowPort() {
-	p := beego.AppConfig.String("allow_ports")
+	p, _ := web.AppConfig.String("allow_ports")
 	ports = common.GetPorts(p)
 }
 

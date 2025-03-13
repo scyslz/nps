@@ -26,8 +26,8 @@ func (s *Flow) Add(in, out int64) {
 }
 
 type Config struct {
-	U        string  // username
-	P        string  // password
+	U        string // username
+	P        string // password
 	Compress bool
 	Crypt    bool
 }
@@ -196,11 +196,11 @@ type Host struct {
 }
 
 type Target struct {
-	nowIndex       int
-	TargetStr      string
-	TargetArr      []string
-	LocalProxy     bool
-	ProxyProtocol  int // Proxy Protocol 配置：0=关闭, 1=v1, 2=v2
+	nowIndex      int
+	TargetStr     string
+	TargetArr     []string
+	LocalProxy    bool
+	ProxyProtocol int // Proxy Protocol 配置：0=关闭, 1=v1, 2=v2
 	sync.RWMutex
 }
 

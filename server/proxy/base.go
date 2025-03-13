@@ -12,8 +12,8 @@ import (
 	"ehang.io/nps/lib/common"
 	"ehang.io/nps/lib/conn"
 	"ehang.io/nps/lib/file"
-	"github.com/astaxie/beego"
-	"github.com/astaxie/beego/logs"
+	"github.com/beego/beego/v2/core/logs"
+	"github.com/beego/beego/v2/server/web"
 )
 
 type Service interface {
@@ -25,7 +25,7 @@ type NetBridge interface {
 	SendLinkInfo(clientId int, link *conn.Link, t *file.Tunnel) (target net.Conn, err error)
 }
 
-//BaseServer struct
+// BaseServer struct
 type BaseServer struct {
 	id              int
 	bridge          NetBridge
@@ -36,7 +36,7 @@ type BaseServer struct {
 }
 
 func NewBaseServer(bridge *bridge.Bridge, task *file.Tunnel) *BaseServer {
-	allowLocalProxy, _ := beego.AppConfig.Bool("allow_local_proxy")
+	allowLocalProxy, _ := web.AppConfig.Bool("allow_local_proxy")
 	return &BaseServer{
 		bridge:          bridge,
 		task:            task,
@@ -46,7 +46,7 @@ func NewBaseServer(bridge *bridge.Bridge, task *file.Tunnel) *BaseServer {
 	}
 }
 
-//add the flow
+// add the flow
 func (s *BaseServer) FlowAdd(in, out int64) {
 	s.Lock()
 	defer s.Unlock()
@@ -54,7 +54,7 @@ func (s *BaseServer) FlowAdd(in, out int64) {
 	s.task.Flow.InletFlow += in
 }
 
-//change the flow
+// change the flow
 func (s *BaseServer) FlowAddHost(host *file.Host, in, out int64) {
 	s.Lock()
 	defer s.Unlock()
@@ -62,13 +62,13 @@ func (s *BaseServer) FlowAddHost(host *file.Host, in, out int64) {
 	host.Flow.InletFlow += in
 }
 
-//write fail bytes to the connection
+// write fail bytes to the connection
 func (s *BaseServer) writeConnFail(c net.Conn) {
 	c.Write([]byte(common.ConnectionFailBytes))
 	c.Write(s.errorContent)
 }
 
-//auth check
+// auth check
 func (s *BaseServer) auth(r *http.Request, c *conn.Conn, u, p string, task *file.Tunnel) error {
 	var accountMap map[string]string
 	if task.MultiAccount == nil {
@@ -86,7 +86,7 @@ func (s *BaseServer) auth(r *http.Request, c *conn.Conn, u, p string, task *file
 	return nil
 }
 
-//check flow limit of the client ,and decrease the allow num of client
+// check flow limit of the client ,and decrease the allow num of client
 func (s *BaseServer) CheckFlowAndConnNum(client *file.Client) error {
 	if !client.Flow.TimeLimit.IsZero() && client.Flow.TimeLimit.Before(time.Now()) {
 		return errors.New("Service access expired.")

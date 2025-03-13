@@ -13,17 +13,16 @@ import (
 	"sync"
 	"time"
 
-	"ehang.io/nps/lib/nps_mux"
-
 	"ehang.io/nps/lib/common"
 	"ehang.io/nps/lib/conn"
 	"ehang.io/nps/lib/crypt"
 	"ehang.io/nps/lib/file"
+	"ehang.io/nps/lib/nps_mux"
 	"ehang.io/nps/lib/version"
 	"ehang.io/nps/server/connection"
 	"ehang.io/nps/server/tool"
-	"github.com/astaxie/beego"
-	"github.com/astaxie/beego/logs"
+	"github.com/beego/beego/v2/core/logs"
+	"github.com/beego/beego/v2/server/web"
 )
 
 var ServerTlsEnable bool = false
@@ -74,10 +73,12 @@ func NewTunnel(tunnelPort int, tunnelType string, ipVerify bool, runList *sync.M
 }
 
 func (s *Bridge) StartTunnel() error {
+	bridgeIP, _ := web.AppConfig.String("bridge_ip")
+	bridgePort, _ := web.AppConfig.String("bridge_port")
 	go s.ping()
 	if s.tunnelType == "kcp" {
 		logs.Info("server start, the bridge type is %s, the bridge port is %d", s.tunnelType, s.TunnelPort)
-		return conn.NewKcpListenerAndProcess(beego.AppConfig.String("bridge_ip")+":"+beego.AppConfig.String("bridge_port"), func(c net.Conn) {
+		return conn.NewKcpListenerAndProcess(bridgeIP+":"+bridgePort, func(c net.Conn) {
 			s.cliProcess(conn.NewConn(c))
 		})
 	} else {
@@ -98,11 +99,11 @@ func (s *Bridge) StartTunnel() error {
 		if ServerTlsEnable {
 			go func() {
 				// 监听TLS 端口
-				tlsBridgePort := beego.AppConfig.DefaultInt("tls_bridge_port", 8025)
+				tlsBridgePort := web.AppConfig.DefaultInt("tls_bridge_port", 8025)
 
 				logs.Info("tls server start, the bridge type is %s, the tls bridge port is %d", "tcp", tlsBridgePort)
 				tlsListener, tlsErr := net.ListenTCP("tcp", &net.TCPAddr{
-					IP:   net.ParseIP(beego.AppConfig.String("bridge_ip")),
+					IP:   net.ParseIP(bridgeIP),
 					Port: tlsBridgePort,
 					Zone: "",
 				})
@@ -355,7 +356,10 @@ func (s *Bridge) typeDeal(typeVal string, c *conn.Conn, id int, vs string) {
 			logs.Error("p2p error, failed to match the key successfully")
 		} else if v, ok := s.Client.Load(t.Client.Id); ok {
 			//向密钥对应的客户端发送与服务端udp建立连接信息，地址，密钥
-			svrAddr := beego.AppConfig.String("p2p_ip") + ":" + beego.AppConfig.String("p2p_port")
+			p2pIP, _ := web.AppConfig.String("p2p_ip")
+			p2pPort, _ := web.AppConfig.String("p2p_port")
+			svrAddr := p2pIP + ":" + p2pPort
+
 			if err != nil {
 				logs.Warn("get local udp addr error")
 				return
@@ -459,12 +463,12 @@ func (s *Bridge) ping() {
 			s.Client.Range(func(key, value interface{}) bool {
 				clientID := key.(int)
 				client := value.(*Client)
-				
+
 				// 跳过虚拟客户端的健康检查
 				if clientID <= 0 {
 					return true
 				}
-				
+
 				// 处理正常客户端
 				if client == nil || client.tunnel == nil || client.signal == nil || client.tunnel.IsClose {
 					client.retryTime++
@@ -595,18 +599,18 @@ loop:
 
 			for i := 0; i < len(ports); i++ {
 				tl := &file.Tunnel{
-					Mode:        t.Mode,
-					Port:        ports[i],
-					ServerIp:    t.ServerIp,
-					Client:      client,
-					Password:    t.Password,
-					LocalPath:   t.LocalPath,
-					StripPre:    t.StripPre,
+					Mode:         t.Mode,
+					Port:         ports[i],
+					ServerIp:     t.ServerIp,
+					Client:       client,
+					Password:     t.Password,
+					LocalPath:    t.LocalPath,
+					StripPre:     t.StripPre,
 					MultiAccount: t.MultiAccount,
-					Id:          int(file.GetDb().JsonDb.GetTaskId()),
-					Status:      true,
-					Flow:        new(file.Flow),
-					NoStore:     true,
+					Id:           int(file.GetDb().JsonDb.GetTaskId()),
+					Status:       true,
+					Flow:         new(file.Flow),
+					NoStore:      true,
 				}
 
 				if len(ports) == 1 {

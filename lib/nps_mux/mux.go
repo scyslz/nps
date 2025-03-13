@@ -362,7 +362,7 @@ func (s *Mux) release() {
 	s.newConnQueue.Stop()
 }
 
-//Get New connId as unique flag
+// Get New connId as unique flag
 func (s *Mux) getId() (id int32) {
 	//Avoid going beyond the scope
 	if (math.MaxInt32 - s.id) < 10000 {

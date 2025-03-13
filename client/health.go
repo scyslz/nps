@@ -10,7 +10,7 @@ import (
 	"ehang.io/nps/lib/conn"
 	"ehang.io/nps/lib/file"
 	"ehang.io/nps/lib/sheap"
-	"github.com/astaxie/beego/logs"
+	"github.com/beego/beego/v2/core/logs"
 	"github.com/pkg/errors"
 )
 

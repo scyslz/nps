@@ -13,20 +13,20 @@ import (
 	"ehang.io/nps/lib/conn"
 	"ehang.io/nps/lib/file"
 	"ehang.io/nps/server/connection"
-	"github.com/astaxie/beego"
-	"github.com/astaxie/beego/logs"
+	"github.com/beego/beego/v2/core/logs"
+	"github.com/beego/beego/v2/server/web"
 )
 
 type TunnelModeServer struct {
 	BaseServer
 	process           process
 	listener          net.Listener
-	activeConnections sync.Map      // 连接池
+	activeConnections sync.Map
 }
 
 // tcp|http|host
 func NewTunnelModeServer(process process, bridge NetBridge, task *file.Tunnel) *TunnelModeServer {
-	allowLocalProxy, _ := beego.AppConfig.Bool("allow_local_proxy")
+	allowLocalProxy, _ := web.AppConfig.Bool("allow_local_proxy")
 	s := new(TunnelModeServer)
 	s.bridge = bridge
 	s.process = process
@@ -85,24 +85,25 @@ type WebServer struct {
 
 // 开始
 func (s *WebServer) Start() error {
-	p, _ := beego.AppConfig.Int("web_port")
-	if p == 0 {
+	p, err := web.AppConfig.Int("web_port")
+	if err != nil || p == 0 {
 		stop := make(chan struct{})
 		<-stop
 	}
-	beego.BConfig.WebConfig.Session.SessionOn = true
-	beego.SetStaticPath(beego.AppConfig.String("web_base_url")+"/static", filepath.Join(common.GetRunPath(), "web", "static"))
-	beego.SetViewsPath(filepath.Join(common.GetRunPath(), "web", "views"))
-	err := errors.New("Web management startup failure ")
+	web.BConfig.WebConfig.Session.SessionOn = true
+	baseURL, _ := web.AppConfig.String("web_base_url")
+	web.SetStaticPath(baseURL+"/static", filepath.Join(common.GetRunPath(), "web", "static"))
+	web.SetViewsPath(filepath.Join(common.GetRunPath(), "web", "views"))
+	err = errors.New("Web management startup failure ")
 	var l net.Listener
 	if l, err = connection.GetWebManagerListener(); err == nil {
-		beego.InitBeforeHTTPRun()
-		if beego.AppConfig.String("web_open_ssl") == "true" {
-			keyPath := beego.AppConfig.String("web_key_file")
-			certPath := beego.AppConfig.String("web_cert_file")
-			err = http.ServeTLS(l, beego.BeeApp.Handlers, certPath, keyPath)
+		openSSL, _ := web.AppConfig.String("web_open_ssl")
+		if openSSL == "true" {
+			keyPath, _ := web.AppConfig.String("web_key_file")
+			certPath, _ := web.AppConfig.String("web_cert_file")
+			err = http.ServeTLS(l, web.BeeApp.Handlers, certPath, keyPath)
 		} else {
-			err = http.Serve(l, beego.BeeApp.Handlers)
+			err = http.Serve(l, web.BeeApp.Handlers)
 		}
 	} else {
 		logs.Error(err)
@@ -154,5 +155,4 @@ func ProcessHttp(c *conn.Conn, s *TunnelModeServer) error {
 	}
 
 	return s.DealClient(c, s.task.Client, addr, rb, common.CONN_TCP, nil, s.task.Client.Flow, s.task.Target.ProxyProtocol, s.task.Target.LocalProxy, nil)
-
 }

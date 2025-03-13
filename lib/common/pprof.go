@@ -1,15 +1,16 @@
 package common
 
 import (
-	"github.com/astaxie/beego"
-	"github.com/astaxie/beego/logs"
 	"net/http"
 	_ "net/http/pprof"
+
+	"github.com/beego/beego/v2/core/logs"
+	"github.com/beego/beego/v2/server/web"
 )
 
 func InitPProfFromFile() {
-	ip := beego.AppConfig.String("pprof_ip")
-	p := beego.AppConfig.String("pprof_port")
+	ip, _ := web.AppConfig.String("pprof_ip")
+	p, _ := web.AppConfig.String("pprof_port")
 	if len(ip) > 0 && len(p) > 0 && IsPort(p) {
 		runPProf(ip + ":" + p)
 	}

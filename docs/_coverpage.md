@@ -11,6 +11,5 @@
 - 扩展功能强大
 - 全平台兼容，一键注册为服务
 
-
 [GitHub](https://github.com/ehang-io/nps/)
 [开始使用](#nps)

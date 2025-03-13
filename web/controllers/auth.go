@@ -5,11 +5,11 @@ import (
 	"time"
 
 	"ehang.io/nps/lib/crypt"
-	"github.com/astaxie/beego"
+	"github.com/beego/beego/v2/server/web"
 )
 
 type AuthController struct {
-	beego.Controller
+	web.Controller
 }
 
 func (s *AuthController) GetAuthKey() {
@@ -18,11 +18,12 @@ func (s *AuthController) GetAuthKey() {
 		s.Data["json"] = m
 		s.ServeJSON()
 	}()
-	if cryptKey := beego.AppConfig.String("auth_crypt_key"); len(cryptKey) != 16 {
+	if cryptKey, _ := web.AppConfig.String("auth_crypt_key"); len(cryptKey) != 16 {
 		m["status"] = 0
 		return
 	} else {
-		b, err := crypt.AesEncrypt([]byte(beego.AppConfig.String("auth_key")), []byte(cryptKey))
+		authKey, _ := web.AppConfig.String("auth_key")
+		b, err := crypt.AesEncrypt([]byte(authKey), []byte(cryptKey))
 		if err != nil {
 			m["status"] = 0
 			return

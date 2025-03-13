@@ -2,8 +2,8 @@ package main
 
 import (
 	"flag"
-	"log"
 	"fmt"
+	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -12,8 +12,9 @@ import (
 	"sync"
 
 	"ehang.io/nps/bridge"
+	"ehang.io/nps/lib/common"
+	"ehang.io/nps/lib/crypt"
 	"ehang.io/nps/lib/daemon"
-
 	"ehang.io/nps/lib/file"
 	"ehang.io/nps/lib/install"
 	"ehang.io/nps/lib/version"
@@ -21,12 +22,8 @@ import (
 	"ehang.io/nps/server/connection"
 	"ehang.io/nps/server/tool"
 	"ehang.io/nps/web/routers"
-
-	"ehang.io/nps/lib/common"
-	"ehang.io/nps/lib/crypt"
-	"github.com/astaxie/beego"
-	"github.com/astaxie/beego/logs"
-
+	"github.com/beego/beego/v2/core/logs"
+	"github.com/beego/beego/v2/server/web"
 	"github.com/kardianos/service"
 )
 
@@ -56,39 +53,39 @@ func main() {
 		}
 	}
 
-	if err := beego.LoadAppConfig("ini", filepath.Join(common.GetRunPath(), "conf", "nps.conf")); err != nil {
+	if err := web.LoadAppConfig("ini", filepath.Join(common.GetRunPath(), "conf", "nps.conf")); err != nil {
 		log.Fatalln("load config file error", err.Error())
 	}
 
 	common.InitPProfFromFile()
-	if level = beego.AppConfig.String("log_level"); level == "" {
+	if level, _ = web.AppConfig.String("log_level"); level == "" {
 		level = "7"
 	}
 	logs.Reset()
 	logs.EnableFuncCallDepth(true)
 	logs.SetLogFuncCallDepth(3)
-	logPath := beego.AppConfig.String("log_path")
+	logPath, _ := web.AppConfig.String("log_path")
 	if logPath == "" || strings.EqualFold(logPath, "on") || strings.EqualFold(logPath, "true") {
 		logPath = common.GetLogPath()
 	}
 	if common.IsWindows() {
 		logPath = strings.Replace(logPath, "\\", "\\\\", -1)
 	}
-	logDaily := beego.AppConfig.String("log_daily")
+	logDaily, _ := web.AppConfig.String("log_daily")
 	if logDaily == "" {
 		logDaily = "false"
 	}
-	logMaxFiles := beego.AppConfig.String("log_max_files")
+	logMaxFiles, _ := web.AppConfig.String("log_max_files")
 	if logMaxFiles == "" {
 		logMaxFiles = "30"
 	}
-	logMaxDays := beego.AppConfig.String("log_max_days")
+	logMaxDays, _ := web.AppConfig.String("log_max_days")
 	if logMaxDays == "" {
 		logMaxDays = "30"
 	}
-	logMaxSize, err := beego.AppConfig.Int("log_max_size")
+	logMaxSize, err := web.AppConfig.Int("log_max_size")
 	if err != nil {
-	    logMaxSize = 5
+		logMaxSize = 5
 	}
 
 	// init service
@@ -100,7 +97,7 @@ func main() {
 		Option:      options,
 	}
 
-	bridge.ServerTlsEnable = beego.AppConfig.DefaultBool("tls_enable", false)
+	bridge.ServerTlsEnable = web.AppConfig.DefaultBool("tls_enable", false)
 
 	for _, v := range os.Args[1:] {
 		switch v {
@@ -244,7 +241,7 @@ func run() {
 	task := &file.Tunnel{
 		Mode: "webServer",
 	}
-	bridgePort, err := beego.AppConfig.Int("bridge_port")
+	bridgePort, err := web.AppConfig.Int("bridge_port")
 	if err != nil {
 		logs.Error("Getting bridge_port error", err)
 		os.Exit(0)
@@ -257,9 +254,10 @@ func run() {
 	crypt.InitTls()
 	tool.InitAllowPort()
 	tool.StartSystemInfo()
-	timeout, err := beego.AppConfig.Int("disconnect_timeout")
+	timeout, err := web.AppConfig.Int("disconnect_timeout")
 	if err != nil {
 		timeout = 60
 	}
-	go server.StartNewServer(bridgePort, task, beego.AppConfig.String("bridge_type"), timeout)
+	bridgeType, _ := web.AppConfig.String("bridge_type")
+	go server.StartNewServer(bridgePort, task, bridgeType, timeout)
 }

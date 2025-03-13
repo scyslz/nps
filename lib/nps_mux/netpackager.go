@@ -3,8 +3,9 @@ package nps_mux
 import (
 	"encoding/binary"
 	"errors"
-	"github.com/astaxie/beego/logs"
 	"io"
+
+	"github.com/beego/beego/v2/core/logs"
 )
 
 type basePackager struct {

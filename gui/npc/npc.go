@@ -1,23 +1,24 @@
 package main
 
 import (
-	"ehang.io/nps/client"
-	"ehang.io/nps/lib/common"
-	"ehang.io/nps/lib/daemon"
-	"ehang.io/nps/lib/version"
 	"fmt"
-	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/app"
-	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/layout"
-	"fyne.io/fyne/v2/widget"
-	"github.com/astaxie/beego/logs"
 	"io/ioutil"
 	"os"
 	"path"
 	"runtime"
 	"strings"
 	"time"
+
+	"ehang.io/nps/client"
+	"ehang.io/nps/lib/common"
+	"ehang.io/nps/lib/daemon"
+	"ehang.io/nps/lib/version"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/app"
+	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/layout"
+	"fyne.io/fyne/v2/widget"
+	"github.com/beego/beego/v2/core/logs"
 )
 
 func main() {

@@ -2,11 +2,11 @@ package controllers
 
 import (
 	"strings"
+
 	"ehang.io/nps/lib/file"
 	"ehang.io/nps/server"
 	"ehang.io/nps/server/tool"
-
-	"github.com/astaxie/beego"
+	"github.com/beego/beego/v2/server/web"
 )
 
 type IndexController struct {
@@ -14,7 +14,7 @@ type IndexController struct {
 }
 
 func (s *IndexController) Index() {
-	s.Data["web_base_url"] = beego.AppConfig.String("web_base_url")
+	s.Data["web_base_url"], _ = web.AppConfig.String("web_base_url")
 	s.Data["data"] = server.GetDashboardData()
 	s.SetInfo("dashboard")
 	s.display("index/index")
@@ -96,13 +96,13 @@ func (s *IndexController) Add() {
 		id := int(file.GetDb().JsonDb.GetTaskId())
 		clientId := s.GetIntNoErr("client_id")
 		t := &file.Tunnel{
-			Port:      s.GetIntNoErr("port"),
-			ServerIp:  s.getEscapeString("server_ip"),
-			Mode:      s.getEscapeString("type"),
-			Target:    &file.Target{
-				TargetStr: strings.ReplaceAll(s.getEscapeString("target"), "\r\n", "\n"),
+			Port:     s.GetIntNoErr("port"),
+			ServerIp: s.getEscapeString("server_ip"),
+			Mode:     s.getEscapeString("type"),
+			Target: &file.Target{
+				TargetStr:     strings.ReplaceAll(s.getEscapeString("target"), "\r\n", "\n"),
 				ProxyProtocol: s.GetIntNoErr("proxy_protocol"),
-				LocalProxy: (clientId > 0 && s.GetBoolNoErr("local_proxy")) || clientId <= 0,
+				LocalProxy:    (clientId > 0 && s.GetBoolNoErr("local_proxy")) || clientId <= 0,
 			},
 			Id:        id,
 			Status:    true,
@@ -226,7 +226,7 @@ func (s *IndexController) Start() {
 
 func (s *IndexController) HostList() {
 	if s.Ctx.Request.Method == "GET" {
-        	s.Data["data"] = server.GetDashboardData()
+		s.Data["data"] = server.GetDashboardData()
 		s.Data["client_id"] = s.getEscapeString("client_id")
 		s.Data["menu"] = "host"
 		s.SetInfo("host list")
@@ -271,12 +271,12 @@ func (s *IndexController) AddHost() {
 		id := int(file.GetDb().JsonDb.GetHostId())
 		clientId := s.GetIntNoErr("client_id")
 		h := &file.Host{
-			Id:             id,
-			Host:           s.getEscapeString("host"),
-			Target:         &file.Target{
-				TargetStr: strings.ReplaceAll(s.getEscapeString("target"), "\r\n", "\n"),
+			Id:   id,
+			Host: s.getEscapeString("host"),
+			Target: &file.Target{
+				TargetStr:     strings.ReplaceAll(s.getEscapeString("target"), "\r\n", "\n"),
 				ProxyProtocol: s.GetIntNoErr("proxy_protocol"),
-				LocalProxy: (clientId > 0 && s.GetBoolNoErr("local_proxy")) || clientId <= 0,
+				LocalProxy:    (clientId > 0 && s.GetBoolNoErr("local_proxy")) || clientId <= 0,
 			},
 			HeaderChange:   s.getEscapeString("header"),
 			HostChange:     s.getEscapeString("hostchange"),
@@ -288,7 +288,7 @@ func (s *IndexController) AddHost() {
 			KeyFilePath:    s.getEscapeString("key_file_path"),
 			CertFilePath:   s.getEscapeString("cert_file_path"),
 			AutoHttps:      s.GetBoolNoErr("auto_https"),
-			AutoCORS:        s.GetBoolNoErr("auto_cors"),
+			AutoCORS:       s.GetBoolNoErr("auto_cors"),
 			TargetIsHttps:  s.GetBoolNoErr("target_is_https"),
 		}
 		var err error

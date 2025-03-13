@@ -1,5 +1,5 @@
-
 # nps
+
 ![](https://img.shields.io/github/stars/ehang-io/nps.svg)   ![](https://img.shields.io/github/forks/ehang-io/nps.svg)
 [![Gitter](https://badges.gitter.im/cnlh-nps/community.svg)](https://gitter.im/cnlh-nps/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 ![Release](https://github.com/ehang-io/nps/workflows/Release/badge.svg)
@@ -7,10 +7,12 @@
 
 [README](https://github.com/ehang-io/nps/blob/master/README.md)|[中文文档](https://github.com/ehang-io/nps/blob/master/README_zh.md)
 
-nps是一款轻量级、高性能、功能强大的**内网穿透**代理服务器。目前支持**tcp、udp流量转发**，可支持任何**tcp、udp**上层协议（访问内网网站、本地支付接口调试、ssh访问、远程桌面，内网dns解析等等……），此外还**支持内网http代理、内网socks5代理**、**p2p等**，并带有功能强大的web管理端。
-
+nps是一款轻量级、高性能、功能强大的**内网穿透**代理服务器。目前支持**tcp、udp流量转发**，可支持任何**tcp、udp**
+上层协议（访问内网网站、本地支付接口调试、ssh访问、远程桌面，内网dns解析等等……），此外还**支持内网http代理、内网socks5代理**、*
+*p2p等**，并带有功能强大的web管理端。
 
 ## 背景
+
 ![image](https://github.com/ehang-io/nps/blob/master/image/web.png?raw=true)
 
 1. 做微信公众号开发、小程序开发等----> 域名代理模式
@@ -22,7 +24,9 @@ nps是一款轻量级、高性能、功能强大的**内网穿透**代理服务�
 4. 在外网使用HTTP代理访问内网站点----> http代理模式
 
 5. 搭建一个内网穿透ss，在外网如同使用内网vpn一样访问内网资源或者设备----> socks5代理模式
+
 ## 特点
+
 - 协议支持全面，兼容几乎所有常用协议，例如tcp、udp、http(s)、socks5、p2p、http代理...
 - 全平台兼容(linux、windows、macos、群辉等)，支持一键安装为系统服务
 - 控制全面，同时支持服务端和客户端控制
@@ -34,14 +38,17 @@ nps是一款轻量级、高性能、功能强大的**内网穿透**代理服务�
 - 服务端支持多用户和用户注册功能
 
 **没找到你想要的功能？不要紧，点击[进入文档](https://ehang-io.github.io/nps)查找吧**
+
 ## 快速开始
 
 ### 安装
+
 > [releases](https://github.com/ehang-io/nps/releases)
 
 下载对应的系统版本即可，服务端和客户端是单独的
 
 ### 服务端启动
+
 下载完服务器压缩包后，解压，然后进入解压后的文件夹
 
 - 执行安装命令
@@ -69,21 +76,25 @@ nps默认配置文件使用了80，443，8080，8024端口
 ```安装后windows配置文件位于 C:\Program Files\nps，linux和darwin位于/etc/nps```
 
 **如果发现没有启动成功，可以查看日志(Windows日志文件位于当前运行目录下，linux和darwin位于/var/log/nps.log)**
+
 - 访问服务端ip:web服务端口（默认为8080）
 - 使用用户名和密码登陆（默认admin/123，正式使用一定要更改）
 - 创建客户端
 
 ### 客户端连接
+
 - 点击web管理中客户端前的+号，复制启动命令
 - 执行启动命令，linux直接执行即可，windows将./npc换成npc.exe用cmd执行
 
 如果需要注册到系统服务可查看[注册到系统服务](https://ehang-io.github.io/nps/#/use?id=注册到系统服务)
 
 ### 配置
+
 - 客户端连接后，在web中配置对应穿透服务即可
 - 更多高级用法见[完整文档](https://ehang-io.github.io/nps/)
 
 ## 贡献
+
 - 如果遇到bug可以直接提交至dev分支
 - 使用遇到问题可以通过issues反馈
 - 项目处于开发阶段，还有很多待完善的地方，如果可以贡献代码，请提交 PR 至 dev 分支

@@ -1,15 +1,16 @@
 package goroutine
 
 import (
-	"ehang.io/nps/lib/common"
-	"ehang.io/nps/lib/file"
-	"github.com/astaxie/beego/logs"
-	"github.com/panjf2000/ants/v2"
 	"io"
 	"net"
 	"strings"
 	"sync"
 	"time"
+
+	"ehang.io/nps/lib/common"
+	"ehang.io/nps/lib/file"
+	"github.com/beego/beego/v2/core/logs"
+	"github.com/panjf2000/ants/v2"
 )
 
 type connGroup struct {

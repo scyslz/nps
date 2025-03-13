@@ -21,8 +21,8 @@ import (
 	"ehang.io/nps/lib/file"
 	"ehang.io/nps/lib/goroutine"
 	"ehang.io/nps/server/connection"
-	"github.com/astaxie/beego"
-	"github.com/astaxie/beego/logs"
+	"github.com/beego/beego/v2/core/logs"
+	"github.com/beego/beego/v2/server/web"
 )
 
 var localTCPAddr = &net.TCPAddr{IP: net.ParseIP("127.0.0.1")}
@@ -66,10 +66,10 @@ func (c *flowConn) Close() error {
 	return c.ReadWriteCloser.Close()
 }
 
-func (c *flowConn) LocalAddr() net.Addr  { return c.fakeAddr }
-func (c *flowConn) RemoteAddr() net.Addr { return c.fakeAddr }
-func (*flowConn) SetDeadline(t time.Time) error   { return nil }
-func (*flowConn) SetReadDeadline(t time.Time) error { return nil }
+func (c *flowConn) LocalAddr() net.Addr              { return c.fakeAddr }
+func (c *flowConn) RemoteAddr() net.Addr             { return c.fakeAddr }
+func (*flowConn) SetDeadline(t time.Time) error      { return nil }
+func (*flowConn) SetReadDeadline(t time.Time) error  { return nil }
 func (*flowConn) SetWriteDeadline(t time.Time) error { return nil }
 
 type httpServer struct {
@@ -86,7 +86,7 @@ type httpServer struct {
 }
 
 func NewHttp(bridge *bridge.Bridge, task *file.Tunnel, httpPort, httpsPort int, httpOnlyPass string, addOrigin bool) *httpServer {
-	allowLocalProxy, _ := beego.AppConfig.Bool("allow_local_proxy")
+	allowLocalProxy, _ := web.AppConfig.Bool("allow_local_proxy")
 	return &httpServer{
 		BaseServer: BaseServer{
 			task:            task,
@@ -429,4 +429,3 @@ func (s *httpServer) NewServer(port int, scheme string) *http.Server {
 		//TLSNextProto: make(map[string]func(*http.Server, *tls.Conn, http.Handler)),
 	}
 }
-
