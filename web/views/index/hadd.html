@@ -207,7 +207,7 @@
         })
 
         $("#https_just_proxy_select").on("change", function () {
-            if ($("#scheme_select").val() == "https" && $("#https_just_proxy_select").val() == "1") {
+            if ($("#https_just_proxy_select").val() == "1") {
                 $("#proxy_protocol").css("display", "block")
             } else {
                 $("#proxy_protocol").css("display", "none")
