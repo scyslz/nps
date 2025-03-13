@@ -16,7 +16,7 @@ import (
 	"ehang.io/nps/lib/file"
 	"ehang.io/nps/lib/install"
 	"ehang.io/nps/lib/version"
-	"github.com/beego/beego/v2/core/logs"
+	"github.com/beego/beego/logs"
 	"github.com/ccding/go-stun/stun"
 	"github.com/kardianos/service"
 )

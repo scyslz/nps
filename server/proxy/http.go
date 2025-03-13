@@ -21,8 +21,8 @@ import (
 	"ehang.io/nps/lib/file"
 	"ehang.io/nps/lib/goroutine"
 	"ehang.io/nps/server/connection"
-	"github.com/beego/beego/v2/core/logs"
-	"github.com/beego/beego/v2/server/web"
+	"github.com/beego/beego"
+	"github.com/beego/beego/logs"
 )
 
 var localTCPAddr = &net.TCPAddr{IP: net.ParseIP("127.0.0.1")}
@@ -86,7 +86,7 @@ type httpServer struct {
 }
 
 func NewHttp(bridge *bridge.Bridge, task *file.Tunnel, httpPort, httpsPort int, httpOnlyPass string, addOrigin bool) *httpServer {
-	allowLocalProxy, _ := web.AppConfig.Bool("allow_local_proxy")
+	allowLocalProxy, _ := beego.AppConfig.Bool("allow_local_proxy")
 	return &httpServer{
 		BaseServer: BaseServer{
 			task:            task,

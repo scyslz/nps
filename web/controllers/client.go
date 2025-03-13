@@ -8,7 +8,7 @@ import (
 	"ehang.io/nps/lib/file"
 	"ehang.io/nps/lib/rate"
 	"ehang.io/nps/server"
-	"github.com/beego/beego/v2/server/web"
+	"github.com/beego/beego"
 )
 
 type ClientController struct {
@@ -34,7 +34,7 @@ func (s *ClientController) List() {
 	cmd := make(map[string]interface{})
 	ip := s.Ctx.Request.Host
 	cmd["ip"] = common.GetIpByAddr(ip)
-	cmd["bridgeType"], _ = web.AppConfig.String("bridge_type")
+	cmd["bridgeType"] = beego.AppConfig.String("bridge_type")
 	cmd["bridgePort"] = server.Bridge.TunnelPort
 	s.AjaxTable(list, cnt, cnt, cmd)
 }
@@ -114,8 +114,7 @@ func (s *ClientController) Edit() {
 			return
 		} else {
 			if s.getEscapeString("web_username") != "" {
-				webUsername, _ := web.AppConfig.String("web_username")
-				if s.getEscapeString("web_username") == webUsername || !file.GetDb().VerifyUserName(s.getEscapeString("web_username"), c.Id) {
+				if s.getEscapeString("web_username") == beego.AppConfig.String("web_username") || !file.GetDb().VerifyUserName(s.getEscapeString("web_username"), c.Id) {
 					s.AjaxErr("web login username duplicate, please reset")
 					return
 				}
@@ -141,7 +140,7 @@ func (s *ClientController) Edit() {
 			c.Cnf.P = s.getEscapeString("p")
 			c.Cnf.Compress = common.GetBoolByStr(s.getEscapeString("compress"))
 			c.Cnf.Crypt = s.GetBoolNoErr("crypt")
-			b, err := web.AppConfig.Bool("allow_user_change_username")
+			b, err := beego.AppConfig.Bool("allow_user_change_username")
 			if s.GetSession("isAdmin").(bool) || (err == nil && b) {
 				c.WebUserName = s.getEscapeString("web_username")
 			}

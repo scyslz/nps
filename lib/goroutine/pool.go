@@ -9,7 +9,7 @@ import (
 
 	"ehang.io/nps/lib/common"
 	"ehang.io/nps/lib/file"
-	"github.com/beego/beego/v2/core/logs"
+	"github.com/beego/beego/logs"
 	"github.com/panjf2000/ants/v2"
 )
 

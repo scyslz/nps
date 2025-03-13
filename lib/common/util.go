@@ -22,8 +22,8 @@ import (
 	"ehang.io/nps/lib/crypt"
 	"ehang.io/nps/lib/version"
 	"github.com/araddon/dateparse"
-	"github.com/beego/beego/v2/core/logs"
-	"github.com/beego/beego/v2/server/web"
+	"github.com/beego/beego"
+	"github.com/beego/beego/logs"
 )
 
 // Get the corresponding IP address through domain name
@@ -200,7 +200,7 @@ func ChangeHostAndHeader(r *http.Request, host string, header string, httpOnly b
 	// 判断是否需要添加真实 IP 信息
 	var addOrigin bool
 	if !httpOnly {
-		addOrigin, _ = web.AppConfig.Bool("http_add_origin_header")
+		addOrigin, _ = beego.AppConfig.Bool("http_add_origin_header")
 		r.Header.Set("X-Forwarded-For", xfwdFor)
 	} else {
 		addOrigin = false

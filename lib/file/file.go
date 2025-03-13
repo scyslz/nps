@@ -12,8 +12,8 @@ import (
 	"ehang.io/nps/lib/common"
 	"ehang.io/nps/lib/rate"
 	"ehang.io/nps/lib/version"
-	"github.com/beego/beego/v2/core/logs"
-	"github.com/beego/beego/v2/server/web"
+	"github.com/beego/beego"
+	"github.com/beego/beego/logs"
 )
 
 func NewJsonDb(runPath string) *JsonDb {
@@ -60,7 +60,7 @@ func (s *JsonDb) LoadTaskFromJsonFile() {
 }
 
 func (s *JsonDb) LoadClientFromJsonFile() {
-	if allowLocalProxy, _ := web.AppConfig.Bool("allow_local_proxy"); allowLocalProxy {
+	if allowLocalProxy, _ := beego.AppConfig.Bool("allow_local_proxy"); allowLocalProxy {
 		if _, err := s.GetClient(-1); err != nil {
 			local := new(Client)
 			local.Id = -1

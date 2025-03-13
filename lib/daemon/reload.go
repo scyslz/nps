@@ -1,4 +1,3 @@
-//go:build !windows
 // +build !windows
 
 package daemon
@@ -10,7 +9,7 @@ import (
 	"syscall"
 
 	"ehang.io/nps/lib/common"
-	"github.com/beego/beego/v2/server/web"
+	"github.com/beego/beego"
 )
 
 func init() {
@@ -19,7 +18,7 @@ func init() {
 	go func() {
 		for {
 			<-s
-			web.LoadAppConfig("ini", filepath.Join(common.GetRunPath(), "conf", "nps.conf"))
+			beego.LoadAppConfig("ini", filepath.Join(common.GetRunPath(), "conf", "nps.conf"))
 		}
 	}()
 }

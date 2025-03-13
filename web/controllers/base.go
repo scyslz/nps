@@ -12,35 +12,35 @@ import (
 	"ehang.io/nps/lib/crypt"
 	"ehang.io/nps/lib/file"
 	"ehang.io/nps/server"
-	"github.com/beego/beego/v2/server/web"
+	"github.com/beego/beego"
 )
 
 type BaseController struct {
-	web.Controller
+	beego.Controller
 	controllerName string
 	actionName     string
 }
 
 // 初始化参数
 func (s *BaseController) Prepare() {
-	webBaseUrl, _ := web.AppConfig.String("web_base_url")
-	s.Data["web_base_url"] = webBaseUrl
+	s.Data["web_base_url"] = beego.AppConfig.String("web_base_url")
 	controllerName, actionName := s.GetControllerAndAction()
 	s.controllerName = strings.ToLower(controllerName[0 : len(controllerName)-10])
 	s.actionName = strings.ToLower(actionName)
+
 	// web api verify
 	// param 1 is md5(authKey+Current timestamp)
 	// param 2 is timestamp (It's limited to 20 seconds.)
 	md5Key := s.getEscapeString("auth_key")
 	timestamp := s.GetIntNoErr("timestamp")
-	configKey, _ := web.AppConfig.String("auth_key")
+	configKey := beego.AppConfig.String("auth_key")
 	if configKey == "" {
 		configKey = crypt.GetRandomString(64)
 	}
 	timeNowUnix := time.Now().Unix()
 	if !(md5Key != "" && (math.Abs(float64(timeNowUnix-int64(timestamp))) <= 20) && (crypt.Md5(configKey+strconv.Itoa(timestamp)) == md5Key)) {
 		if s.GetSession("auth") != true {
-			s.Redirect(webBaseUrl+"/login/index", 302)
+			s.Redirect(beego.AppConfig.String("web_base_url")+"/login/index", 302)
 		}
 	} else {
 		s.SetSession("isAdmin", true)
@@ -55,22 +55,23 @@ func (s *BaseController) Prepare() {
 	} else {
 		s.Data["isAdmin"] = true
 	}
-	//s.Data["https_just_proxy"], _ = web.AppConfig.Bool("https_just_proxy")
-	s.Data["allow_user_login"], _ = web.AppConfig.Bool("allow_user_login")
-	s.Data["allow_flow_limit"], _ = web.AppConfig.Bool("allow_flow_limit")
-	s.Data["allow_rate_limit"], _ = web.AppConfig.Bool("allow_rate_limit")
-	s.Data["allow_time_limit"], _ = web.AppConfig.Bool("allow_time_limit")
-	s.Data["allow_connection_num_limit"], _ = web.AppConfig.Bool("allow_connection_num_limit")
-	s.Data["allow_multi_ip"], _ = web.AppConfig.Bool("allow_multi_ip")
-	s.Data["system_info_display"], _ = web.AppConfig.Bool("system_info_display")
-	s.Data["allow_tunnel_num_limit"], _ = web.AppConfig.Bool("allow_tunnel_num_limit")
-	s.Data["allow_local_proxy"], _ = web.AppConfig.Bool("allow_local_proxy")
-	s.Data["allow_user_change_username"], _ = web.AppConfig.Bool("allow_user_change_username")
+
+	//s.Data["https_just_proxy"], _ = beego.AppConfig.Bool("https_just_proxy")
+	s.Data["allow_user_login"], _ = beego.AppConfig.Bool("allow_user_login")
+	s.Data["allow_flow_limit"], _ = beego.AppConfig.Bool("allow_flow_limit")
+	s.Data["allow_rate_limit"], _ = beego.AppConfig.Bool("allow_rate_limit")
+	s.Data["allow_time_limit"], _ = beego.AppConfig.Bool("allow_time_limit")
+	s.Data["allow_connection_num_limit"], _ = beego.AppConfig.Bool("allow_connection_num_limit")
+	s.Data["allow_multi_ip"], _ = beego.AppConfig.Bool("allow_multi_ip")
+	s.Data["system_info_display"], _ = beego.AppConfig.Bool("system_info_display")
+	s.Data["allow_tunnel_num_limit"], _ = beego.AppConfig.Bool("allow_tunnel_num_limit")
+	s.Data["allow_local_proxy"], _ = beego.AppConfig.Bool("allow_local_proxy")
+	s.Data["allow_user_change_username"], _ = beego.AppConfig.Bool("allow_user_change_username")
 }
 
 // 加载模板
 func (s *BaseController) display(tpl ...string) {
-	s.Data["web_base_url"], _ = web.AppConfig.String("web_base_url")
+	s.Data["web_base_url"] = beego.AppConfig.String("web_base_url")
 	s.Data["version"] = server.GetVersion()
 	s.Data["year"] = server.GetCurrentYear()
 	var tplname string
@@ -84,7 +85,7 @@ func (s *BaseController) display(tpl ...string) {
 	}
 	ip := s.Ctx.Request.Host
 	s.Data["ip"] = common.GetIpByAddr(ip)
-	s.Data["bridgeType"], _ = web.AppConfig.String("bridge_type")
+	s.Data["bridgeType"] = beego.AppConfig.String("bridge_type")
 	if common.IsWindows() {
 		s.Data["win"] = ".exe"
 	}
@@ -92,21 +93,21 @@ func (s *BaseController) display(tpl ...string) {
 	s.Data["p"] = strconv.Itoa(server.Bridge.TunnelPort)
 
 	if bridge.ServerTlsEnable {
-		tlsPort := strconv.Itoa(web.AppConfig.DefaultInt("tls_bridge_port", 8025))
+		tlsPort := strconv.Itoa(beego.AppConfig.DefaultInt("tls_bridge_port", 8025))
 		s.Data["tls_p"] = tlsPort
 		s.Data["p1"] = strconv.Itoa(server.Bridge.TunnelPort) + " / " + tlsPort
 	} else {
 		s.Data["p1"] = strconv.Itoa(server.Bridge.TunnelPort)
 	}
 
-	s.Data["proxyPort"], _ = web.AppConfig.String("hostPort")
+	s.Data["proxyPort"] = beego.AppConfig.String("hostPort")
 	s.Layout = "public/layout.html"
 	s.TplName = tplname
 }
 
 // 错误
 func (s *BaseController) error() {
-	s.Data["web_base_url"], _ = web.AppConfig.String("web_base_url")
+	s.Data["web_base_url"] = beego.AppConfig.String("web_base_url")
 	s.Data["version"] = server.GetVersion()
 	s.Data["year"] = server.GetCurrentYear()
 	s.Layout = "public/layout.html"

@@ -4,13 +4,13 @@ import (
 	"net/http"
 	_ "net/http/pprof"
 
-	"github.com/beego/beego/v2/core/logs"
-	"github.com/beego/beego/v2/server/web"
+	"github.com/beego/beego"
+	"github.com/beego/beego/logs"
 )
 
 func InitPProfFromFile() {
-	ip, _ := web.AppConfig.String("pprof_ip")
-	p, _ := web.AppConfig.String("pprof_port")
+	ip := beego.AppConfig.String("pprof_ip")
+	p := beego.AppConfig.String("pprof_port")
 	if len(ip) > 0 && len(p) > 0 && IsPort(p) {
 		runPProf(ip + ":" + p)
 	}

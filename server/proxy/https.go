@@ -10,8 +10,8 @@ import (
 	"ehang.io/nps/lib/conn"
 	"ehang.io/nps/lib/crypt"
 	"ehang.io/nps/lib/file"
-	"github.com/beego/beego/v2/core/logs"
-	"github.com/beego/beego/v2/server/web"
+	"github.com/beego/beego"
+	"github.com/beego/beego/logs"
 	"github.com/pkg/errors"
 )
 
@@ -33,7 +33,7 @@ type HttpsServer struct {
 }
 
 func NewHttpsServer(l net.Listener, bridge NetBridge, task *file.Tunnel) *HttpsServer {
-	allowLocalProxy, _ := web.AppConfig.Bool("allow_local_proxy")
+	allowLocalProxy, _ := beego.AppConfig.Bool("allow_local_proxy")
 	https := &HttpsServer{
 		listener: l,
 		httpServer: httpServer{
@@ -48,12 +48,12 @@ func NewHttpsServer(l net.Listener, bridge NetBridge, task *file.Tunnel) *HttpsS
 	}
 
 	https.sslCacheTimeout = 60
-	if cacheTime, err := web.AppConfig.Int("ssl_cache_timeout"); err == nil {
+	if cacheTime, err := beego.AppConfig.Int("ssl_cache_timeout"); err == nil {
 		https.sslCacheTimeout = cacheTime
 	}
 
-	https.defaultCertFile, _ = web.AppConfig.String("https_default_cert_file")
-	https.defaultKeyFile, _ = web.AppConfig.String("https_default_key_file")
+	https.defaultCertFile = beego.AppConfig.String("https_default_cert_file")
+	https.defaultKeyFile = beego.AppConfig.String("https_default_key_file")
 
 	https.startCacheCleaner(time.Duration(https.sslCacheTimeout) * time.Second)
 

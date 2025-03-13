@@ -17,8 +17,8 @@ import (
 	"ehang.io/nps/lib/file"
 	"ehang.io/nps/server/proxy"
 	"ehang.io/nps/server/tool"
-	"github.com/beego/beego/v2/core/logs"
-	"github.com/beego/beego/v2/server/web"
+	"github.com/beego/beego"
+	"github.com/beego/beego/logs"
 	"github.com/shirou/gopsutil/v4/cpu"
 	"github.com/shirou/gopsutil/v4/load"
 	"github.com/shirou/gopsutil/v4/mem"
@@ -37,7 +37,7 @@ func init() {
 // init task from db
 func InitFromCsv() {
 	//Add a public password
-	if vkey, _ := web.AppConfig.String("public_vkey"); vkey != "" {
+	if vkey := beego.AppConfig.String("public_vkey"); vkey != "" {
 		c := file.NewClient(vkey, true, true)
 		file.GetDb().NewClient(c)
 		RunList.Store(c.Id, nil)
@@ -88,15 +88,14 @@ func DealBridgeTask() {
 
 // start a new server
 func StartNewServer(bridgePort int, cnf *file.Tunnel, bridgeType string, bridgeDisconnect int) {
-	ipLimit, _ := web.AppConfig.String("ip_limit")
-	Bridge = bridge.NewTunnel(bridgePort, bridgeType, common.GetBoolByStr(ipLimit), &RunList, bridgeDisconnect)
+	Bridge = bridge.NewTunnel(bridgePort, bridgeType, common.GetBoolByStr(beego.AppConfig.String("ip_limit")), &RunList, bridgeDisconnect)
 	go func() {
 		if err := Bridge.StartTunnel(); err != nil {
 			logs.Error("start server bridge error", err)
 			os.Exit(0)
 		}
 	}()
-	if p, err := web.AppConfig.Int("p2p_port"); err == nil {
+	if p, err := beego.AppConfig.Int("p2p_port"); err == nil {
 		go proxy.NewP2PServer(p).Start()
 		go proxy.NewP2PServer(p + 1).Start()
 		go proxy.NewP2PServer(p + 2).Start()
@@ -149,12 +148,12 @@ func NewMode(Bridge *bridge.Bridge, c *file.Tunnel) proxy.Service {
 		AddTask(t)
 		service = proxy.NewWebServer(Bridge)
 	case "httpHostServer":
-		httpPort, _ := web.AppConfig.Int("http_proxy_port")
-		httpsPort, _ := web.AppConfig.Int("https_proxy_port")
-		//useCache, _ := web.AppConfig.Bool("http_cache")
-		//cacheLen, _ := web.AppConfig.Int("http_cache_length")
-		addOrigin, _ := web.AppConfig.Bool("http_add_origin_header")
-		httpOnlyPass, _ := web.AppConfig.String("x_nps_http_only")
+		httpPort, _ := beego.AppConfig.Int("http_proxy_port")
+		httpsPort, _ := beego.AppConfig.Int("https_proxy_port")
+		//useCache, _ := beego.AppConfig.Bool("http_cache")
+		//cacheLen, _ := beego.AppConfig.Int("http_cache_length")
+		addOrigin, _ := beego.AppConfig.Bool("http_add_origin_header")
+		httpOnlyPass := beego.AppConfig.String("x_nps_http_only")
 		service = proxy.NewHttp(Bridge, c, httpPort, httpsPort, httpOnlyPass, addOrigin)
 	}
 	return service
@@ -198,7 +197,7 @@ func AddTask(t *file.Tunnel) error {
 		logs.Error("taskId %d start error port %d open failed", t.Id, t.Port)
 		return errors.New("the port open error")
 	}
-	if minute, err := web.AppConfig.Int("flow_store_interval"); err == nil && minute > 0 {
+	if minute, err := beego.AppConfig.Int("flow_store_interval"); err == nil && minute > 0 {
 		go flowSession(time.Minute * time.Duration(minute))
 	}
 	if svr := NewMode(Bridge, t); svr != nil {
@@ -341,7 +340,7 @@ func dealClientData() {
 			v.LastOnlineTime = time.Now().Format("2006-01-02 15:04:05")
 			v.Version = vv.(*bridge.Client).Version
 		} else if v.Id <= 0 {
-			if allowLocalProxy, _ := web.AppConfig.Bool("allow_local_proxy"); allowLocalProxy {
+			if allowLocalProxy, _ := beego.AppConfig.Bool("allow_local_proxy"); allowLocalProxy {
 				v.IsConnect = true
 				v.Version = version.VERSION
 				// 如果客户端 ID 小于等于 0 且允许本地代理，插入虚拟客户端
@@ -431,8 +430,7 @@ func GetDashboardData() map[string]interface{} {
 	data["version"] = version.VERSION
 	data["hostCount"] = common.GeSynctMapLen(file.GetDb().JsonDb.Hosts)
 	data["clientCount"] = common.GeSynctMapLen(file.GetDb().JsonDb.Clients)
-	pubVkey, _ := web.AppConfig.String("public_vkey")
-	if pubVkey != "" { //remove public vkey
+	if beego.AppConfig.String("public_vkey") != "" { //remove public vkey
 		data["clientCount"] = data["clientCount"].(int) - 1
 	}
 	dealClientData()
@@ -475,14 +473,14 @@ func GetDashboardData() map[string]interface{} {
 	data["httpProxyCount"] = http
 	data["secretCount"] = secret
 	data["p2pCount"] = p2p
-	data["bridgeType"], _ = web.AppConfig.String("bridge_type")
-	data["httpProxyPort"], _ = web.AppConfig.String("http_proxy_port")
-	data["httpsProxyPort"], _ = web.AppConfig.String("https_proxy_port")
-	data["ipLimit"], _ = web.AppConfig.String("ip_limit")
-	data["flowStoreInterval"], _ = web.AppConfig.String("flow_store_interval")
-	data["serverIp"], _ = web.AppConfig.String("p2p_ip")
-	data["p2pPort"], _ = web.AppConfig.String("p2p_port")
-	data["logLevel"], _ = web.AppConfig.String("log_level")
+	data["bridgeType"] = beego.AppConfig.String("bridge_type")
+	data["httpProxyPort"] = beego.AppConfig.String("http_proxy_port")
+	data["httpsProxyPort"] = beego.AppConfig.String("https_proxy_port")
+	data["ipLimit"] = beego.AppConfig.String("ip_limit")
+	data["flowStoreInterval"] = beego.AppConfig.String("flow_store_interval")
+	data["serverIp"] = beego.AppConfig.String("p2p_ip")
+	data["p2pPort"] = beego.AppConfig.String("p2p_port")
+	data["logLevel"] = beego.AppConfig.String("log_level")
 	tcpCount := 0
 
 	file.GetDb().JsonDb.Clients.Range(func(key, value interface{}) bool {

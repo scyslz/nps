@@ -6,7 +6,7 @@ import (
 	"ehang.io/nps/lib/file"
 	"ehang.io/nps/server"
 	"ehang.io/nps/server/tool"
-	"github.com/beego/beego/v2/server/web"
+	"github.com/beego/beego"
 )
 
 type IndexController struct {
@@ -14,7 +14,7 @@ type IndexController struct {
 }
 
 func (s *IndexController) Index() {
-	s.Data["web_base_url"], _ = web.AppConfig.String("web_base_url")
+	s.Data["web_base_url"] = beego.AppConfig.String("web_base_url")
 	s.Data["data"] = server.GetDashboardData()
 	s.SetInfo("dashboard")
 	s.display("index/index")

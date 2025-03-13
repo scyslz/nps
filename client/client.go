@@ -15,7 +15,7 @@ import (
 	"ehang.io/nps/lib/conn"
 	"ehang.io/nps/lib/crypt"
 	"ehang.io/nps/lib/nps_mux"
-	"github.com/beego/beego/v2/core/logs"
+	"github.com/beego/beego/logs"
 	"github.com/xtaci/kcp-go"
 )
 

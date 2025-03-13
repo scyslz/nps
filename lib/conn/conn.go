@@ -21,7 +21,7 @@ import (
 	"ehang.io/nps/lib/goroutine"
 	"ehang.io/nps/lib/pmux"
 	"ehang.io/nps/lib/rate"
-	"github.com/beego/beego/v2/core/logs"
+	"github.com/beego/beego/logs"
 	"github.com/xtaci/kcp-go"
 )
 

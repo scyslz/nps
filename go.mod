@@ -5,6 +5,7 @@ go 1.24.1
 require (
 	fyne.io/fyne/v2 v2.5.5
 	github.com/araddon/dateparse v0.0.0-20210429162001-6b43995a97de
+	github.com/beego/beego v1.12.14
 	github.com/beego/beego/v2 v2.3.5
 	github.com/c4milo/unpackit v1.0.0
 	github.com/ccding/go-stun v0.1.5
@@ -76,5 +77,6 @@ require (
 	golang.org/x/sys v0.31.0 // indirect
 	golang.org/x/text v0.23.0 // indirect
 	google.golang.org/protobuf v1.36.5 // indirect
+	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

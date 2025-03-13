@@ -13,7 +13,7 @@ import (
 	"time"
 
 	"ehang.io/nps/lib/common"
-	"github.com/beego/beego/v2/core/logs"
+	"github.com/beego/beego/logs"
 	"github.com/pkg/errors"
 )
 

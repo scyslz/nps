@@ -15,7 +15,7 @@ import (
 	"ehang.io/nps/lib/file"
 	"ehang.io/nps/lib/nps_mux"
 	"ehang.io/nps/server/proxy"
-	"github.com/beego/beego/v2/core/logs"
+	"github.com/beego/beego/logs"
 	"github.com/xtaci/kcp-go"
 )
 

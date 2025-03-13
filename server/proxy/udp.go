@@ -11,8 +11,8 @@ import (
 	"ehang.io/nps/lib/common"
 	"ehang.io/nps/lib/conn"
 	"ehang.io/nps/lib/file"
-	"github.com/beego/beego/v2/core/logs"
-	"github.com/beego/beego/v2/server/web"
+	"github.com/beego/beego"
+	"github.com/beego/beego/logs"
 )
 
 type UdpModeServer struct {
@@ -22,7 +22,7 @@ type UdpModeServer struct {
 }
 
 func NewUdpModeServer(bridge *bridge.Bridge, task *file.Tunnel) *UdpModeServer {
-	allowLocalProxy, _ := web.AppConfig.Bool("allow_local_proxy")
+	allowLocalProxy, _ := beego.AppConfig.Bool("allow_local_proxy")
 	s := new(UdpModeServer)
 	s.bridge = bridge
 	s.task = task

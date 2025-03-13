@@ -9,13 +9,13 @@ import (
 	"ehang.io/nps/lib/common"
 	"ehang.io/nps/lib/file"
 	"ehang.io/nps/server"
+	"github.com/beego/beego"
 	"github.com/beego/beego/v2/client/cache"
-	"github.com/beego/beego/v2/server/web"
 	"github.com/beego/beego/v2/server/web/captcha"
 )
 
 type LoginController struct {
-	web.Controller
+	beego.Controller
 }
 
 var ipRecord sync.Map
@@ -34,22 +34,22 @@ func init() {
 
 func (self *LoginController) Index() {
 	// Try login implicitly, will succeed if it's configured as no-auth(empty username&password).
-	webBaseUrl, _ := web.AppConfig.String("web_base_url")
+	webBaseUrl := beego.AppConfig.String("web_base_url")
 	if self.doLogin("", "", false) {
 		self.Redirect(webBaseUrl+"/index/index", 302)
 	}
 	self.Data["web_base_url"] = webBaseUrl
 	self.Data["version"] = server.GetVersion()
 	self.Data["year"] = server.GetCurrentYear()
-	self.Data["register_allow"], _ = web.AppConfig.Bool("allow_user_register")
-	self.Data["captcha_open"], _ = web.AppConfig.Bool("open_captcha")
+	self.Data["register_allow"], _ = beego.AppConfig.Bool("allow_user_register")
+	self.Data["captcha_open"], _ = beego.AppConfig.Bool("open_captcha")
 	self.TplName = "login/index.html"
 }
 
 func (self *LoginController) Verify() {
 	username := self.GetString("username")
 	password := self.GetString("password")
-	captchaOpen, _ := web.AppConfig.Bool("open_captcha")
+	captchaOpen, _ := beego.AppConfig.Bool("open_captcha")
 	if captchaOpen {
 		if !cpt.VerifyReq(self.Ctx.Request) {
 			self.Data["json"] = map[string]interface{}{"status": 0, "msg": "the verification code is wrong, please get it again and try again"}
@@ -77,16 +77,14 @@ func (self *LoginController) doLogin(username, password string, explicit bool) b
 		}
 	}
 	var auth bool
-	webUsername, _ := web.AppConfig.String("web_username")
-	webPassword, _ := web.AppConfig.String("web_password")
-	if password == webPassword && username == webUsername {
+	if password == beego.AppConfig.String("web_password") && username == beego.AppConfig.String("web_username") {
 		self.SetSession("isAdmin", true)
 		self.DelSession("clientId")
 		self.DelSession("username")
 		auth = true
 		server.Bridge.Register.Store(common.GetIpByAddr(self.Ctx.Input.IP()), time.Now().Add(time.Hour*time.Duration(2)))
 	}
-	b, err := web.AppConfig.Bool("allow_user_login")
+	b, err := beego.AppConfig.Bool("allow_user_login")
 	if err == nil && b && !auth {
 		file.GetDb().JsonDb.Clients.Range(func(key, value interface{}) bool {
 			v := value.(*file.Client)
@@ -128,17 +126,17 @@ func (self *LoginController) doLogin(username, password string, explicit bool) b
 }
 func (self *LoginController) Register() {
 	if self.Ctx.Request.Method == "GET" {
-		self.Data["web_base_url"], _ = web.AppConfig.String("web_base_url")
+		self.Data["web_base_url"] = beego.AppConfig.String("web_base_url")
 		self.Data["version"] = server.GetVersion()
 		self.Data["year"] = server.GetCurrentYear()
 		self.TplName = "login/register.html"
 	} else {
-		if b, err := web.AppConfig.Bool("allow_user_register"); err != nil || !b {
+		if b, err := beego.AppConfig.Bool("allow_user_register"); err != nil || !b {
 			self.Data["json"] = map[string]interface{}{"status": 0, "msg": "register is not allow"}
 			self.ServeJSON()
 			return
 		}
-		if webUsername, _ := web.AppConfig.String("web_username"); self.GetString("username") == "" || self.GetString("password") == "" || self.GetString("username") == webUsername {
+		if self.GetString("username") == "" || self.GetString("password") == "" || self.GetString("username") == beego.AppConfig.String("web_username") {
 			self.Data["json"] = map[string]interface{}{"status": 0, "msg": "please check your input"}
 			self.ServeJSON()
 			return
@@ -161,9 +159,8 @@ func (self *LoginController) Register() {
 }
 
 func (self *LoginController) Out() {
-	webBaseUrl, _ := web.AppConfig.String("web_base_url")
 	self.SetSession("auth", false)
-	self.Redirect(webBaseUrl+"/login/index", 302)
+	self.Redirect(beego.AppConfig.String("web_base_url")+"/login/index", 302)
 }
 
 func clearIprecord() {

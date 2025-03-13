@@ -21,8 +21,8 @@ import (
 	"ehang.io/nps/lib/version"
 	"ehang.io/nps/server/connection"
 	"ehang.io/nps/server/tool"
-	"github.com/beego/beego/v2/core/logs"
-	"github.com/beego/beego/v2/server/web"
+	"github.com/beego/beego"
+	"github.com/beego/beego/logs"
 )
 
 var ServerTlsEnable bool = false
@@ -73,12 +73,10 @@ func NewTunnel(tunnelPort int, tunnelType string, ipVerify bool, runList *sync.M
 }
 
 func (s *Bridge) StartTunnel() error {
-	bridgeIP, _ := web.AppConfig.String("bridge_ip")
-	bridgePort, _ := web.AppConfig.String("bridge_port")
 	go s.ping()
 	if s.tunnelType == "kcp" {
 		logs.Info("server start, the bridge type is %s, the bridge port is %d", s.tunnelType, s.TunnelPort)
-		return conn.NewKcpListenerAndProcess(bridgeIP+":"+bridgePort, func(c net.Conn) {
+		return conn.NewKcpListenerAndProcess(beego.AppConfig.String("bridge_ip")+":"+beego.AppConfig.String("bridge_port"), func(c net.Conn) {
 			s.cliProcess(conn.NewConn(c))
 		})
 	} else {
@@ -99,11 +97,11 @@ func (s *Bridge) StartTunnel() error {
 		if ServerTlsEnable {
 			go func() {
 				// 监听TLS 端口
-				tlsBridgePort := web.AppConfig.DefaultInt("tls_bridge_port", 8025)
+				tlsBridgePort := beego.AppConfig.DefaultInt("tls_bridge_port", 8025)
 
 				logs.Info("tls server start, the bridge type is %s, the tls bridge port is %d", "tcp", tlsBridgePort)
 				tlsListener, tlsErr := net.ListenTCP("tcp", &net.TCPAddr{
-					IP:   net.ParseIP(bridgeIP),
+					IP:   net.ParseIP(beego.AppConfig.String("bridge_ip")),
 					Port: tlsBridgePort,
 					Zone: "",
 				})
@@ -356,10 +354,7 @@ func (s *Bridge) typeDeal(typeVal string, c *conn.Conn, id int, vs string) {
 			logs.Error("p2p error, failed to match the key successfully")
 		} else if v, ok := s.Client.Load(t.Client.Id); ok {
 			//向密钥对应的客户端发送与服务端udp建立连接信息，地址，密钥
-			p2pIP, _ := web.AppConfig.String("p2p_ip")
-			p2pPort, _ := web.AppConfig.String("p2p_port")
-			svrAddr := p2pIP + ":" + p2pPort
-
+			svrAddr := beego.AppConfig.String("p2p_ip") + ":" + beego.AppConfig.String("p2p_port")
 			if err != nil {
 				logs.Warn("get local udp addr error")
 				return

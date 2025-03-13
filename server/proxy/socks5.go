@@ -11,8 +11,8 @@ import (
 	"ehang.io/nps/lib/common"
 	"ehang.io/nps/lib/conn"
 	"ehang.io/nps/lib/file"
-	"github.com/beego/beego/v2/core/logs"
-	"github.com/beego/beego/v2/server/web"
+	"github.com/beego/beego"
+	"github.com/beego/beego/logs"
 )
 
 const (
@@ -379,7 +379,7 @@ func (s *Sock5ModeServer) Start() error {
 
 // new
 func NewSock5ModeServer(bridge NetBridge, task *file.Tunnel) *Sock5ModeServer {
-	allowLocalProxy, _ := web.AppConfig.Bool("allow_local_proxy")
+	allowLocalProxy, _ := beego.AppConfig.Bool("allow_local_proxy")
 	s := new(Sock5ModeServer)
 	s.bridge = bridge
 	s.task = task
