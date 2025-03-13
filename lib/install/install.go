@@ -166,18 +166,25 @@ func downloadLatest(bin string) string {
 	rl := new(release)
 	json.Unmarshal(b, &rl)
 	version := rl.TagName
-	fmt.Println("the latest version is", version)
+	fmt.Println("The latest version is", version)
 	filename := runtime.GOOS + "_" + runtime.GOARCH + "_" + bin + ".tar.gz"
 	// download latest package
 	downloadUrl := fmt.Sprintf("https://github.com/djylb/nps/releases/download/%s/%s", version, filename)
-	fmt.Println("download package from ", downloadUrl)
+	fmt.Println("Downloading package from", downloadUrl)
 	resp, err := http.Get(downloadUrl)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
-	destPath, err := unpackit.Unpack(resp.Body, "")
+
+	destPath, err := ioutil.TempDir(os.TempDir(), "nps-")
+	if err != nil {
+		log.Fatal("Failed to create temp directory:", err)
+	}
+
+	err = unpackit.Unpack(resp.Body, destPath)
 	if err != nil {
 		log.Fatal(err)
+		return ""
 	}
 	if bin == "server" {
 		destPath = strings.Replace(destPath, "/web", "", -1)
