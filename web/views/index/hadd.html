@@ -7,31 +7,29 @@
                     <div class="form-group">
                         <label class="control-label font-bold" langtag="word-clientid"></label>
                         <div class="col-sm-10">
-                            <select class="form-control" langtag="word-belongclient" name="client_id"
-                                    placeholder=""></select>
+                            <select class="form-control" name="client_id" placeholder="" langtag="word-belongclient"></select>
                             <!--<input value="{{.client_id}}" class="form-control" type="text" name="client_id" placeholder="" langtag="word-clientid">-->
                         </div>
                     </div>
                     <div class="form-group">
                         <label class="control-label font-bold" langtag="word-remark"></label>
                         <div class="col-sm-10">
-                            <input class="form-control" langtag="word-remark" name="remark" placeholder="" type="text">
+                            <input class="form-control" type="text" name="remark" placeholder="" langtag="word-remark">
                         </div>
                     </div>
                     <div class="form-group">
                         <label class="control-label font-bold" langtag="word-host"></label>
                         <div class="col-sm-10">
-                            <input class="form-control" langtag="info-suchashost" name="host" placeholder=""
-                                   type="text">
+                            <input class="form-control" type="text" name="host" placeholder="" langtag="info-suchashost">
                         </div>
                     </div>
                     <div class="form-group" id="scheme">
                         <label class="control-label font-bold" langtag="word-scheme"></label>
                         <div class="col-sm-10">
-                            <select class="form-control" id="scheme_select" name="scheme">
-                                <option langtag="word-all" value="all"></option>
-                                <option langtag="word-http" value="http"></option>
-                                <option langtag="word-https" value="https"></option>
+                            <select id="scheme_select" class="form-control" name="scheme">
+                                <option value="all" langtag="word-all"></option>
+                                <option value="http" langtag="word-http"></option>
+                                <option value="https" langtag="word-https"></option>
                             </select>
                         </div>
                     </div>
@@ -75,24 +73,19 @@
                     <div class="form-group" id="cert_file">
                         <label class="control-label font-bold" langtag="word-httpscert"></label>
                         <div class="col-sm-10">
-                            <textarea class="form-control" id="pemText" langtag="info-pemtext" name="cert_file_path"
-                                      placeholder=""
-                                      rows="6" type="text"></textarea>
+                            <textarea class="form-control" id="pemText" langtag="info-pemtext" name="cert_file_path" placeholder="" rows="6" type="text"></textarea>
                         </div>
                     </div>
                     <div class="form-group" id="key_file">
                         <label class="control-label font-bold" langtag="word-httpskey"></label>
                         <div class="col-sm-10">
-                            <textarea class="form-control" id="pemKey" langtag="info-pemkey" name="key_file_path"
-                                      placeholder=""
-                                      rows="6" type="text"></textarea>
+                            <textarea class="form-control" id="pemKey" langtag="info-pemkey" name="key_file_path" placeholder="" rows="6" type="text"></textarea>
                         </div>
                     </div>
                     <div class="form-group">
                         <label class="control-label font-bold" langtag="word-urlroute"></label>
                         <div class="col-sm-10">
-                            <input class="form-control" langtag="info-unrestricted" name="location" placeholder=""
-                                   type="text">
+                            <input class="form-control" langtag="info-unrestricted" name="location" placeholder="" type="text">
                         </div>
                     </div>
                     {{if eq true .allow_local_proxy}}
@@ -118,9 +111,7 @@
                     <div class="form-group">
                         <label class="control-label font-bold" langtag="word-target"></label>
                         <div class="col-sm-10">
-                            <textarea class="form-control" langtag="info-suchasiplist" name="target" placeholder=""
-                                      rows="4"
-                                      type="text"></textarea>
+                            <textarea class="form-control" langtag="info-suchasiplist" name="target" placeholder="" rows="4" type="text"></textarea>
                             <span class="help-block m-b-none" langtag="info-targethost"></span>
 
                         </div>
@@ -128,8 +119,7 @@
                     <div class="form-group" id="header">
                         <label class="control-label font-bold" langtag="word-requestheader"></label>
                         <div class="col-sm-10">
-                            <textarea class="form-control" name="header" placeholder="Cache-Control: no-cache" rows="4"
-                                      type="text"></textarea>
+                            <textarea class="form-control" name="header" placeholder="Cache-Control: no-cache" rows="4" type="text"></textarea>
                             <span class="help-block m-b-none" langtag="info-header"></span>
                         </div>
 
@@ -137,9 +127,7 @@
                     <div class="form-group" id="hostchange">
                         <label class="control-label font-bold" langtag="word-requesthost"></label>
                         <div class="col-sm-10">
-                            <input class="form-control" langtag="word-requesthost" name="hostchange" placeholder=""
-                                   type="text"
-                                   value="">
+                            <input class="form-control" langtag="word-requesthost" name="hostchange" placeholder="" type="text" value="">
                         </div>
                     </div>
                     <div class="hr-line-dashed"></div>
@@ -148,9 +136,7 @@
                             <button class="btn btn-light" onclick="goback()" type="button">
                                 <i class="fa fa-fw fa-lg fa-window-close"></i> <span langtag="word-cancel"></span>
                             </button>
-                            <button class="btn btn-success"
-                                    onclick="submitform('add', '{{.web_base_url}}/index/addhost', $('form').serializeArray())"
-                                    type="button">
+                            <button class="btn btn-success" onclick="submitform('add', '{{.web_base_url}}/index/addhost', $('form').serializeArray())" type="button">
                                 <i class="fa fa-fw fa-lg fa-check-circle"></i> <span langtag="word-add"></span>
                             </button>
                         </div>
@@ -160,6 +146,7 @@
         </div>
     </div>
 </div>
+
 <script>
     $(function () {
         const pemText = document.getElementById("pemText");
@@ -174,14 +161,12 @@
             event.preventDefault();
             const file = event.dataTransfer.files[0];
             const reader = new FileReader();
-
             reader.onload = function (e) {
                 pemText.value = e.target.result;
                 console.log("上传pem")
                 $('#edit_form').data('bootstrapValidator').updateStatus('pemText', 'NOT_VALIDATED');
                 $('#edit_form').data('bootstrapValidator').validateField('pemText');
             }
-
             reader.readAsText(file);
         });
 
@@ -189,16 +174,13 @@
             event.preventDefault();
             const file = event.dataTransfer.files[0];
             const reader = new FileReader();
-
             reader.onload = function (e) {
                 pemKey.value = e.target.result;
                 $('#edit_form').data('bootstrapValidator').updateStatus('pemKey', 'NOT_VALIDATED');
                 $('#edit_form').data('bootstrapValidator').validateField('pemKey');
             }
-
             reader.readAsText(file);
         });
-
 
         $("#scheme_select").on("change", function () {
             if ($("#scheme_select").val() == "all" || $("#scheme_select").val() == "https") {
@@ -233,7 +215,6 @@
                 $("#key_file").css("display", "block")
             }
         })
-
         getClientList();
     })
 

@@ -7,12 +7,11 @@ require (
 	github.com/araddon/dateparse v0.0.0-20210429162001-6b43995a97de
 	github.com/beego/beego/v2 v2.3.5
 	github.com/c4milo/unpackit v1.0.0
-	github.com/ccding/go-stun/stun v0.0.0-20200514191101-4dc67bcdb029
+	github.com/ccding/go-stun v0.1.5
 	github.com/golang/snappy v1.0.0
 	github.com/kardianos/service v1.2.2
 	github.com/panjf2000/ants/v2 v2.11.2
 	github.com/pkg/errors v0.9.1
-	github.com/shirou/gopsutil/v3 v3.24.5
 	github.com/shirou/gopsutil/v4 v4.25.2
 	github.com/xtaci/kcp-go v5.4.20+incompatible
 	golang.org/x/net v0.37.0
@@ -44,7 +43,7 @@ require (
 	github.com/klauspost/cpuid/v2 v2.2.10 // indirect
 	github.com/klauspost/pgzip v1.2.6 // indirect
 	github.com/klauspost/reedsolomon v1.12.4 // indirect
-	github.com/kr/text v0.1.0 // indirect
+	github.com/kr/text v0.2.0 // indirect
 	github.com/lufia/plan9stats v0.0.0-20250303091104-876f3ea5145d // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
@@ -58,7 +57,6 @@ require (
 	github.com/prometheus/procfs v0.15.1 // indirect
 	github.com/rymdport/portal v0.4.1 // indirect
 	github.com/shiena/ansicolor v0.0.0-20230509054315-a9deabde6e02 // indirect
-	github.com/shoenig/go-m1cpu v0.1.6 // indirect
 	github.com/srwiley/oksvg v0.0.0-20221011165216-be6e8873101c // indirect
 	github.com/srwiley/rasterx v0.0.0-20220730225603-2ab79fcdd4ef // indirect
 	github.com/stretchr/testify v1.10.0 // indirect

@@ -18,18 +18,16 @@
                 <div class="content">
                     <div class="table-responsive">
                         <div id="toolbar">
-                            <a class="btn btn-primary dim"
-                               href="{{.web_base_url}}/index/add?type={{.type}}&client_id={{.client_id}}">
-                                <i class="fa fa-fw fa-lg fa-plus"></i> <span langtag="word-add"></span></a>
+                            <a class="btn btn-primary dim" href="{{.web_base_url}}/index/add?type={{.type}}&client_id={{.client_id}}">
+                                <i class="fa fa-fw fa-lg fa-plus"></i>
+                                <span langtag="word-add"></span>
+                            </a>
                         </div>
-                        <table class="table-striped table-hover" data-mobile-responsive="true"
-                               id="taskList_table"></table>
+                        <table class="table-striped table-hover" data-mobile-responsive="true" id="taskList_table"></table>
                     </div>
                 </div>
                 <div class="ibox-content">
-
                     <table id="table"></table>
-
                 </div>
             </div>
         </div>
@@ -49,29 +47,12 @@
             return {
                 "offset": params.offset,
                 "limit": params.limit,
-                "type": {
-            {.
-                type
+                "type":{{.type}},
+                "client_id":{{.client_id}},
+                "search": params.search,
+                "sort": params.sort,
+                "order": params.order
             }
-        },
-            "client_id"
-        :
-            {
-                {.
-                    client_id
-                }
-            }
-        ,
-            "search"
-        :
-            params.search,
-                "sort"
-        :
-            params.sort,
-                "order"
-        :
-            params.order
-        }
         },
         search: true,
         contentType: "application/x-www-form-urlencoded",
@@ -85,15 +66,9 @@
         pageList: [5, 10, 20, 50],//分页步进值
         detailView: true,
         smartDisplay: true, // 智能显示 pagination 和 cardview 等
-        onExpandRow: function () {
-            $('body').setLang('.detail-view');
-        },
-        onLoadSuccess: function (data) {
-            $('body').setLang('.detail-view');
-        },
-        onPostBody: function (data) {
-            if ($(this)[0].locale != undefined) $('body').setLang('#table');
-        },
+        onExpandRow: function () {$('body').setLang ('.detail-view');},
+        onLoadSuccess:function (data) {$('body').setLang ('.detail-view');},
+        onPostBody: function (data) { if ($(this)[0].locale != undefined ) $('body').setLang ('#table'); },
         detailFormatter: function (index, row, element) {
             tmp = '<b langtag="word-exportflow"></b>: ' + changeunit(row.Flow.ExportFlow) + '&emsp;'
                 + '<b langtag="word-inletflow"></b>: ' + changeunit(row.Flow.InletFlow) + '&emsp;'
@@ -105,36 +80,15 @@
             if (row.Mode == "p2p") {
                 return tmp + "<br/><br>"
                     + '<b langtag="word-commandaccessp2p"></b>: ' + "<code>./npc{{.win}} -server={{.ip}}:{{.p}} -vkey=" + row.Client.VerifyKey
-                    + " -type=" + {
-                {.
-                    bridgeType
-                }
-            }
-                +" -password=" + row.Password + " -target=" + row.Target.TargetStr + "</code>" + "<br/><br>"
-                + '<b langtag="word-commandaccessp2ps"></b>: ' + "<code>./npc{{.win}} -server={{.ip}}:{{.p}} -vkey=" + row.Client.VerifyKey
-                + " -type=" + {
-                {.
-                    bridgeType
-                }
-            }
-                +" -password=" + row.Password + " -local_type=p2ps" + "</code>" + "<br/><br>"
-                + '<b langtag="word-commandaccessp2pt"></b>: ' + "<code>./npc{{.win}} -server={{.ip}}:{{.p}} -vkey=" + row.Client.VerifyKey
-                + " -type=" + {
-                {.
-                    bridgeType
-                }
-            }
-                +" -password=" + row.Password + " -local_type=p2pt" + "</code>"
-
+                    + " -type=" +{{.bridgeType}} +" -password=" + row.Password + " -target=" + row.Target.TargetStr + "</code>" + "<br/><br>"
+                    + '<b langtag="word-commandaccessp2ps"></b>: ' + "<code>./npc{{.win}} -server={{.ip}}:{{.p}} -vkey=" + row.Client.VerifyKey
+                    + " -type=" +{{.bridgeType}} +" -password=" + row.Password + " -local_type=p2ps" + "</code>" + "<br/><br>"
+                    + '<b langtag="word-commandaccessp2pt"></b>: ' + "<code>./npc{{.win}} -server={{.ip}}:{{.p}} -vkey=" + row.Client.VerifyKey
+                    + " -type=" +{{.bridgeType}} +" -password=" + row.Password + " -local_type=p2pt" + "</code>"
             }
             if (row.Mode == "secret") {
                 return tmp + "<br/><br>" + '<b langtag="word-commandaccess"></b>: ' + "<code>./npc{{.win}} -server={{.ip}}:{{.p}} -vkey=" + row.Client.VerifyKey
-                    + " -type=" + {
-                {.
-                    bridgeType
-                }
-            }
-                +" -password=" + row.Password + " -local_type=secret" + "</code>"
+                    + " -type=" +{{.bridgeType}} +" -password=" + row.Password + " -local_type=secret" + "</code>"
             }
             return tmp
         },

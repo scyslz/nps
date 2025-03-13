@@ -1,26 +1,20 @@
 <!DOCTYPE html>
 <html>
-
 <head>
-
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
-
     <title langtag="title-login"></title>
-
     <!-- Mainly scripts -->
     <!-- Latest compiled and minified CSS -->
     <link href="{{.web_base_url}}/static/css/fontawesome.min.css" rel="stylesheet">
     <link href="{{.web_base_url}}/static/css/solid.min.css" rel="stylesheet">
     <link href="{{.web_base_url}}/static/css/bootstrap.min.css" rel="stylesheet">
     <link href="{{.web_base_url}}/static/css/style.css?v={{.version}}" rel="stylesheet">
-
     <!-- Latest compiled and minified JavaScript -->
     <script src="{{.web_base_url}}/static/js/jquery-3.7.1.min.js"></script>
     <script src="{{.web_base_url}}/static/js/bootstrap.min.js"></script>
     <!-- Latest compiled and minified Locales -->
     <script src="{{.web_base_url}}/static/js/language.js?v={{.version}}" type="text/javascript"></script>
-
 </head>
 
 <body class="gray-bg">
@@ -29,17 +23,16 @@
         <div></div>
         <h1 class="navbar-header font-bold" langtag="application" style="margin:0px"></h1>
         <span class="btn-group dropdown">
-                <button aria-expanded="false" aria-haspopup="true" class="btn btn-primary dropdown-toggle"
-                        data-toggle="dropdown"
-                        id="languagemenu" type="button"><i
-                        class="fa fa-globe-asia fa-lg"></i><span></span></button>
-                <ul class="dropdown-menu"></ul>
-            </span>
+            <button aria-expanded="false" aria-haspopup="true" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" id="languagemenu" type="button">
+                <i class="fa fa-globe-asia fa-lg"></i>
+                <span></span>
+            </button>
+            <ul class="dropdown-menu"></ul>
+        </span>
     </nav>
 </div>
 <div class="loginColumns animated fadeInDown mt-3 px-5">
     <div class="row">
-
         <div class="col-md-6 mt-3">
             <h3 langtag="info-tagline"></h3>
             <ul class="px-1 text-justify">
@@ -54,32 +47,25 @@
                 <li langtag="info-feature9"></li>
             </ul>
         </div>
-
         <div class="col-md-6 mt-3">
             <div class="ibox-content">
                 <form class="m-t" onsubmit="return false">
                     <div class="form-group">
-                        <input class="form-control" langtag="word-username" name="username" placeholder="username"
-                               required="">
+                        <input class="form-control" langtag="word-username" name="username" placeholder="username" required="">
                     </div>
                     <div class="form-group">
-                        <input class="form-control" langtag="word-password" name="password" placeholder="password"
-                               required=""
-                               type="password">
+                        <input class="form-control" langtag="word-password" name="password" placeholder="password" required="" type="password">
                     </div>
                     {{if eq true .captcha_open}}
                     <div class="form-group">
                         {{create_captcha}}
-                        <input class="form-control" langtag="word-captcha" name="captcha" placeholder="captcha"
-                               required="">
+                        <input class="form-control" langtag="word-captcha" name="captcha" placeholder="captcha" required="">
                     </div>
                     {{end}}
-                    <button class="btn btn-primary block full-width m-b" langtag="word-login"
-                            onclick="login()"></button>
+                    <button class="btn btn-primary block full-width m-b" langtag="word-login" onclick="login()"></button>
                     {{if eq true .register_allow}}
                     <p class="text-muted text-center"><small langtag="info-noaccount"></small></p>
-                    <a class="btn btn-sm btn-white btn-block" href="{{.web_base_url}}/login/register"
-                       langtag="word-register"></a>
+                    <a class="btn btn-sm btn-white btn-block" href="{{.web_base_url}}/login/register" langtag="word-register"></a>
                     {{end}}
                 </form>
             </div>
@@ -93,10 +79,6 @@
         <div><strong langtag="word-copyright"></strong> <span langtag="application"></span> &copy; 2018-{{.year}}</div>
     </div>
 </div>
-
-</body>
-</html>
-
 
 <script type="text/javascript">
     window.nps = {

@@ -52,10 +52,8 @@ type ReadOnlyConn struct {
 	remoteAddr net.Addr
 }
 
-func (c *ReadOnlyConn) Read(p []byte) (int, error) { return c.r.Read(p) }
-func (c *ReadOnlyConn) Write(_ []byte) (int, error) {
-	return 0, errors.New("readOnlyConn: write not allowed")
-}
+func (c *ReadOnlyConn) Read(p []byte) (int, error)         { return c.r.Read(p) }
+func (c *ReadOnlyConn) Write(_ []byte) (int, error)        { return 0, errors.New("readOnlyConn: write not allowed") }
 func (c *ReadOnlyConn) Close() error                       { return nil }
 func (c *ReadOnlyConn) LocalAddr() net.Addr                { return nil }
 func (c *ReadOnlyConn) RemoteAddr() net.Addr               { return c.remoteAddr }

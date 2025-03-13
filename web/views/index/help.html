@@ -1,16 +1,13 @@
 <div class="row">
     <div class="col-md-12">
         <div class="tile">
-            <iframe frameborder="0"
-                    height="30px" scrolling="0"
+            <iframe frameborder="0" height="30px" scrolling="0"
                     src="https://ghbtns.com/github-btn.html?user=cnlh&repo=nps&type=star&count=true&size=large"
                     width="160px"></iframe>
-            <iframe frameborder="0"
-                    height="30px" scrolling="0"
+            <iframe frameborder="0" height="30px" scrolling="0"
                     src="https://ghbtns.com/github-btn.html?user=cnlh&repo=nps&type=watch&count=true&size=large&v=2"
                     width="160px"></iframe>
-            <iframe frameborder="0"
-                    height="30px" scrolling="0"
+            <iframe frameborder="0" height="30px" scrolling="0"
                     src="https://ghbtns.com/github-btn.html?user=cnlh&repo=nps&type=fork&count=true&size=large"
                     width="158px"></iframe>
         </div>
@@ -67,8 +64,8 @@
                 <li>
                     在该客户端隧道管理中添加一条tcp隧道，填写监听的端口（8001）、内网目标ip和目标端口（10.1.50.101:22），选择压缩方式，保存。
                 </li>
-                <li>访问公网服务器ip（{{.ip}}）,填写的监听端口(8001)，相当于访问内网ip(10.1.50.101):目标端口(22)，例如：ssh
-                    -p 8001 root@{{.ip}}
+                <li>
+                    访问公网服务器ip（{{.ip}}）,填写的监听端口(8001)，相当于访问内网ip(10.1.50.101):目标端口(22)，例如：ssh -p 8001 root@{{.ip}}
                 </li>
             </ul>
             <p>注：上文中提到公网ip（{{.ip}}）为系统自动识别，如果是在测试环境中请自行对应，默认内网客户端已经启动</p>
@@ -119,7 +116,8 @@
                 <li>
                     在该客户端隧道管理中添加一条socks5代理，填写监听的端口（8003），验证用户名和密码自行选择（建议先不填，部分客户端不支持，proxifer支持），选择压缩方式，保存。
                 </li>
-                <li>在外网环境的本机配置socks5代理，ip为公网服务器ip（{{.ip}}），端口为填写的监听端口(8003)，即可畅享内网了
+                <li>
+                    在外网环境的本机配置socks5代理，ip为公网服务器ip（{{.ip}}），端口为填写的监听端口(8003)，即可畅享内网了
                 </li>
             </ul>
             <p>注：上文中提到公网ip（{{.ip}}）为系统自动识别，如果是在测试环境中请自行对应，默认内网客户端已经启动</p>
