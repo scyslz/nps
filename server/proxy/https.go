@@ -191,7 +191,7 @@ func checkHTTPAndRedirect(c net.Conn, rb []byte) {
 	c.SetDeadline(time.Now().Add(10 * time.Second))
 	defer c.Close()
 
-	logs.Info("Pre-read rb content: %q", string(rb))
+	logs.Debug("Pre-read rb content: %q", string(rb))
 
 	reader := bufio.NewReader(io.MultiReader(bytes.NewReader(rb), c))
 	req, err := http.ReadRequest(reader)
@@ -199,8 +199,10 @@ func checkHTTPAndRedirect(c net.Conn, rb []byte) {
 		logs.Warn("Failed to parse HTTP request from %s, err=%v", c.RemoteAddr(), err)
 		return
 	}
+	logs.Debug("HTTP Request Sent to HTTPS Port")
 	req.URL.Scheme = "https"
 	c.SetDeadline(time.Time{})
+
 	_, err = file.GetDb().GetInfoByHost(req.Host, req)
 	if err != nil {
 		logs.Debug("Host not found: %s %s %s", req.URL.Scheme, req.Host, req.RequestURI)
@@ -212,7 +214,6 @@ func checkHTTPAndRedirect(c net.Conn, rb []byte) {
 	response := "HTTP/1.1 302 Found\r\n" +
 		"Location: " + redirectURL + "\r\n" +
 		"Content-Length: 0\r\n" +
-		"X-Error-Code: 497\r\n" +
 		"Connection: close\r\n\r\n"
 
 	if _, writeErr := c.Write([]byte(response)); writeErr != nil {
