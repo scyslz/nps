@@ -20,7 +20,7 @@ import (
 
 var _ = unsafe.Sizeof(0)
 
-//go:linkname initBeforeHTTPRun github.com/beego/beego/v2/server/beego.initBeforeHTTPRun
+//go:linkname initBeforeHTTPRun github.com/beego/beego.initBeforeHTTPRun
 func initBeforeHTTPRun()
 
 type TunnelModeServer struct {

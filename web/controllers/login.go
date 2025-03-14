@@ -10,8 +10,8 @@ import (
 	"ehang.io/nps/lib/file"
 	"ehang.io/nps/server"
 	"github.com/beego/beego"
-	"github.com/beego/beego/v2/client/cache"
-	"github.com/beego/beego/v2/server/web/captcha"
+	"github.com/beego/beego/cache"
+	"github.com/beego/beego/utils/captcha"
 )
 
 type LoginController struct {
