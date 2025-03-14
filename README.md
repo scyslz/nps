@@ -188,6 +188,11 @@ proxy_buffering off;
 
 ### DEV
 
+- 2025-03-14 v0.26.39
+
+  - 待定，优先修BUG，新功能随缘更新
+
+### Stable
 - 2025-03-14 v0.26.38
   - 域名转发支持HTTP/2
   - 当配置请求域名修时同时修改Origin头避免后端监测
@@ -195,10 +200,7 @@ proxy_buffering off;
   - 更新相关依赖，修复CVE-2025-22870
   - 使用 [XTLS/go-win7](https://github.com/XTLS/go-win7) 编译旧版代码支持Win7
   - 整理仓库代码
-
-  - 待定，优先修BUG，新功能随缘更新
-
-### Stable
+  - 优化域名查找算法
 
 - 2025-03-13 v0.26.37
   - 优化域名转发列表显示
