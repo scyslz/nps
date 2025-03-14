@@ -13,14 +13,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
+      - name: Checkout codebase
+        uses: actions/checkout@v4
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
           check-latest: true
         id: go
-      - name: Check out code into the Go module directory
-        uses: actions/checkout@v4
       - name: Get dependencies
         run: |
           go get -v -t -d ./...
@@ -80,6 +80,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
+      - name: Checkout codebase
+        uses: actions/checkout@v4
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
@@ -94,8 +96,6 @@ jobs:
           curl -O -L https://github.com/XTLS/go-win7/releases/latest/download/go-for-win7-linux-amd64.zip
           unzip ./go-for-win7-linux-amd64.zip -d $GOSDK
           rm ./go-for-win7-linux-amd64.zip
-      - name: Check out code into the Go module directory
-        uses: actions/checkout@v4
       - name: Get dependencies
         run: |
           go get -v -t -d ./...
