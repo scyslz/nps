@@ -16,9 +16,7 @@ NPS 是一款轻量高效的内网穿透代理服务器，支持多种协议（T
 由于[NPS](https://github.com/ehang-io/nps)停更已久，本仓库基于 nps 0.26 整合社区更新二次开发而来。
 
 - **提问前请先查阅：**  [文档](https://d-jy.net/docs/nps/) 与 [Issues](https://github.com/djylb/nps/issues)
-
 - **欢迎参与：**  提交 PR、反馈问题或建议，共同推动项目发展。
-
 - **讨论交流：**  加入 [Telegram 交流群](https://t.me/npsdev) 与其他用户交流经验。
 
 ---
@@ -36,6 +34,7 @@ NPS 是一款轻量高效的内网穿透代理服务器，支持多种协议（T
 
 - **安全与扩展**  
   内置加密传输、流量限制、证书管理等多重功能，保障数据安全。
+
 ---
 
 ## 安装与使用
@@ -47,7 +46,6 @@ NPS 是一款轻量高效的内网穿透代理服务器，支持多种协议（T
 ***DockerHub***： [NPS](https://hub.docker.com/r/duan2001/nps) [NPC](https://hub.docker.com/r/duan2001/npc)
 
 ***GHCR***： [NPS](https://github.com/djylb/nps/pkgs/container/nps) [NPC](https://github.com/djylb/nps/pkgs/container/npc)
-
 
 #### NPS 服务端
 ```bash
