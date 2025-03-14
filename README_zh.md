@@ -1,8 +1,8 @@
 # NPS 内网穿透
 
-[![GitHub stars](https://img.shields.io/github/stars/djylb/nps.svg)](https://github.com/djylb/nps)  
-[![GitHub forks](https://img.shields.io/github/forks/djylb/nps.svg)](https://github.com/djylb/nps)  
-[![Release](https://github.com/djylb/nps/workflows/Release/badge.svg)](https://github.com/djylb/nps/actions)  
+[![GitHub stars](https://img.shields.io/github/stars/djylb/nps.svg)](https://github.com/djylb/nps)
+[![GitHub forks](https://img.shields.io/github/forks/djylb/nps.svg)](https://github.com/djylb/nps)
+[![Release](https://github.com/djylb/nps/workflows/Release/badge.svg)](https://github.com/djylb/nps/actions)
 [![GitHub All Releases](https://img.shields.io/github/downloads/djylb/nps/total)](https://github.com/djylb/nps/releases)
 
 - [README](https://github.com/djylb/nps/blob/master/README.md) | [中文文档](https://github.com/djylb/nps/blob/master/README_zh.md)
@@ -14,6 +14,7 @@
 NPS 是一款轻量高效的内网穿透代理服务器，支持多种协议（TCP、UDP、HTTP、SOCKS5 等）转发。它提供直观的 Web 管理界面，使得内网资源能安全、便捷地在外网访问，同时满足多种复杂场景的需求。
 
 由于[nps](https://github.com/ehang-io/nps)停更已久，本仓库基于 nps 0.26 整合社区更新二次开发而来。
+
 ---
 
 ## 主要特性
@@ -33,8 +34,24 @@ NPS 是一款轻量高效的内网穿透代理服务器，支持多种协议（T
 ---
 
 ## 安装与使用
+### Docker 部署
 
 ***DockerHub***： [NPS](https://hub.docker.com/r/duan2001/nps) [NPC](https://hub.docker.com/r/duan2001/npc)
+
+***GHCR***： [NPS](https://github.com/djylb/nps/pkgs/container/nps) [NPC](https://github.com/djylb/nps/pkgs/container/npc)
+
+
+#### NPS 服务端
+```bash
+docker pull duan2001/nps
+docker run -d --restart=always --name nps --net=host -v <本机配置目录>:/conf -v /etc/localtime:/etc/localtime:ro duan2001/nps
+```
+
+#### NPC 客户端
+```bash
+docker pull duan2001/npc
+docker run -d --restart=always --name npc --net=host duan2001/npc -server=xxx:123 -vkey=key1,key2 -tls_enable=true -log=off
+```
 
 ### 服务端安装
 
@@ -88,20 +105,6 @@ npc start
 
 > **提示：** 客户端支持同时传入多个隧道 ID，示例：  
 > `npc -server=xxx:8024 -vkey=key1,key2`
-
-### Docker 部署
-
-#### NPS 服务端
-```bash
-docker pull duan2001/nps
-docker run -d --restart=always --name nps --net=host -v <本机配置目录>:/conf -v /etc/localtime:/etc/localtime:ro duan2001/nps
-```
-
-#### NPC 客户端
-```bash
-docker pull duan2001/npc
-docker run -d --restart=always --name npc --net=host duan2001/npc -server=xxx:123 -vkey=key1,key2 -tls_enable=true -log=off
-```
 
 ---
 
