@@ -1,8 +1,12 @@
 package proxy
 
 import (
+	"bufio"
+	"bytes"
 	"crypto/tls"
+	"io"
 	"net"
+	"net/http"
 	"sync"
 	"time"
 
@@ -130,7 +134,8 @@ func (https *HttpsServer) Start() error {
 		helloInfo, rb, err := crypt.ReadClientHello(c)
 		if err != nil || helloInfo == nil {
 			logs.Warn("Failed to read clientHello from %s, err=%v", c.RemoteAddr(), err)
-			c.Close()
+			// Check if the request is an HTTP request.
+			checkHTTPAndRedirect(c, rb)
 			return
 		}
 
@@ -144,7 +149,7 @@ func (https *HttpsServer) Start() error {
 		host, err := file.GetDb().FindCertByHost(serverName)
 		if err != nil {
 			c.Close()
-			logs.Debug("The URL %s can't be parsed! Remote address: %s", serverName, c.RemoteAddr().String())
+			logs.Debug("The URL %s cannot be parsed! Remote address: %s", serverName, c.RemoteAddr().String())
 			return
 		}
 
@@ -180,6 +185,38 @@ func (https *HttpsServer) Start() error {
 		}
 	})
 	return nil
+}
+
+func checkHTTPAndRedirect(c net.Conn, rb []byte) {
+	c.SetDeadline(time.Now().Add(10 * time.Second))
+	defer c.Close()
+	reader := bufio.NewReader(io.MultiReader(bytes.NewReader(rb), c))
+	req, err := http.ReadRequest(reader)
+	if err != nil {
+		logs.Warn("Failed to parse HTTP request from %s, err=%v", c.RemoteAddr(), err)
+		return
+	}
+	req.URL.Scheme = "https"
+	c.SetDeadline(time.Time{})
+	_, err = file.GetDb().GetInfoByHost(req.Host, req)
+	if err != nil {
+		logs.Debug("Host not found: %s %s %s", req.URL.Scheme, req.Host, req.RequestURI)
+		return
+	}
+
+	redirectURL := "https://" + req.Host + req.RequestURI
+
+	response := "HTTP/1.1 302 Found\r\n" +
+		"Location: " + redirectURL + "\r\n" +
+		"Content-Length: 0\r\n" +
+		"X-Error-Code: 497\r\n" +
+		"Connection: close\r\n\r\n"
+
+	if _, writeErr := c.Write([]byte(response)); writeErr != nil {
+		logs.Error("Failed to write redirect response to %s, err=%v", c.RemoteAddr(), writeErr)
+	} else {
+		logs.Info("Redirected HTTP request from %s to %s", c.RemoteAddr(), redirectURL)
+	}
 }
 
 func (https *HttpsServer) getCertAndKey(host *file.Host) (string, string) {
@@ -262,6 +299,7 @@ func (https *HttpsServer) Close() error {
 	return https.listener.Close()
 }
 
+// HttpsListener wraps a parent listener.
 type HttpsListener struct {
 	acceptConn     chan *conn.Conn
 	parentListener net.Listener

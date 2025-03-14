@@ -2,7 +2,7 @@ package common
 
 import (
 	"time"
-	
+
 	"github.com/beego/beego/logs"
 )
 

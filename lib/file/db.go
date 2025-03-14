@@ -355,7 +355,6 @@ func (s *DbUtils) GetHostById(id int) (h *Host, err error) {
 	return
 }
 
-
 // get key by host from x
 func (s *DbUtils) GetInfoByHost(host string, r *http.Request) (h *Host, err error) {
 	host = common.GetIpByAddr(host)
@@ -365,7 +364,7 @@ func (s *DbUtils) GetInfoByHost(host string, r *http.Request) (h *Host, err erro
 	if requestPath == "" {
 		requestPath = "/"
 	}
-	
+
 	scheme := r.URL.Scheme
 
 	var bestMatch *Host

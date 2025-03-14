@@ -3,6 +3,7 @@ package crypt
 import (
 	"crypto/tls"
 	"errors"
+	"io"
 	"net"
 	"sync"
 	"time"
@@ -12,30 +13,39 @@ const defaultMaxSize = 8192
 
 type SniffConn struct {
 	net.Conn
-	mu      sync.Mutex
-	buf     []byte
-	maxSize int
+	mu           sync.Mutex
+	buf          []byte
+	maxSize      int
+	limitReached bool
 }
 
 func NewSniffConn(conn net.Conn, maxSize int) *SniffConn {
 	return &SniffConn{
-		Conn:    conn,
-		buf:     make([]byte, 0, maxSize),
-		maxSize: maxSize,
+		Conn:         conn,
+		buf:          make([]byte, 0),
+		maxSize:      maxSize,
+		limitReached: false,
 	}
 }
 
 func (s *SniffConn) Read(p []byte) (int, error) {
+	s.mu.Lock()
+	if s.limitReached {
+		s.mu.Unlock()
+		return 0, io.EOF
+	}
+	s.mu.Unlock()
+
 	n, err := s.Conn.Read(p)
 	if n > 0 {
 		s.mu.Lock()
-		remain := s.maxSize - len(s.buf)
-		if remain > 0 {
-			if n > remain {
-				n = remain
-			}
+		if len(s.buf)+n >= s.maxSize {
 			s.buf = append(s.buf, p[:n]...)
+			s.limitReached = true
+			s.mu.Unlock()
+			return n, io.EOF
 		}
+		s.buf = append(s.buf, p[:n]...)
 		s.mu.Unlock()
 	}
 	return n, err
