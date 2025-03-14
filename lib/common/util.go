@@ -11,6 +11,7 @@ import (
 	"io/ioutil"
 	"net"
 	"net/http"
+	"net/url"
 	"os"
 	"regexp"
 	"sort"
@@ -25,6 +26,88 @@ import (
 	"github.com/beego/beego"
 	"github.com/beego/beego/logs"
 )
+
+// ExtractHost
+// return "[2001:db8::1]:80"
+func ExtractHost(input string) string {
+	if strings.Contains(input, "://") {
+		if u, err := url.Parse(input); err == nil && u.Host != "" {
+			return u.Host
+		}
+	}
+	if idx := strings.IndexByte(input, '/'); idx != -1 {
+		input = input[:idx]
+	}
+	return input
+}
+
+// RemovePortFromHost
+// return "[2001:db8::1]"
+func RemovePortFromHost(host string) string {
+	if len(host) == 0 {
+		return host
+	}
+	var idx int
+	// IPv6
+	if host[0] == '[' {
+		if idx = strings.IndexByte(host, ']'); idx != -1 {
+			return host[:idx+1]
+		}
+		return ""
+	}
+	// IPv4 or Domain
+	if idx = strings.LastIndexByte(host, ':'); idx != -1 && idx == strings.IndexByte(host, ':') {
+		return host[:idx]
+	}
+	return host
+}
+
+// GetIpByAddr
+// return "2001:db8::1"
+func GetIpByAddr(host string) string {
+	if len(host) == 0 {
+		return host
+	}
+	var idx int
+	// IPv6
+	if host[0] == '[' {
+		if idx = strings.IndexByte(host, ']'); idx != -1 {
+			return host[1:idx]
+		}
+		return ""
+	}
+	// IPv4 or Domain
+	if idx = strings.LastIndexByte(host, ':'); idx != -1 && idx == strings.IndexByte(host, ':') {
+		return host[:idx]
+	}
+	return host
+}
+
+// GetPortByAddr
+// return int or 0
+func GetPortByAddr(addr string) int {
+	if len(addr) == 0 {
+		return 0
+	}
+	// IPv6
+	if addr[0] == '[' {
+		if end := strings.IndexByte(addr, ']'); end != -1 && end+1 < len(addr) && addr[end+1] == ':' {
+			portStr := addr[end+2:]
+			if port, err := strconv.Atoi(portStr); err == nil && port > 0 && port <= 65535 {
+				return port
+			}
+		}
+		return 0
+	}
+	// Other
+	if idx := strings.LastIndexByte(addr, ':'); idx != -1 {
+		portStr := addr[idx+1:]
+		if port, err := strconv.Atoi(portStr); err == nil && port > 0 && port <= 65535 {
+			return port
+		}
+	}
+	return 0
+}
 
 // Get the corresponding IP address through domain name
 func GetHostByName(hostname string) string {
@@ -185,7 +268,7 @@ func ChangeHostAndHeader(r *http.Request, host string, header string, httpOnly b
 	}
 
 	// 获取请求的客户端 IP
-	clientIP := AddrToIP(r.RemoteAddr)
+	clientIP := GetIpByAddr(r.RemoteAddr)
 
 	//logs.Debug("get X-Remote-IP = " + clientIP)
 
@@ -222,14 +305,6 @@ func ChangeHostAndHeader(r *http.Request, host string, header string, httpOnly b
 			}
 		}
 	}
-}
-
-// 获取 IP 地址
-func AddrToIP(addr string) string {
-	if strings.HasPrefix(addr, "[") && strings.Contains(addr, "]") {
-		return addr[1:strings.LastIndex(addr, "]")]
-	}
-	return strings.Split(addr, ":")[0]
 }
 
 // Read file content by file path
@@ -375,75 +450,6 @@ func FormatAddress(s string) string {
 		return s
 	}
 	return "127.0.0.1:" + s
-}
-
-// RemovePortFromHost 移除主机名中的末尾端口号，不影响 IPv6 格式
-func RemovePortFromHost(host string) string {
-	// 如果是 IPv6 格式，例如 [2001:db8::1] 或 [2001:db8::1]:8000
-	if strings.HasPrefix(host, "[") && strings.Contains(host, "]") {
-		// 检查是否有端口号
-		if idx := strings.LastIndex(host, "]:"); idx != -1 {
-			return host[:idx+1] // 保留 [IPv6]
-		}
-		return host // 直接返回 [IPv6]，不修改
-	}
-
-	// 正则匹配 IPv4 或 域名 末尾的 `:port`
-	re := regexp.MustCompile(`^(.*):\d+$`)
-	matches := re.FindStringSubmatch(host)
-	if len(matches) == 2 {
-		return matches[1] // 移除端口号
-	}
-	return host // 无需修改
-}
-
-// get address from the complete address
-func GetIpByAddr(addr string) string {
-	// Handle IPv6 addresses properly
-	if strings.HasPrefix(addr, "[") && strings.Contains(addr, "]:") {
-		lastBracketIndex := strings.LastIndex(addr, "]")
-		if lastBracketIndex != -1 {
-			return addr[1:lastBracketIndex]
-		}
-	} else if strings.Contains(addr, ":") {
-		lastColonIndex := strings.LastIndex(addr, ":")
-		if lastColonIndex != -1 && strings.Count(addr, ":") > 1 {
-			return addr[:lastColonIndex]
-		}
-	}
-	arr := strings.Split(addr, ":")
-	return arr[0]
-}
-
-// get port from the complete address
-func GetPortByAddr(addr string) int {
-	// Handle IPv6 addresses properly
-	if strings.HasPrefix(addr, "[") && strings.Contains(addr, "]:") {
-		lastColonIndex := strings.LastIndex(addr, ":")
-		p, err := strconv.Atoi(addr[lastColonIndex+1:])
-		if err != nil {
-			return 0
-		}
-		return p
-	} else if strings.Contains(addr, ":") {
-		lastColonIndex := strings.LastIndex(addr, ":")
-		if lastColonIndex != -1 && strings.Count(addr, ":") > 1 {
-			p, err := strconv.Atoi(addr[lastColonIndex+1:])
-			if err != nil {
-				return 0
-			}
-			return p
-		}
-	}
-	arr := strings.Split(addr, ":")
-	if len(arr) < 2 {
-		return 0
-	}
-	p, err := strconv.Atoi(arr[len(arr)-1])
-	if err != nil {
-		return 0
-	}
-	return p
 }
 
 func in(target string, str_array []string) bool {

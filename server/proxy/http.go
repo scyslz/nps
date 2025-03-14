@@ -171,7 +171,7 @@ func (s *httpServer) handleProxy(w http.ResponseWriter, r *http.Request) {
 	defer host.Client.AddConn()
 
 	// IP 黑名单检查
-	clientIP := common.AddrToIP(r.RemoteAddr)
+	clientIP := common.GetIpByAddr(r.RemoteAddr)
 	if IsGlobalBlackIp(clientIP) || common.IsBlackIp(clientIP, host.Client.VerifyKey, host.Client.BlackIpList) {
 		//http.Error(w, "403 Forbidden", http.StatusForbidden)
 		logs.Warn("Blocked IP: %s", clientIP)
