@@ -13,7 +13,13 @@
 
 NPS 是一款轻量高效的内网穿透代理服务器，支持多种协议（TCP、UDP、HTTP、SOCKS5 等）转发。它提供直观的 Web 管理界面，使得内网资源能安全、便捷地在外网访问，同时满足多种复杂场景的需求。
 
-由于[nps](https://github.com/ehang-io/nps)停更已久，本仓库基于 nps 0.26 整合社区更新二次开发而来。
+由于[NPS](https://github.com/ehang-io/nps)停更已久，本仓库基于 nps 0.26 整合社区更新二次开发而来。
+
+- **提问前请先查阅：**  [文档](https://d-jy.net/docs/nps/) 与 [Issues](https://github.com/djylb/nps/issues)
+
+- **欢迎参与：**  提交 PR、反馈问题或建议，共同推动项目发展。
+
+- **讨论交流：**  加入 [Telegram 交流群](https://t.me/npsdev) 与其他用户交流经验。
 
 ---
 
@@ -30,10 +36,12 @@ NPS 是一款轻量高效的内网穿透代理服务器，支持多种协议（T
 
 - **安全与扩展**  
   内置加密传输、流量限制、证书管理等多重功能，保障数据安全。
-
 ---
 
 ## 安装与使用
+
+更多详细配置请参考 [文档](https://d-jy.net/docs/nps/)（部分内容可能未更新）。
+
 ### Docker 部署
 
 ***DockerHub***： [NPS](https://hub.docker.com/r/duan2001/nps) [NPC](https://hub.docker.com/r/duan2001/npc)
@@ -108,44 +116,22 @@ npc start
 
 ---
 
-## 其他说明
-
-- **IPv6 支持**  
-  默认启用，无需额外配置。
-
-- **HTTPS 与反向代理**  
-  支持配置证书（绝对路径或证书内容），并可在反向代理场景中通过添加特定 HTTP 头（如 `X-NPS-Http-Only`）跳过重定向。
-
-- **日志管理**  
-  可通过配置文件灵活设置日志级别、保存路径、文件大小与保留数量。
-
-更多详细配置请参考 [文档](https://d-jy.net/docs/nps/)（部分内容可能已更新）。
-
----
-
 ## 更新日志
 
-- **v0.26.39 (2025-03-14)**  
-  主要 Bug 修复及新功能优化。
+### DEV
 
-- **v0.26.38 (2025-03-14)**  
-  域名转发支持 HTTP/2，优化证书缓存及依赖更新。
+- **Main** 
+  - 待定，优先修BUG，新功能随缘更新
 
-- **v0.26.37 (2025-03-13)**  
-  新增后端 HTTPS 支持，改进 CORS 自动补全与 SNI 识别。
+### Stable
+
+- **v0.26.38 (2025-03-14)** 
+  - 域名转发支持HTTP/2
+  - 当配置请求域名修时同时修改Origin头避免后端监测
+  - 调整域名编辑页面逻辑
+  - 更新相关依赖，修复CVE-2025-22870
+  - 使用 [XTLS/go-win7](https://github.com/XTLS/go-win7) 编译旧版代码支持Win7
+  - 整理仓库代码
+  - 优化域名查找算法
 
 更多历史更新记录请参阅项目 [Releases](https://github.com/djylb/nps/releases)。
-
----
-
-## 贡献与反馈
-
-- **提问前请先查阅：**  
-  [文档](https://d-jy.net/docs/nps//) 与 [issues](https://github.com/djylb/nps/issues)
-
-- **欢迎参与：**  
-  提交 PR、反馈问题或建议，共同推动项目发展。
-
-- **讨论交流：**  
-  加入 [Telegram 交流群](https://t.me/npsdev) 与其他用户交流经验。
-
