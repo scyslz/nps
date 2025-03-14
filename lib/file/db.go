@@ -157,8 +157,14 @@ func (s *DbUtils) DelHost(id int) error {
 
 func (s *DbUtils) IsHostExist(h *Host) bool {
 	var exist bool
+	if h.Location == "" {
+		h.Location = "/"
+	}
 	s.JsonDb.Hosts.Range(func(key, value interface{}) bool {
 		v := value.(*Host)
+		if v.Location == "" {
+			v.Location = "/"
+		}
 		if v.Id != h.Id && v.Host == h.Host && h.Location == v.Location && (v.Scheme == "all" || v.Scheme == h.Scheme) {
 			exist = true
 			return false
@@ -349,22 +355,31 @@ func (s *DbUtils) GetHostById(id int) (h *Host, err error) {
 	return
 }
 
+
 // get key by host from x
 func (s *DbUtils) GetInfoByHost(host string, r *http.Request) (h *Host, err error) {
 	host = common.GetIpByAddr(host)
+	hostLength := len(host)
 
 	requestPath := r.RequestURI
 	if requestPath == "" {
 		requestPath = "/"
 	}
+	
 	scheme := r.URL.Scheme
 
 	var bestMatch *Host
+	var bestDomainLength int
 	s.JsonDb.Hosts.Range(func(key, value interface{}) bool {
 		v := value.(*Host)
 
-		// 过滤掉关闭的 Host 项或协议不匹配的项
+		// 过滤无效项
 		if v.IsClose || (v.Scheme != "all" && v.Scheme != scheme) {
+			return true
+		}
+
+		curDomainLength := len(strings.TrimPrefix(v.Host, "*"))
+		if hostLength < curDomainLength {
 			return true
 		}
 
@@ -372,11 +387,8 @@ func (s *DbUtils) GetInfoByHost(host string, r *http.Request) (h *Host, err erro
 		matched := false
 		if v.Host == host {
 			matched = true
-		} else if strings.HasPrefix(v.Host, "*") {
-			// 通配符匹配时去掉星号
-			if strings.HasSuffix(host, v.Host[1:]) {
-				matched = true
-			}
+		} else if strings.HasPrefix(v.Host, "*") && strings.HasSuffix(host, v.Host[1:]) {
+			matched = true
 		}
 		if !matched {
 			return true
@@ -399,18 +411,18 @@ func (s *DbUtils) GetInfoByHost(host string, r *http.Request) (h *Host, err erro
 		// 3. 若相同，则优先匹配完全一致的域名
 		if bestMatch == nil {
 			bestMatch = v
+			bestDomainLength = len(strings.TrimPrefix(bestMatch.Host, "*"))
 		} else {
-			curDomainLength := len(strings.TrimPrefix(v.Host, "*"))
-			bestDomainLength := len(strings.TrimPrefix(bestMatch.Host, "*"))
 			if curDomainLength > bestDomainLength {
 				bestMatch = v
+				bestDomainLength = len(strings.TrimPrefix(bestMatch.Host, "*"))
 			} else if curDomainLength == bestDomainLength {
 				if len(location) > len(bestMatch.Location) {
 					bestMatch = v
-				} else if len(location) == len(bestMatch.Location) {
-					if !strings.HasPrefix(v.Host, "*") && strings.HasPrefix(bestMatch.Host, "*") {
-						bestMatch = v
-					}
+					bestDomainLength = len(strings.TrimPrefix(bestMatch.Host, "*"))
+				} else if len(location) == len(bestMatch.Location) && !strings.HasPrefix(v.Host, "*") && strings.HasPrefix(bestMatch.Host, "*") {
+					bestMatch = v
+					bestDomainLength = len(strings.TrimPrefix(bestMatch.Host, "*"))
 				}
 			}
 		}
@@ -425,33 +437,59 @@ func (s *DbUtils) GetInfoByHost(host string, r *http.Request) (h *Host, err erro
 
 func (s *DbUtils) FindCertByHost(host string) (*Host, error) {
 	if host == "" {
-		return nil, errors.New("invalid host")
+		return nil, errors.New("Invalid Host")
 	}
 
+	hostLength := len(host)
+
 	var bestMatch *Host
-	s.JsonDb.Hosts.Range(func(_, value interface{}) bool {
+	var bestDomainLength int
+	s.JsonDb.Hosts.Range(func(key, value interface{}) bool {
 		v := value.(*Host)
-		var matched bool
-		// 精确匹配
+
+		// 过滤无效项
+		if v.IsClose || (v.Scheme == "http") {
+			return true
+		}
+
+		curDomainLength := len(strings.TrimPrefix(v.Host, "*"))
+		if hostLength < curDomainLength {
+			return true
+		}
+
+		// 匹配域名
+		matched := false
 		if v.Host == host {
+			if v.Location == "/" || v.Location == "" {
+				bestMatch = v
+				return false
+			}
 			matched = true
-		} else if strings.HasPrefix(v.Host, "*.") && strings.HasSuffix(host, v.Host[1:]) {
+		} else if strings.HasPrefix(v.Host, "*") && strings.HasSuffix(host, v.Host[1:]) {
 			matched = true
 		}
 		if !matched {
 			return true
 		}
-		if v.Location == "/" || v.Location == "" {
-			bestMatch = v
-			return false
-		}
+
 		if bestMatch == nil {
 			bestMatch = v
+			bestDomainLength = len(strings.TrimPrefix(bestMatch.Host, "*"))
 		} else {
-			curDomainLength := len(strings.TrimPrefix(v.Host, "*."))
-			bestDomainLength := len(strings.TrimPrefix(bestMatch.Host, "*."))
 			if curDomainLength > bestDomainLength {
 				bestMatch = v
+				bestDomainLength = len(strings.TrimPrefix(bestMatch.Host, "*"))
+			} else if curDomainLength == bestDomainLength {
+				if !strings.HasPrefix(v.Host, "*") && strings.HasPrefix(bestMatch.Host, "*") {
+					bestMatch = v
+					bestDomainLength = len(strings.TrimPrefix(bestMatch.Host, "*"))
+				} else if len(v.Location) < len(bestMatch.Location) {
+					bestMatch = v
+					bestDomainLength = len(strings.TrimPrefix(bestMatch.Host, "*"))
+				} else if v.Location == "/" || v.Location == "" {
+					bestMatch = v
+					bestDomainLength = len(strings.TrimPrefix(bestMatch.Host, "*"))
+				}
 			}
 		}
 		return true
@@ -460,5 +498,5 @@ func (s *DbUtils) FindCertByHost(host string) (*Host, error) {
 	if bestMatch != nil {
 		return bestMatch, nil
 	}
-	return nil, errors.New("no matching certificate found")
+	return nil, errors.New("The host could not be parsed")
 }
