@@ -190,6 +190,9 @@ func (https *HttpsServer) Start() error {
 func checkHTTPAndRedirect(c net.Conn, rb []byte) {
 	c.SetDeadline(time.Now().Add(10 * time.Second))
 	defer c.Close()
+
+	logs.Info("Pre-read rb content: %q", string(rb))
+
 	reader := bufio.NewReader(io.MultiReader(bytes.NewReader(rb), c))
 	req, err := http.ReadRequest(reader)
 	if err != nil {

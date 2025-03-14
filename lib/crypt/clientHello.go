@@ -93,7 +93,7 @@ func ReadClientHello(clientConn net.Conn) (helloInfo *tls.ClientHelloInfo, rawDa
 		if err == nil {
 			err = errors.New("no clientHello, but handshake returned nil error")
 		}
-		return nil, nil, err
+		return nil, sconn.Bytes(), err
 	}
 
 	return helloInfoPtr, sconn.Bytes(), nil
