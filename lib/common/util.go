@@ -20,11 +20,11 @@ import (
 	"sync"
 	"time"
 
-	"ehang.io/nps/lib/crypt"
-	"ehang.io/nps/lib/version"
 	"github.com/araddon/dateparse"
 	"github.com/beego/beego"
 	"github.com/beego/beego/logs"
+	"github.com/djylb/nps/lib/crypt"
+	"github.com/djylb/nps/lib/version"
 )
 
 // ExtractHost

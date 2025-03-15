@@ -3,10 +3,10 @@ package controllers
 import (
 	"strings"
 
-	"ehang.io/nps/lib/file"
-	"ehang.io/nps/server"
-	"ehang.io/nps/server/tool"
 	"github.com/beego/beego"
+	"github.com/djylb/nps/lib/file"
+	"github.com/djylb/nps/server"
+	"github.com/djylb/nps/server/tool"
 )
 
 type IndexController struct {

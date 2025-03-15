@@ -1,6 +1,6 @@
 FROM golang:1.24 AS builder
 ARG GOPROXY=direct
-WORKDIR /go/src/ehang.io/nps
+WORKDIR /go/src/github.com/djylb/nps
 COPY . .
 RUN go mod edit -go=$(go version | awk '{print $3}' | sed 's/go//') && \
     go mod tidy && \
@@ -9,8 +9,8 @@ RUN CGO_ENABLED=0 go build -ldflags="-w -s -extldflags -static" ./cmd/nps/nps.go
 RUN mkdir tmp
 
 FROM scratch
-COPY --from=builder /go/src/ehang.io/nps/nps /
-COPY --from=builder /go/src/ehang.io/nps/web /web
-COPY --from=builder /go/src/ehang.io/nps/tmp /tmp
+COPY --from=builder /go/src/github.com/djylb/nps/nps /
+COPY --from=builder /go/src/github.com/djylb/nps/web /web
+COPY --from=builder /go/src/github.com/djylb/nps/tmp /tmp
 VOLUME /conf
 CMD ["/nps", "service"]

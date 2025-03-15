@@ -6,12 +6,12 @@ import (
 	"sync"
 	"time"
 
-	"ehang.io/nps/lib/common"
-	"ehang.io/nps/lib/file"
-	"ehang.io/nps/server"
 	"github.com/beego/beego"
 	"github.com/beego/beego/cache"
 	"github.com/beego/beego/utils/captcha"
+	"github.com/djylb/nps/lib/common"
+	"github.com/djylb/nps/lib/file"
+	"github.com/djylb/nps/server"
 )
 
 type LoginController struct {

@@ -8,11 +8,11 @@ import (
 	"net"
 	"strconv"
 
-	"ehang.io/nps/lib/common"
-	"ehang.io/nps/lib/conn"
-	"ehang.io/nps/lib/file"
 	"github.com/beego/beego"
 	"github.com/beego/beego/logs"
+	"github.com/djylb/nps/lib/common"
+	"github.com/djylb/nps/lib/conn"
+	"github.com/djylb/nps/lib/file"
 )
 
 const (

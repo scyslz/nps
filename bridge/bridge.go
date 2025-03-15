@@ -13,16 +13,16 @@ import (
 	"sync"
 	"time"
 
-	"ehang.io/nps/lib/common"
-	"ehang.io/nps/lib/conn"
-	"ehang.io/nps/lib/crypt"
-	"ehang.io/nps/lib/file"
-	"ehang.io/nps/lib/nps_mux"
-	"ehang.io/nps/lib/version"
-	"ehang.io/nps/server/connection"
-	"ehang.io/nps/server/tool"
 	"github.com/beego/beego"
 	"github.com/beego/beego/logs"
+	"github.com/djylb/nps/lib/common"
+	"github.com/djylb/nps/lib/conn"
+	"github.com/djylb/nps/lib/crypt"
+	"github.com/djylb/nps/lib/file"
+	"github.com/djylb/nps/lib/nps_mux"
+	"github.com/djylb/nps/lib/version"
+	"github.com/djylb/nps/server/connection"
+	"github.com/djylb/nps/server/tool"
 )
 
 var ServerTlsEnable bool = false

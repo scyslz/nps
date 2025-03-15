@@ -9,13 +9,13 @@ import (
 	"sync"
 	"unsafe"
 
-	"ehang.io/nps/bridge"
-	"ehang.io/nps/lib/common"
-	"ehang.io/nps/lib/conn"
-	"ehang.io/nps/lib/file"
-	"ehang.io/nps/server/connection"
 	"github.com/beego/beego"
 	"github.com/beego/beego/logs"
+	"github.com/djylb/nps/bridge"
+	"github.com/djylb/nps/lib/common"
+	"github.com/djylb/nps/lib/conn"
+	"github.com/djylb/nps/lib/file"
+	"github.com/djylb/nps/server/connection"
 )
 
 var _ = unsafe.Sizeof(0)

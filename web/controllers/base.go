@@ -7,12 +7,12 @@ import (
 	"strings"
 	"time"
 
-	"ehang.io/nps/bridge"
-	"ehang.io/nps/lib/common"
-	"ehang.io/nps/lib/crypt"
-	"ehang.io/nps/lib/file"
-	"ehang.io/nps/server"
 	"github.com/beego/beego"
+	"github.com/djylb/nps/bridge"
+	"github.com/djylb/nps/lib/common"
+	"github.com/djylb/nps/lib/crypt"
+	"github.com/djylb/nps/lib/file"
+	"github.com/djylb/nps/server"
 )
 
 type BaseController struct {

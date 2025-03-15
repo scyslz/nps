@@ -10,12 +10,12 @@ import (
 	"sync"
 	"time"
 
-	"ehang.io/nps/lib/common"
-	"ehang.io/nps/lib/conn"
-	"ehang.io/nps/lib/crypt"
-	"ehang.io/nps/lib/file"
 	"github.com/beego/beego"
 	"github.com/beego/beego/logs"
+	"github.com/djylb/nps/lib/common"
+	"github.com/djylb/nps/lib/conn"
+	"github.com/djylb/nps/lib/crypt"
+	"github.com/djylb/nps/lib/file"
 	"github.com/pkg/errors"
 )
 

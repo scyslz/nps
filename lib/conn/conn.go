@@ -15,13 +15,13 @@ import (
 	"sync"
 	"time"
 
-	"ehang.io/nps/lib/common"
-	"ehang.io/nps/lib/crypt"
-	"ehang.io/nps/lib/file"
-	"ehang.io/nps/lib/goroutine"
-	"ehang.io/nps/lib/pmux"
-	"ehang.io/nps/lib/rate"
 	"github.com/beego/beego/logs"
+	"github.com/djylb/nps/lib/common"
+	"github.com/djylb/nps/lib/crypt"
+	"github.com/djylb/nps/lib/file"
+	"github.com/djylb/nps/lib/goroutine"
+	"github.com/djylb/nps/lib/pmux"
+	"github.com/djylb/nps/lib/rate"
 	"github.com/xtaci/kcp-go"
 )
 

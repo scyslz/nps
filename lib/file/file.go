@@ -9,11 +9,11 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"ehang.io/nps/lib/common"
-	"ehang.io/nps/lib/rate"
-	"ehang.io/nps/lib/version"
 	"github.com/beego/beego"
 	"github.com/beego/beego/logs"
+	"github.com/djylb/nps/lib/common"
+	"github.com/djylb/nps/lib/rate"
+	"github.com/djylb/nps/lib/version"
 )
 
 func NewJsonDb(runPath string) *JsonDb {

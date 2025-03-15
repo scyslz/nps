@@ -20,12 +20,12 @@ import (
 	"strings"
 	"time"
 
-	"ehang.io/nps/lib/common"
-	"ehang.io/nps/lib/config"
-	"ehang.io/nps/lib/conn"
-	"ehang.io/nps/lib/crypt"
-	"ehang.io/nps/lib/version"
 	"github.com/beego/beego/logs"
+	"github.com/djylb/nps/lib/common"
+	"github.com/djylb/nps/lib/config"
+	"github.com/djylb/nps/lib/conn"
+	"github.com/djylb/nps/lib/crypt"
+	"github.com/djylb/nps/lib/version"
 	"github.com/xtaci/kcp-go"
 	"golang.org/x/net/proxy"
 )

@@ -1,4 +1,4 @@
-module ehang.io/nps
+module github.com/djylb/nps
 
 go 1.24
 

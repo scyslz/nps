@@ -3,7 +3,7 @@ package controllers
 import (
 	"strings"
 
-	"ehang.io/nps/lib/file"
+	"github.com/djylb/nps/lib/file"
 )
 
 type GlobalController struct {

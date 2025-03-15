@@ -9,7 +9,7 @@
 ## 源码安装
 
 - 安装源码
-  ```go get -u ehang.io/nps```
+  ```go get -u github.com/djylb/nps```
 - 编译
 
 服务端```go build cmd/nps/nps.go```

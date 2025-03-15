@@ -13,8 +13,8 @@ import (
 	"runtime"
 	"strings"
 
-	"ehang.io/nps/lib/common"
 	"github.com/c4milo/unpackit"
+	"github.com/djylb/nps/lib/common"
 )
 
 // Keep it in sync with the template from service_sysv_linux.go file

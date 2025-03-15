@@ -9,16 +9,16 @@ import (
 	"strings"
 	"time"
 
-	"ehang.io/nps/client"
-	"ehang.io/nps/lib/common"
-	"ehang.io/nps/lib/daemon"
-	"ehang.io/nps/lib/version"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
 	"github.com/beego/beego/logs"
+	"github.com/djylb/nps/client"
+	"github.com/djylb/nps/lib/common"
+	"github.com/djylb/nps/lib/daemon"
+	"github.com/djylb/nps/lib/version"
 )
 
 func main() {

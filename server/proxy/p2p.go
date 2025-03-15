@@ -5,8 +5,8 @@ import (
 	"strings"
 	"time"
 
-	"ehang.io/nps/lib/common"
 	"github.com/beego/beego/logs"
+	"github.com/djylb/nps/lib/common"
 )
 
 type P2PServer struct {

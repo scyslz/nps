@@ -10,14 +10,14 @@ import (
 	"sync"
 	"time"
 
-	"ehang.io/nps/client"
-	"ehang.io/nps/lib/common"
-	"ehang.io/nps/lib/config"
-	"ehang.io/nps/lib/file"
-	"ehang.io/nps/lib/install"
-	"ehang.io/nps/lib/version"
 	"github.com/beego/beego/logs"
 	"github.com/ccding/go-stun/stun"
+	"github.com/djylb/nps/client"
+	"github.com/djylb/nps/lib/common"
+	"github.com/djylb/nps/lib/config"
+	"github.com/djylb/nps/lib/file"
+	"github.com/djylb/nps/lib/install"
+	"github.com/djylb/nps/lib/version"
 	"github.com/kardianos/service"
 )
 

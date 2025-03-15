@@ -8,14 +8,14 @@ import (
 	"sync"
 	"time"
 
-	"ehang.io/nps/lib/common"
-	"ehang.io/nps/lib/config"
-	"ehang.io/nps/lib/conn"
-	"ehang.io/nps/lib/crypt"
-	"ehang.io/nps/lib/file"
-	"ehang.io/nps/lib/nps_mux"
-	"ehang.io/nps/server/proxy"
 	"github.com/beego/beego/logs"
+	"github.com/djylb/nps/lib/common"
+	"github.com/djylb/nps/lib/config"
+	"github.com/djylb/nps/lib/conn"
+	"github.com/djylb/nps/lib/crypt"
+	"github.com/djylb/nps/lib/file"
+	"github.com/djylb/nps/lib/nps_mux"
+	"github.com/djylb/nps/server/proxy"
 	"github.com/xtaci/kcp-go"
 )
 
