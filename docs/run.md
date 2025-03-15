@@ -8,11 +8,19 @@
 #### **Linux / macOS**
 ```bash
 sudo ./nps install
+
+# 支持指定配置文件路径
+./nps -conf_path="/app/nps"
+./nps install -conf_path="/app/nps"
 ```
 #### **Windows**
 以 **管理员身份** 运行 `cmd` 或 `PowerShell`，进入安装目录：
 ```powershell
 nps.exe install
+
+# 支持指定配置文件路径
+.\nps.exe -conf_path="D:\test\nps"
+.\nps.exe install -conf_path="D:\test\nps"
 ```
 
 ---

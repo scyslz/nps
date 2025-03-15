@@ -62,11 +62,15 @@ NPS 提供官方二进制安装包，适用于 **Windows、Linux、macOS、FreeB
 - [32 位（Server）](https://github.com/djylb/nps/releases/latest/download/windows_386_server_old.tar.gz)
 - [32 位（Client）](https://github.com/djylb/nps/releases/latest/download/windows_386_client_old.tar.gz)
 
-**安装方式（解压后进入文件夹）**
+📌 **安装方式（解压后进入文件夹）**
 ```powershell
 # NPS 服务器
 .\nps.exe install
 .\nps.exe start|stop|restart|uninstall
+
+# 支持指定配置文件路径
+.\nps.exe -conf_path="D:\test\nps"
+.\nps.exe install -conf_path="D:\test\nps"
 
 # 更新
 .\nps.exe stop
@@ -104,11 +108,15 @@ NPS 提供官方二进制安装包，适用于 **Windows、Linux、macOS、FreeB
 - [ARMv7（Server）](https://github.com/djylb/nps/releases/latest/download/linux_arm_v7_server.tar.gz)
 - [ARMv7（Client）](https://github.com/djylb/nps/releases/latest/download/linux_arm_v7_client.tar.gz)
 
-#### **安装方式（解压后进入文件夹）**
+📌 **安装方式（解压后进入文件夹）**
 ```bash
 # NPS 服务器
 ./nps install
 nps start|stop|restart|uninstall
+
+# 支持指定配置文件路径
+./nps -conf_path="/app/nps"
+./nps install -conf_path="/app/nps"
 
 # 更新
 nps stop
@@ -134,10 +142,30 @@ npc start
 - [Apple Silicon（Server）](https://github.com/djylb/nps/releases/latest/download/darwin_arm64_server.tar.gz)
 - [Apple Silicon（Client）](https://github.com/djylb/nps/releases/latest/download/darwin_arm64_client.tar.gz)
 
-**安装方式（解压后进入文件夹）**
+📌 **安装方式（解压后进入文件夹）**
 ```bash
+# NPS 服务器
+./nps install
+nps start|stop|restart|uninstall
+
+# 支持指定配置文件路径
+./nps -conf_path="/app/nps"
+./nps install -conf_path="/app/nps"
+
+# 更新
+nps stop
+nps-update update
+nps start
+
+# NPC 客户端
 ./npc install
+/usr/bin/npc install -server=xxx:123 -vkey=xxx -type=tcp -tls_enable=true -log=off
 npc start|stop|restart|uninstall
+
+# 更新
+npc stop
+/usr/bin/npc-update update
+npc start
 ```
 
 ---
