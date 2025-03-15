@@ -2,7 +2,7 @@
 
 ## 安装包安装
 
-[releases](https://github.com/ehang-io/nps/releases)
+[releases](https://github.com/djylb/nps/releases)
 
 下载对应的系统版本即可，服务端和客户端是单独的
 
@@ -17,6 +17,12 @@
 客户端```go build cmd/npc/npc.go```
 
 ## docker安装
+***DockerHub***： 
 
-> [server](https://hub.docker.com/r/ffdfgdfg/nps)
-> [client](https://hub.docker.com/r/ffdfgdfg/npc)
+> [Server](https://hub.docker.com/r/duan2001/nps)
+> [Client](https://hub.docker.com/r/duan2001/npc)
+> 
+***GHCR***： 
+
+> [Server](https://github.com/djylb/nps/pkgs/container/nps)
+> [Client](https://github.com/djylb/nps/pkgs/container/npc)

@@ -1,4 +1,4 @@
-![image](https://github.com/ehang-io/nps/blob/master/image/web2.png?raw=true)
+![image](https://github.com/djylb/nps/blob/master/image/web2.png?raw=true)
 
 # 介绍
 
