@@ -28,7 +28,7 @@ NPS 可直接为域名提供 HTTPS 代理服务，类似于 Nginx 处理 HTTPS �
 ---
 
 ### **1.2 由后端服务器处理 HTTPS**
-如果希望**HTTPS 由内网服务器（如 Nginx）处理**，在 Web 管理界面：
+如果希望 **HTTPS 由内网服务器（如 Nginx）处理** ，在 Web 管理界面：
 1. **"由后端处理 HTTPS (仅转发)" 选项设为 "是"**
 2. **将目标类型 (HTTP/HTTPS) 设置为 HTTPS**
 

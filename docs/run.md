@@ -222,12 +222,12 @@ sc start Npc2
 sc stop Npc2
 sc delete Npc2
 ```
-> 📌 **多个客户端实例** 需要 **不同的 `vkey`**。
+> 📌 **多个客户端实例** 需要 **不同的 `vkey`** 。
 
 ---
 
 ### **3.2 Linux 多开**
-**创建 `systemd` 配置文件**，例如 `/etc/systemd/system/npc2.service`：
+**创建 `systemd` 配置文件** ，例如 `/etc/systemd/system/npc2.service`：
 ```ini
 [Unit]
 Description=NPS 内网穿透客户端 2

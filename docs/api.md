@@ -7,7 +7,7 @@
 
 每次 API 请求都需附带两个参数：
 
-- **`auth_key`**：
+- **`auth_key`** ：
   - 生成规则：`auth_key = md5(配置文件中的auth_key + 当前时间戳)`
   - 示例（Java Hutool工具）：
 
@@ -17,7 +17,7 @@ String authKey = MD5.create().digestHex("your_auth_key_here" + time.toString());
 System.out.println(authKey);
 ```
 
-- **`timestamp`**：当前 Unix 时间戳（秒级）。
+- **`timestamp`** ：当前 Unix 时间戳（秒级）。
 
 **示例请求：**
 

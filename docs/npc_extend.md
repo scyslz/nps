@@ -6,7 +6,7 @@
 ```bash
 ./npc nat -stun_addr=stun.stunprotocol.org:3478
 ```
-如果 **P2P 双方都是 `Symmetric NAT`**，则 **无法穿透**，其他 NAT 组合通常可以成功。
+如果 **P2P 双方都是 `Symmetric NAT`** ，则 **无法穿透**，其他 NAT 组合通常可以成功。
 
 📌 **可选参数**
 
@@ -70,7 +70,7 @@ proxy_url=socks5://111:222@127.0.0.1:8024
 ---
 
 ## 5. 其他命令行参数
-📌 **所有参数可与启动命令组合使用**：
+📌 **所有参数可与启动命令组合使用** ：
 
 ```bash
 ./npc -server=xxx:123 -vkey=xxx -tls_enable -log=off -debug=false
