@@ -44,6 +44,11 @@ func Logs() *C.char {
 	return C.CString(common.GetLogMsg())
 }
 
+//export SetTlsEnable
+func SetTlsEnable(enable bool) {
+	client.SetTlsEnable(enable)
+}
+
 func main() {
 	// Need a main function to make CGO compile package as C shared library
 }
