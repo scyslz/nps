@@ -321,4 +321,4 @@ strip_pre=/web/
 auto_reconnection=true
 ```
 
-✅ **如需更多帮助，请查看 [官方文档](https://github.com/djylb/nps) 或提交 [GitHub Issues](https://github.com/djylb/nps/issues) 反馈问题。**
+✅ **如需更多帮助，请查看 [文档](https://github.com/djylb/nps) 或提交 [GitHub Issues](https://github.com/djylb/nps/issues) 反馈问题。**
