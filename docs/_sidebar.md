@@ -17,8 +17,8 @@
 
     * [功能](feature.md)
     * [说明](description.md)
-    * [web api](api.md)
-    * [sdk](npc_sdk.md)
+    * [Web API](api.md)
+    * [SDK](npc_sdk.md)
 
 * 其他
 
