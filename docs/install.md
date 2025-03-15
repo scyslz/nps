@@ -1,28 +1,185 @@
-# 安装
+# 安装指南
 
-## 安装包安装
+NPS 提供多种安装方式，推荐使用 **Docker 部署**，也支持 **二进制发布包安装** 及 **源码编译**。
 
-[releases](https://github.com/djylb/nps/releases)
+---
 
-下载对应的系统版本即可，服务端和客户端是单独的
+## 1. Docker 安装（推荐）
 
-## 源码安装
+提供 Docker 镜像，支持 **DockerHub** 和 **GitHub Container Registry (GHCR)** 。
 
-- 安装源码
-  ```go get -u github.com/djylb/nps```
-- 编译
+### **1.1 NPS 服务器端**
 
-服务端```go build cmd/nps/nps.go```
+#### **DockerHub（推荐）**
+```bash
+docker pull duan2001/nps
+docker run -d --restart=always --name nps --net=host -v <本机conf目录>:/conf -v /etc/localtime:/etc/localtime:ro duan2001/nps
+```
 
-客户端```go build cmd/npc/npc.go```
+#### **GHCR（可选）**
+```bash
+docker pull ghcr.io/djylb/nps
+docker run -d --restart=always --name nps --net=host -v <本机conf目录>:/conf -v /etc/localtime:/etc/localtime:ro ghcr.io/djylb/nps
+```
 
-## docker安装
-***DockerHub***： 
+---
 
-> [Server](https://hub.docker.com/r/duan2001/nps)
-> [Client](https://hub.docker.com/r/duan2001/npc)
-> 
-***GHCR***： 
+### **1.2 NPC 客户端**
 
-> [Server](https://github.com/djylb/nps/pkgs/container/nps)
-> [Client](https://github.com/djylb/nps/pkgs/container/npc)
+#### **DockerHub（推荐）**
+```bash
+docker pull duan2001/npc
+docker run -d --restart=always --name npc --net=host duan2001/npc -server=xxxx:123 -vkey=xxxx,xxxx -tls_enable=true -log=off
+```
+
+#### **GHCR（可选）**
+```bash
+docker pull ghcr.io/djylb/npc
+docker run -d --restart=always --name npc --net=host ghcr.io/djylb/npc -server=xxxx:123 -vkey=xxxx,xxxx -tls_enable=true -log=off
+```
+
+---
+
+## 2. 发布包安装
+
+NPS 提供官方二进制安装包，适用于 **Windows、Linux、macOS、FreeBSD** 等多种平台。
+
+📌 **下载地址**：[🔗 最新发布页面](https://github.com/djylb/nps/releases/latest)
+
+---
+
+### **2.1 Windows 安装**
+
+**Windows 10/11 用户（推荐）**：
+- [64 位（Server）](https://github.com/djylb/nps/releases/latest/download/windows_amd64_server.tar.gz)
+- [64 位（Client）](https://github.com/djylb/nps/releases/latest/download/windows_amd64_client.tar.gz)
+- [32 位（Server）](https://github.com/djylb/nps/releases/latest/download/windows_386_server.tar.gz)
+- [32 位（Client）](https://github.com/djylb/nps/releases/latest/download/windows_386_client.tar.gz)
+
+**Windows 7 用户（使用 `old` 结尾版本）**：
+- [64 位（Server）](https://github.com/djylb/nps/releases/latest/download/windows_amd64_server_old.tar.gz)
+- [64 位（Client）](https://github.com/djylb/nps/releases/latest/download/windows_amd64_client_old.tar.gz)
+- [32 位（Server）](https://github.com/djylb/nps/releases/latest/download/windows_386_server_old.tar.gz)
+- [32 位（Client）](https://github.com/djylb/nps/releases/latest/download/windows_386_client_old.tar.gz)
+
+**安装方式（解压后进入文件夹）**
+```powershell
+# NPS 服务器
+.\nps.exe install
+.\nps.exe start|stop|restart|uninstall
+
+# 更新
+.\nps.exe stop
+.\nps-update.exe update
+.\nps.exe start
+
+# NPC 客户端
+.\npc.exe install -server="xxx:123" -vkey="xxx" -type="tcp" -tls_enable="true" -log="off"
+.\npc.exe start|stop|restart|uninstall
+
+# 更新
+.\npc.exe stop
+.\npc-update.exe update
+.\npc.exe start
+```
+
+> **Windows 7 旧版** 不支持命令更新，如需升级请手动替换文件。
+
+---
+
+### **2.2 Linux 安装**
+📌 **推荐使用 Docker 运行。**
+
+#### **AMD64**
+- [64 位（Server）](https://github.com/djylb/nps/releases/latest/download/linux_amd64_server.tar.gz)
+- [64 位（Client）](https://github.com/djylb/nps/releases/latest/download/linux_amd64_client.tar.gz)
+
+#### **ARM**
+- [ARM64（Server）](https://github.com/djylb/nps/releases/latest/download/linux_arm64_server.tar.gz)
+- [ARM64（Client）](https://github.com/djylb/nps/releases/latest/download/linux_arm64_client.tar.gz)
+- [ARMv5（Server）](https://github.com/djylb/nps/releases/latest/download/linux_arm_v5_server.tar.gz)
+- [ARMv5（Client）](https://github.com/djylb/nps/releases/latest/download/linux_arm_v5_client.tar.gz)
+- [ARMv6（Server）](https://github.com/djylb/nps/releases/latest/download/linux_arm_v6_server.tar.gz)
+- [ARMv6（Client）](https://github.com/djylb/nps/releases/latest/download/linux_arm_v6_client.tar.gz)
+- [ARMv7（Server）](https://github.com/djylb/nps/releases/latest/download/linux_arm_v7_server.tar.gz)
+- [ARMv7（Client）](https://github.com/djylb/nps/releases/latest/download/linux_arm_v7_client.tar.gz)
+
+#### **安装方式（解压后进入文件夹）**
+```bash
+# NPS 服务器
+./nps install
+nps start|stop|restart|uninstall
+
+# 更新
+nps stop
+nps-update update
+nps start
+
+# NPC 客户端
+./npc install
+/usr/bin/npc install -server=xxx:123 -vkey=xxx -type=tcp -tls_enable=true -log=off
+npc start|stop|restart|uninstall
+
+# 更新
+npc stop
+/usr/bin/npc-update update
+npc start
+```
+
+---
+
+### **2.3 macOS 安装**
+- [Intel（Server）](https://github.com/djylb/nps/releases/latest/download/darwin_amd64_server.tar.gz)
+- [Intel（Client）](https://github.com/djylb/nps/releases/latest/download/darwin_amd64_client.tar.gz)
+- [Apple Silicon（Server）](https://github.com/djylb/nps/releases/latest/download/darwin_arm64_server.tar.gz)
+- [Apple Silicon（Client）](https://github.com/djylb/nps/releases/latest/download/darwin_arm64_client.tar.gz)
+
+**安装方式（解压后进入文件夹）**
+```bash
+./npc install
+npc start|stop|restart|uninstall
+```
+
+---
+
+### **2.4 FreeBSD 安装**
+- [AMD64（Server）](https://github.com/djylb/nps/releases/latest/download/freebsd_amd64_server.tar.gz)
+- [AMD64（Client）](https://github.com/djylb/nps/releases/latest/download/freebsd_amd64_client.tar.gz)
+- [386（Server）](https://github.com/djylb/nps/releases/latest/download/freebsd_386_server.tar.gz)
+- [386（Client）](https://github.com/djylb/nps/releases/latest/download/freebsd_386_client.tar.gz)
+- [ARM（Server）](https://github.com/djylb/nps/releases/latest/download/freebsd_arm_server.tar.gz)
+- [ARM（Client）](https://github.com/djylb/nps/releases/latest/download/freebsd_arm_client.tar.gz)
+
+---
+
+## 3. 源码安装（Go 编译）
+
+### **3.1 安装依赖**
+```bash
+go get -u github.com/djylb/nps
+```
+
+### **3.2 编译**
+#### **NPS 服务器**
+```bash
+go build -o nps cmd/nps/nps.go
+```
+
+#### **NPC 客户端**
+```bash
+go build -o npc cmd/npc/npc.go
+```
+
+编译完成后，即可使用 `./nps` 或 `./npc` 启动。
+
+---
+
+## 4. 相关链接
+
+- **最新发布版本**：[GitHub Releases](https://github.com/djylb/nps/releases/latest)
+- **DockerHub 镜像**
+  - [NPS Server](https://hub.docker.com/r/duan2001/nps)
+  - [NPC Client](https://hub.docker.com/r/duan2001/npc)
+- **GHCR 镜像**
+  - [NPS Server](https://github.com/djylb/nps/pkgs/container/nps)
+  - [NPC Client](https://github.com/djylb/nps/pkgs/container/npc)
