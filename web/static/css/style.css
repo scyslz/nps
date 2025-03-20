@@ -1966,23 +1966,23 @@ button:focus {
 }
 
 .btn-primary.btn-outline {
-    color: #1ab394;
+    color: #1ab394!important;
 }
 
 .btn-success.btn-outline {
-    color: #1c84c6;
+    color: #1c84c6!important;
 }
 
 .btn-info.btn-outline {
-    color: #23c6c8;
+    color: #23c6c8!important;
 }
 
 .btn-warning.btn-outline {
-    color: #f8ac59;
+    color: #f8ac59!important;
 }
 
 .btn-danger.btn-outline {
-    color: #ed5565;
+    color: #ed5565!important;
 }
 
 .btn-primary.btn-outline:hover,
@@ -1990,7 +1990,7 @@ button:focus {
 .btn-info.btn-outline:hover,
 .btn-warning.btn-outline:hover,
 .btn-danger.btn-outline:hover {
-    color: #fff;
+    color: #fff!important;
 }
 
 .btn.active,
@@ -7046,6 +7046,22 @@ body.mini-navbar.fixed-sidebar .logo-element {
 .loginColumns {
     max-width: 800px;
     margin: 0 auto;
+}
+
+.loginColumns input {
+    height: 36px;
+}
+
+.loginColumns .captcha-group {
+    display: flex;
+}
+
+.loginColumns .captcha-group .captcha {
+    margin-left: 15px;
+}
+
+.loginColumns .captcha-group .captcha img {
+    height: 36px;
 }
 
 .passwordBox {

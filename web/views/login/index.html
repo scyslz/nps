@@ -57,9 +57,9 @@
                         <input class="form-control" langtag="word-password" name="password" placeholder="password" required="" type="password">
                     </div>
                     {{if eq true .captcha_open}}
-                    <div class="form-group">
-                        {{create_captcha}}
+                    <div class="form-group captcha-group">
                         <input class="form-control" langtag="word-captcha" name="captcha" placeholder="captcha" required="">
+                        {{create_captcha}}
                     </div>
                     {{end}}
                     <button class="btn btn-primary block full-width m-b" langtag="word-login" onclick="login()"></button>
