@@ -85,6 +85,9 @@ func (s *Client) AddConn() {
 }
 
 func (s *Client) GetConn() bool {
+	if s.NowConn < 0 {
+		s.NowConn = 0
+	}
 	if s.MaxConn == 0 || int(s.NowConn) < s.MaxConn {
 		s.CutConn()
 		return true
