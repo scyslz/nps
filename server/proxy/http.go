@@ -170,10 +170,6 @@ func (s *httpServer) handleProxy(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TCP 连接数统计
-	//host.Client.CutConn()
-	defer host.Client.CutConn()
-
 	// IP 黑名单检查
 	clientIP := common.GetIpByAddr(r.RemoteAddr)
 	if IsGlobalBlackIp(clientIP) || common.IsBlackIp(clientIP, host.Client.VerifyKey, host.Client.BlackIpList) {
@@ -204,6 +200,7 @@ func (s *httpServer) handleProxy(w http.ResponseWriter, r *http.Request) {
 		logs.Warn("Connection limit exceeded, client id %d, host id %d, error %s", host.Client.Id, host.Id, err.Error())
 		return
 	}
+	defer host.Client.CutConn()
 
 	// HTTP 认证
 	if r.Header.Get("Upgrade") == "" {
