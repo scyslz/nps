@@ -128,7 +128,7 @@ npc start
   - 前端页面美化 [#47](https://github.com/djylb/nps/pull/47)
   - 增加docker支持架构，添加shell支持
   - 向NPS的docker镜像添加tzdata软件包支持时区配置 [#45](https://github.com/djylb/nps/issues/45)
-  - 私密代理支持通过TLS连接
+  - 私密代理支持通过TLS连接 [#37](https://github.com/djylb/nps/issues/37)
   - docker添加主线分支发布
   - 修复连接数统计问题 [#48](https://github.com/djylb/nps/issues/48)
 
