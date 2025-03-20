@@ -12,8 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        platform: [linux/amd64, linux/arm, linux/arm64, linux/386, linux/mips64le, linux/ppc64le, linux/s390x] # Define the platforms for parallel builds
-        image: [nps, npc]  # Define the images to build and push (nps and npc)
+        image: [nps, npc]
     steps:
       - name: Check out code into the Go module directory
         uses: actions/checkout@v4
@@ -48,15 +47,17 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and push ${{ matrix.image }} for ${{ matrix.platform }}
+      - name: Build and push ${{ matrix.image }}
         uses: docker/build-push-action@v6
         with:
           context: .
           file: ./Dockerfile.${{ matrix.image }}
-          platforms: ${{ matrix.platform }}
+          platforms: linux/amd64,linux/arm,linux/arm64,linux/386,linux/mips64le,linux/ppc64le,linux/s390x
           push: true
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/${{ matrix.image }}:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ matrix.image }}:master
             ${{ secrets.DOCKERHUB_USERNAME }}/${{ matrix.image }}:${{ env.RELEASE_VERSION }}
             ghcr.io/${{ github.actor }}/${{ matrix.image }}:latest
+            ghcr.io/${{ github.actor }}/${{ matrix.image }}:master
             ghcr.io/${{ github.actor }}/${{ matrix.image }}:${{ env.RELEASE_VERSION }}
