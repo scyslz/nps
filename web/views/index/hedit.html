@@ -238,12 +238,12 @@
                 $("#key_file").css("display", "block")
             }
         })
-        
+
         getClientList()
     })
 
     function getClientList() {
-        const clientId = "{{if .t.Client.Id}}{{.t.Client.Id}}{{else}}{{.client_id}}{{end}}"; // 根据优先级选择
+        const clientId = "{{if .h.Client.Id}}{{.h.Client.Id}}{{else}}{{.client_id}}{{end}}"; // 根据优先级选择
         $("select[name='client_id']").empty();
         $.ajax({
             type: "POST",
