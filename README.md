@@ -120,14 +120,17 @@ npc start
 
 - **Main** 
   - 待定，优先修BUG，新功能随缘更新
+
+
+### Stable
+
+- **v0.26.40 (2025-03-21)** 
   - 前端页面美化 [#47](https://github.com/djylb/nps/pull/47)
   - 增加docker支持架构，添加shell支持
   - 向NPS的docker镜像添加tzdata软件包支持时区配置 [#45](https://github.com/djylb/nps/issues/45)
   - 私密代理支持通过TLS连接
   - docker添加主线分支发布
   - 修复连接数统计问题 [#48](https://github.com/djylb/nps/issues/48)
-
-### Stable
 
 - **v0.26.39 (2025-03-16)** 
   - 切换包至本仓库

@@ -1,5 +1,10 @@
-FROM golang:1.24 AS builder
+FROM golang:latest AS builder
 ARG GOPROXY=direct
+RUN echo 'APT::Get::Clean=always;' >> /etc/apt/apt.conf.d/99AutomaticClean && \
+    apt-get update -qqy && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -qyy --no-install-recommends \
+        ca-certificates \
+    && update-ca-certificates && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 WORKDIR /go/src/github.com/djylb/nps
 COPY . .
 RUN go mod edit -go=$(go version | awk '{print $3}' | sed 's/go//') && \
