@@ -373,7 +373,7 @@ func (s *Sock5ModeServer) Start() error {
 		}
 		logs.Trace("New socks5 connection,client %d,remote address %s", s.task.Client.Id, c.RemoteAddr())
 		s.handleConn(c)
-		s.task.Client.AddConn()
+		s.task.Client.CutConn()
 	}, &s.listener)
 }
 

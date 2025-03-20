@@ -286,7 +286,7 @@ func (https *HttpsServer) handleHttpsProxy(host *file.Host, c net.Conn, rb []byt
 		c.Close()
 		return
 	}
-	defer host.Client.AddConn()
+	defer host.Client.CutConn()
 
 	targetAddr, err := host.Target.GetRandomTarget()
 	if err != nil {

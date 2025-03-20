@@ -172,7 +172,7 @@ func (s *httpServer) handleProxy(w http.ResponseWriter, r *http.Request) {
 
 	// TCP 连接数统计
 	//host.Client.CutConn()
-	defer host.Client.AddConn()
+	defer host.Client.CutConn()
 
 	// IP 黑名单检查
 	clientIP := common.GetIpByAddr(r.RemoteAddr)

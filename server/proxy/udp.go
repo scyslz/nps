@@ -82,7 +82,7 @@ func (s *UdpModeServer) process(addr *net.UDPAddr, data []byte) {
 			logs.Warn("client id %d, task id %d,error %s, when udp connection", s.task.Client.Id, s.task.Id, err.Error())
 			return
 		}
-		defer s.task.Client.AddConn()
+		defer s.task.Client.CutConn()
 		link := conn.NewLink(common.CONN_UDP, s.task.Target.TargetStr, s.task.Client.Cnf.Crypt, s.task.Client.Cnf.Compress, addr.String(), s.allowLocalProxy && s.task.Target.LocalProxy)
 		if clientConn, err := s.bridge.SendLinkInfo(s.task.Client.Id, link, s.task); err != nil {
 			return
