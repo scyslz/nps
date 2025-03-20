@@ -9,11 +9,11 @@ RUN go mod edit -go=$(go version | awk '{print $3}' | sed 's/go//') && \
 RUN CGO_ENABLED=0 go build -ldflags="-w -s -extldflags -static" ./cmd/nps/nps.go
 RUN mkdir -p /app && \
     mkdir -p /app/web && \
-    cp /go/src/github.com/djylb/nps/nps /app/ && \
-    cp -r /go/src/github.com/djylb/nps/web/static /app/web/ && \
-    cp -r /go/src/github.com/djylb/nps/web/views /app/web/ && \
-    cp /go/src/github.com/djylb/nps/conf/nps.conf /app/nps.conf.sample && \
-    cp /go/src/github.com/djylb/nps/entrypoint.nps.sh /app/entrypoint.sh && \
+    cp ./nps /app/ && \
+    cp -r ./web/static /app/web/ && \
+    cp -r ./web/views /app/web/ && \
+    cp ./conf/nps.conf /app/nps.conf.sample && \
+    cp ./entrypoint.nps.sh /app/entrypoint.sh && \
     chmod +x /app/entrypoint.sh
 
 FROM alpine
