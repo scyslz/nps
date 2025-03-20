@@ -45,7 +45,7 @@ type flowConn struct {
 func (c *flowConn) Read(p []byte) (int, error) {
 	n, err := c.ReadWriteCloser.Read(p)
 	n64 := int64(n)
-	atomic.AddInt64(&c.flowIn, n64)
+	c.flowIn += n64
 	c.host.Client.Flow.Add(n64, n64)
 	return n, err
 }
@@ -53,7 +53,7 @@ func (c *flowConn) Read(p []byte) (int, error) {
 func (c *flowConn) Write(p []byte) (int, error) {
 	n, err := c.ReadWriteCloser.Write(p)
 	n64 := int64(n)
-	atomic.AddInt64(&c.flowOut, n64)
+	c.flowOut += n64
 	c.host.Client.Flow.Add(n64, n64)
 	return n, err
 }
