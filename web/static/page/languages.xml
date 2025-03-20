@@ -431,11 +431,11 @@
 		<en-US>Disable</en-US>
 	</lang>
 	<lang id="word-proxyprotocolv1">
-		<zh-CN>Proxy Protocol V1-字符串格式</zh-CN>
+		<zh-CN>V1-字符串格式</zh-CN>
 		<en-US>Proxy Protocol v1</en-US>
 	</lang>
 	<lang id="word-proxyprotocolv2">
-		<zh-CN>Proxy Protocol V2-二进制格式</zh-CN>
+		<zh-CN>V2-二进制格式</zh-CN>
 		<en-US>Proxy Protocol v2</en-US>
 	</lang>
 	<lang id="word-proxytolocal">
