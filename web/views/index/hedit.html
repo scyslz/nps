@@ -8,7 +8,8 @@
                     <div class="form-group">
                         <label class="control-label font-bold" langtag="word-clientid"></label>
                         <div class="col-sm-10">
-                            <input class="form-control" langtag="word-clientid" name="client_id" placeholder="" type="text" value="{{.h.Client.Id}}">
+                            <select class="form-control" langtag="word-clientid" name="client_id" placeholder=""></select>
+                            <!-- <input class="form-control" langtag="word-clientid" name="client_id" placeholder="" type="text" value="{{.h.Client.Id}}"> -->
                         </div>
                     </div>
                     <div class="form-group">
@@ -131,7 +132,7 @@
                     <div class="hr-line-dashed"></div>
                     <div class="form-group">
                         <div class="col-sm-4 col-sm-offset-2">
-                            <button class="btn btn-light" onclick="goback()" type="button">
+                            <button class="btn btn-secondary" onclick="goback()" type="button">
                                 <i class="fa fa-fw fa-lg fa-window-close"></i> <span langtag="word-cancel"></span>
                             </button>
                             <button class="btn btn-success" onclick="submitform('edit', '{{.web_base_url}}/index/edithost', $('form').serializeArray())" type="button">
@@ -237,5 +238,31 @@
                 $("#key_file").css("display", "block")
             }
         })
+        
+        getClientList()
     })
+
+    function getClientList() {
+        const clientId = "{{if .t.Client.Id}}{{.t.Client.Id}}{{else}}{{.client_id}}{{end}}"; // 根据优先级选择
+        $("select[name='client_id']").empty();
+        $.ajax({
+            type: "POST",
+            url: "{{.web_base_url}}/client/list", // 服务器数据的加载地址
+            data: {order: "asc", offset: 0, limit: 999},
+            dataType: "json",
+            success: function (data) {
+                if (data && data.rows.length > 0) {
+                    for (var i = 0; i < data.rows.length; i++) {
+                        var option = "<option value=\"" + data.rows[i].Id + "\"";
+                        option += ">" + data.rows[i].Id + '-' + data.rows[i].Remark + "</option>"; // 动态添加数据
+                        $("select[name='client_id']").append(option);
+                    }
+                    // 设置选中项
+                    if (clientId) {
+                        $("select[name='client_id']").val(clientId);
+                    }
+                }
+            }
+        });
+    }
 </script>

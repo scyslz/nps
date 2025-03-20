@@ -423,7 +423,7 @@
 		<en-US>Access address</en-US>
 	</lang>
 	<lang id="word-proxyprotocol">
-		<zh-CN>Proxy Protocol</zh-CN>
+		<zh-CN>代理协议</zh-CN>
 		<en-US>Proxy Protocol</en-US>
 	</lang>
 	<lang id="word-disable">
@@ -431,11 +431,11 @@
 		<en-US>Disable</en-US>
 	</lang>
 	<lang id="word-proxyprotocolv1">
-		<zh-CN>Proxy Protocol v1</zh-CN>
+		<zh-CN>V1-字符串格式，支持 TCPv4、TCPv6</zh-CN>
 		<en-US>Proxy Protocol v1</en-US>
 	</lang>
 	<lang id="word-proxyprotocolv2">
-		<zh-CN>Proxy Protocol v2</zh-CN>
+		<zh-CN>V2-二进制格式，支持 TCPv4、TCPv6、UDPv4、UDPv6</zh-CN>
 		<en-US>Proxy Protocol v2</en-US>
 	</lang>
 	<lang id="word-proxytolocal">
