@@ -123,6 +123,7 @@ npc start
   - 前端页面美化 [#47](https://github.com/djylb/nps/pull/47)
   - 增加docker支持架构，添加shell支持 [#45](https://github.com/djylb/nps/issues/45)
   - 私密代理支持通过TLS连接
+  - docker添加主线分支发布
 
 ### Stable
 
