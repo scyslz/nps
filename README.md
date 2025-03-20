@@ -121,6 +121,7 @@ npc start
 - **Main** 
   - 待定，优先修BUG，新功能随缘更新
   - 前端页面美化 [#47](https://github.com/djylb/nps/pull/47)
+  - 增加docker支持架构，添加shell支持 [#45](https://github.com/djylb/nps/issues/45)
 
 ### Stable
 
