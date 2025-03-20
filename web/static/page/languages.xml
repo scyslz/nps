@@ -3,7 +3,7 @@
 
 	<application>NPS</application>
 
-	<default>zh-CN</default>
+	<default>en-US</default>
 
 	<languages>
 		<zh-CN>简体中文</zh-CN>
