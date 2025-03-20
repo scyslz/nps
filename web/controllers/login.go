@@ -30,6 +30,7 @@ func init() {
 	// use beego cache system store the captcha data
 	store := cache.NewMemoryCache()
 	cpt = captcha.NewWithFilter("/captcha/", store)
+	cpt.SetLength(4)
 }
 
 func (self *LoginController) Index() {
