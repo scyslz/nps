@@ -12,8 +12,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        platform: [linux/amd64, linux/arm, linux/arm64, linux/386, linux/mips64le, linux/ppc64le, linux/s390x] # Define the platforms for parallel builds
-        image: [nps, npc]  # Define the images to build and push (nps and npc)
+        image: [nps, npc]
+        platform: [linux/amd64, linux/arm, linux/arm64, linux/386, linux/mips64le, linux/ppc64le, linux/s390x]
     steps:
       - name: Check out code into the Go module directory
         uses: actions/checkout@v4
@@ -57,6 +57,8 @@ jobs:
           push: true
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/${{ matrix.image }}:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ matrix.image }}:master
             ${{ secrets.DOCKERHUB_USERNAME }}/${{ matrix.image }}:${{ env.RELEASE_VERSION }}
             ghcr.io/${{ github.actor }}/${{ matrix.image }}:latest
+            ghcr.io/${{ github.actor }}/${{ matrix.image }}:master
             ghcr.io/${{ github.actor }}/${{ matrix.image }}:${{ env.RELEASE_VERSION }}
