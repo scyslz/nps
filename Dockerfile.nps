@@ -8,7 +8,8 @@ RUN go mod edit -go=$(go version | awk '{print $3}' | sed 's/go//') && \
 RUN CGO_ENABLED=0 go build -ldflags="-w -s -extldflags -static" ./cmd/nps/nps.go
 RUN mkdir tmp
 
-FROM busybox:stable-glibc
+FROM alpine
+RUN apk add --no-cache tzdata
 COPY --from=builder /go/src/github.com/djylb/nps/nps /
 COPY --from=builder /go/src/github.com/djylb/nps/web /web
 COPY --from=builder /go/src/github.com/djylb/nps/tmp /tmp
