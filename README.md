@@ -120,7 +120,7 @@ npc start
 
 - **Main** 
   - 待定，优先修BUG，新功能随缘更新
-
+  - Docker自动创建NPS默认配置 **（一定要记得改配置）**
 
 ### Stable
 
