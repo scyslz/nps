@@ -9,10 +9,12 @@ on:
 
 jobs:
   build_docker:
-
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        platform: [linux/amd64, linux/arm, linux/arm64, linux/386, linux/mips64le, linux/ppc64le, linux/s390x] # Define the platforms for parallel builds
+        image: [nps, npc]  # Define the images to build and push (nps and npc)
     steps:
-
       - name: Check out code into the Go module directory
         uses: actions/checkout@v4
 
@@ -46,28 +48,15 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and push nps
+      - name: Build and push ${{ matrix.image }} for ${{ matrix.platform }}
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: ./Dockerfile.nps
-          platforms: linux/amd64,linux/arm,linux/arm64,linux/386,linux/mips64le,linux/ppc64le,linux/s390x
+          file: ./Dockerfile.${{ matrix.image }}
+          platforms: ${{ matrix.platform }}
           push: true
           tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/nps:latest
-            ${{ secrets.DOCKERHUB_USERNAME }}/nps:${{ env.RELEASE_VERSION }}
-            ghcr.io/${{ github.actor }}/nps:latest
-            ghcr.io/${{ github.actor }}/nps:${{ env.RELEASE_VERSION }}
-
-      - name: Build and push npc
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: ./Dockerfile.npc
-          platforms: linux/amd64,linux/arm,linux/arm64,linux/386,linux/mips64le,linux/ppc64le,linux/s390x
-          push: true
-          tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/npc:latest
-            ${{ secrets.DOCKERHUB_USERNAME }}/npc:${{ env.RELEASE_VERSION }}
-            ghcr.io/${{ github.actor }}/npc:latest
-            ghcr.io/${{ github.actor }}/npc:${{ env.RELEASE_VERSION }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ matrix.image }}:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ matrix.image }}:${{ env.RELEASE_VERSION }}
+            ghcr.io/${{ github.actor }}/${{ matrix.image }}:latest
+            ghcr.io/${{ github.actor }}/${{ matrix.image }}:${{ env.RELEASE_VERSION }}
