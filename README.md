@@ -120,6 +120,7 @@ npc start
 
 - **Main** 
   - 待定，优先修BUG，新功能随缘更新
+  - 前端页面美化 [#47](https://github.com/djylb/nps/pull/47)
 
 ### Stable
 
