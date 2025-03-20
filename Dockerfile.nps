@@ -1,4 +1,4 @@
-FROM golang:1.24 AS builder
+FROM golang:latest AS builder
 ARG GOPROXY=direct
 WORKDIR /go/src/github.com/djylb/nps
 COPY . .
@@ -8,7 +8,7 @@ RUN go mod edit -go=$(go version | awk '{print $3}' | sed 's/go//') && \
 RUN CGO_ENABLED=0 go build -ldflags="-w -s -extldflags -static" ./cmd/nps/nps.go
 RUN mkdir tmp
 
-FROM scratch
+FROM busybox:stable-glibc
 COPY --from=builder /go/src/github.com/djylb/nps/nps /
 COPY --from=builder /go/src/github.com/djylb/nps/web /web
 COPY --from=builder /go/src/github.com/djylb/nps/tmp /tmp
