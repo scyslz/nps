@@ -251,6 +251,7 @@ func run() {
 	common.InitPProfFromArg(*pprofAddr)
 	//p2p or secret command
 	if *password != "" {
+		client.SetTlsEnable(*tlsEnable)
 		commonConfig := new(config.CommonConfig)
 		commonConfig.Server = *serverAddr
 		commonConfig.VKey = *verifyKey
