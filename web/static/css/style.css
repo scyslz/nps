@@ -12032,6 +12032,12 @@ body.md-skin {
     right: 0;
     overflow-y: auto;
     overflow-x: hidden;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.sidebar-collapse::-webkit-scrollbar {
+    display: none;
 }
 
 .body-small .sidebar-collapse {
