@@ -121,6 +121,7 @@ npc start
 - **Main** 
   - 待定，优先修BUG，新功能随缘更新
   - Docker自动创建NPS默认配置 **（一定要记得改配置）**
+  - 修复页面滚动时，左侧菜单、顶部标题、底部footer一起滚动问题 [#49](https://github.com/djylb/nps/pull/49)
 
 ### Stable
 
