@@ -12,7 +12,6 @@ import (
 	"path/filepath"
 	"strconv"
 	"sync"
-	"sync/atomic"
 	"time"
 
 	"github.com/beego/beego"
@@ -40,12 +39,15 @@ type flowConn struct {
 	flowIn   int64
 	flowOut  int64
 	once     sync.Once
+	mu       sync.Mutex
 }
 
 func (c *flowConn) Read(p []byte) (int, error) {
 	n, err := c.ReadWriteCloser.Read(p)
 	n64 := int64(n)
-	atomic.AddInt64(&c.flowIn, n64)
+	c.mu.Lock()
+	c.flowIn += n64
+	c.mu.Unlock()
 	c.host.Client.Flow.Add(n64, n64)
 	return n, err
 }
@@ -53,7 +55,9 @@ func (c *flowConn) Read(p []byte) (int, error) {
 func (c *flowConn) Write(p []byte) (int, error) {
 	n, err := c.ReadWriteCloser.Write(p)
 	n64 := int64(n)
-	atomic.AddInt64(&c.flowOut, n64)
+	c.mu.Lock()
+	c.flowOut += n64
+	c.mu.Unlock()
 	c.host.Client.Flow.Add(n64, n64)
 	return n, err
 }
@@ -166,10 +170,6 @@ func (s *httpServer) handleProxy(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TCP 连接数统计
-	//host.Client.CutConn()
-	defer host.Client.AddConn()
-
 	// IP 黑名单检查
 	clientIP := common.GetIpByAddr(r.RemoteAddr)
 	if IsGlobalBlackIp(clientIP) || common.IsBlackIp(clientIP, host.Client.VerifyKey, host.Client.BlackIpList) {
@@ -200,6 +200,7 @@ func (s *httpServer) handleProxy(w http.ResponseWriter, r *http.Request) {
 		logs.Warn("Connection limit exceeded, client id %d, host id %d, error %s", host.Client.Id, host.Id, err.Error())
 		return
 	}
+	defer host.Client.CutConn()
 
 	// HTTP 认证
 	if r.Header.Get("Upgrade") == "" {

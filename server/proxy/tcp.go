@@ -66,7 +66,7 @@ func (s *TunnelModeServer) Start() error {
 		logs.Trace("new tcp connection,local port %d,client %d,remote address %s", s.task.Port, s.task.Client.Id, c.RemoteAddr())
 
 		s.process(conn.NewConn(c), s)
-		s.task.Client.AddConn()
+		s.task.Client.CutConn()
 	}, &s.listener)
 }
 

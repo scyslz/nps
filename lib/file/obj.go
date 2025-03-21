@@ -38,7 +38,7 @@ type Client struct {
 	VerifyKey       string     //verify key
 	Addr            string     //the ip of client
 	Remark          string     //remark
-	Status          bool       //is allow connect
+	Status          bool       //is allowed connect
 	IsConnect       bool       //is the client connect
 	RateLimit       int        //rate /kb
 	Flow            *Flow      //flow setting
@@ -49,7 +49,7 @@ type Client struct {
 	NowConn         int32      //the connection num of now
 	WebUserName     string     //the username of web login
 	WebPassword     string     //the password of web login
-	ConfigConnAllow bool       //is allow connected by config file
+	ConfigConnAllow bool       //is allowed connected by config file
 	MaxTunnelNum    int
 	Version         string
 	BlackIpList     []string
@@ -76,17 +76,20 @@ func NewClient(vKey string, noStore bool, noDisplay bool) *Client {
 	}
 }
 
-func (s *Client) CutConn() {
+func (s *Client) AddConn() {
 	atomic.AddInt32(&s.NowConn, 1)
 }
 
-func (s *Client) AddConn() {
+func (s *Client) CutConn() {
 	atomic.AddInt32(&s.NowConn, -1)
 }
 
 func (s *Client) GetConn() bool {
+	if s.NowConn < 0 {
+		s.NowConn = 0
+	}
 	if s.MaxConn == 0 || int(s.NowConn) < s.MaxConn {
-		s.CutConn()
+		s.AddConn()
 		return true
 	}
 	return false
