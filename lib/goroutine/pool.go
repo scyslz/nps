@@ -18,80 +18,66 @@ type connGroup struct {
 	dst    io.ReadWriteCloser
 	wg     *sync.WaitGroup
 	n      *int64
-	flow   *file.Flow
+	flows  []*file.Flow
 	task   *file.Tunnel
 	remote string
 }
 
-//func newConnGroup(dst, src io.ReadWriteCloser, wg *sync.WaitGroup, n *int64) connGroup {
-//	return connGroup{
-//		src: src,
-//		dst: dst,
-//		wg:  wg,
-//		n:   n,
-//	}
-//}
-
-func newConnGroup(dst, src io.ReadWriteCloser, wg *sync.WaitGroup, n *int64, flow *file.Flow, task *file.Tunnel, remote string) connGroup {
+func newConnGroup(dst, src io.ReadWriteCloser, wg *sync.WaitGroup, n *int64, flows []*file.Flow, task *file.Tunnel, remote string) connGroup {
 	return connGroup{
 		src:    src,
 		dst:    dst,
 		wg:     wg,
 		n:      n,
-		flow:   flow,
+		flows:  flows,
 		task:   task,
 		remote: remote,
 	}
 }
 
-func CopyBuffer(dst io.Writer, src io.Reader, flow *file.Flow, task *file.Tunnel, remote string) (err error) {
+func CopyBuffer(dst io.Writer, src io.Reader, flows []*file.Flow, task *file.Tunnel, remote string) (err error) {
 	buf := common.CopyBuff.Get()
 	defer common.CopyBuff.Put(buf)
+
+	checkedHTTP := false
+Loop:
 	for {
-		if len(buf) <= 0 {
-			break
-		}
 		nr, er := src.Read(buf)
-
-		//if len(pr)>0 && pr[0] && nr > 50 {
-		//	logs.Warn(string(buf[:50]))
-		//}
-
-		if task != nil {
-			task.IsHttp = false
-			firstLine := string(buf[0:nr])
-			if len(firstLine) > 3 {
-				method := firstLine[0:3]
-				if method != "" && (method == "HTT" || method == "GET" || method == "POS" || method == "HEA" || method == "PUT" || method == "DEL") {
-					if method != "HTT" {
-						heads := strings.Split(firstLine, "\r\n")
-						if len(heads) >= 2 {
-							logs.Info("HTTP Request method %s, %s, remote address %s, target %s", heads[0], heads[1], remote, task.Target.TargetStr)
+		if nr > 0 {
+			if task != nil && !checkedHTTP {
+				checkedHTTP = true
+				firstLine := string(buf[:nr])
+				if len(firstLine) > 3 {
+					method := firstLine[:3]
+					if method == "HTT" || method == "GET" || method == "POS" || method == "HEA" || method == "PUT" || method == "DEL" {
+						if method != "HTT" {
+							heads := strings.Split(firstLine, "\r\n")
+							if len(heads) >= 2 {
+								logs.Info("HTTP Request method %s, %s, remote address %s, target %s", heads[0], heads[1], remote, task.Target.TargetStr)
+							}
 						}
+						task.IsHttp = true
+					} else {
+						task.IsHttp = false
 					}
-
-					task.IsHttp = true
 				}
 			}
-		}
-
-		if nr > 0 {
-			nw, ew := dst.Write(buf[0:nr])
-			if nw > 0 {
-				//written += int64(nw)
-				if flow != nil {
-					flow.Add(int64(nw), int64(nw))
-					// <<20 = 1024 * 1024
-					if flow.FlowLimit > 0 && (flow.FlowLimit<<20) < (flow.ExportFlow+flow.InletFlow) {
-						logs.Info("流量已经超出.........")
-						break
+			nw, ew := dst.Write(buf[:nr])
+			if nw > 0 && len(flows) > 0 {
+				for _, f := range flows {
+					if f == nil {
+						continue
 					}
-					if !flow.TimeLimit.IsZero() && flow.TimeLimit.Before(time.Now()) {
-						logs.Info("时间已超出.........")
-						break
+					f.Add(int64(nw), int64(nw))
+					if f.FlowLimit > 0 && (f.FlowLimit<<20) < (f.ExportFlow+f.InletFlow) {
+						logs.Info("Flow limit exceeded")
+						break Loop
+					}
+					if !f.TimeLimit.IsZero() && f.TimeLimit.Before(time.Now()) {
+						logs.Info("Time limit exceeded")
+						break Loop
 					}
 				}
-
 			}
 			if ew != nil {
 				err = ew
@@ -107,63 +93,49 @@ func CopyBuffer(dst io.Writer, src io.Reader, flow *file.Flow, task *file.Tunnel
 			break
 		}
 	}
-	//return written, err
 	return err
 }
 
 func copyConnGroup(group interface{}) {
-	//logs.Info("copyConnGroup.........")
 	cg, ok := group.(connGroup)
 	if !ok {
 		return
 	}
-	var err error
-	err = CopyBuffer(cg.dst, cg.src, cg.flow, cg.task, cg.remote)
+	err := CopyBuffer(cg.dst, cg.src, cg.flows, cg.task, cg.remote)
 	if err != nil {
 		cg.src.Close()
 		cg.dst.Close()
-		//logs.Warn("close npc by copy from nps", err, c.connId)
 	}
-
-	//if conns.flow != nil {
-	//	conns.flow.Add(in, out)
-	//}
 	cg.wg.Done()
 }
 
 type Conns struct {
 	conn1 io.ReadWriteCloser // mux connection
 	conn2 net.Conn           // outside connection
-	flow  *file.Flow
+	flows []*file.Flow       // support multiple flows
 	wg    *sync.WaitGroup
 	task  *file.Tunnel
 }
 
-func NewConns(c1 io.ReadWriteCloser, c2 net.Conn, flow *file.Flow, wg *sync.WaitGroup, task *file.Tunnel) Conns {
+func NewConns(c1 io.ReadWriteCloser, c2 net.Conn, flows []*file.Flow, wg *sync.WaitGroup, task *file.Tunnel) Conns {
 	return Conns{
 		conn1: c1,
 		conn2: c2,
-		flow:  flow,
+		flows: flows,
 		wg:    wg,
 		task:  task,
 	}
 }
 
 func copyConns(group interface{}) {
-	//logs.Info("copyConns.........")
 	conns := group.(Conns)
 	wg := new(sync.WaitGroup)
 	wg.Add(2)
 	var in, out int64
 	remoteAddr := conns.conn2.RemoteAddr().String()
-	_ = connCopyPool.Invoke(newConnGroup(conns.conn1, conns.conn2, wg, &in, conns.flow, conns.task, remoteAddr))
-	// outside to mux : incoming
-	_ = connCopyPool.Invoke(newConnGroup(conns.conn2, conns.conn1, wg, &out, conns.flow, conns.task, remoteAddr))
-	// mux to outside : outgoing
+	_ = connCopyPool.Invoke(newConnGroup(conns.conn1, conns.conn2, wg, &in, conns.flows, conns.task, remoteAddr))
+	_ = connCopyPool.Invoke(newConnGroup(conns.conn2, conns.conn1, wg, &out, conns.flows, conns.task, remoteAddr))
 	wg.Wait()
-	//if conns.flow != nil {
-	//	conns.flow.Add(in, out)
-	//}
 	conns.wg.Done()
 }
 

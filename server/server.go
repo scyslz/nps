@@ -27,6 +27,7 @@ import (
 var (
 	Bridge  *bridge.Bridge
 	RunList sync.Map //map[int]interface{}
+	once    sync.Once
 )
 
 func init() {
@@ -72,7 +73,7 @@ func DealBridgeTask() {
 			logs.Trace("New secret connection, addr", s.Conn.Conn.RemoteAddr())
 			if t := file.GetDb().GetTaskByMd5Password(s.Password); t != nil {
 				if t.Status {
-					go proxy.NewBaseServer(Bridge, t).DealClient(s.Conn, t.Client, t.Target.TargetStr, nil, common.CONN_TCP, nil, t.Flow, t.Target.ProxyProtocol, t.Target.LocalProxy, nil)
+					go proxy.NewBaseServer(Bridge, t).DealClient(s.Conn, t.Client, t.Target.TargetStr, nil, common.CONN_TCP, nil, []*file.Flow{t.Flow, t.Client.Flow}, t.Target.ProxyProtocol, t.Target.LocalProxy, nil)
 				} else {
 					s.Conn.Close()
 					logs.Trace("This key %s cannot be processed,status is close", s.Password)
@@ -533,15 +534,21 @@ func GetCurrentYear() int {
 
 // 实例化流量数据到文件
 func flowSession(m time.Duration) {
-	ticker := time.NewTicker(m)
-	defer ticker.Stop()
-	for {
-		select {
-		case <-ticker.C:
-			file.GetDb().JsonDb.StoreHostToJsonFile()
-			file.GetDb().JsonDb.StoreTasksToJsonFile()
-			file.GetDb().JsonDb.StoreClientsToJsonFile()
-			file.GetDb().JsonDb.StoreGlobalToJsonFile()
+	file.GetDb().JsonDb.StoreHostToJsonFile()
+	file.GetDb().JsonDb.StoreTasksToJsonFile()
+	file.GetDb().JsonDb.StoreClientsToJsonFile()
+	file.GetDb().JsonDb.StoreGlobalToJsonFile()
+	once.Do(func() {
+		ticker := time.NewTicker(m)
+		defer ticker.Stop()
+		for {
+			select {
+			case <-ticker.C:
+				file.GetDb().JsonDb.StoreHostToJsonFile()
+				file.GetDb().JsonDb.StoreTasksToJsonFile()
+				file.GetDb().JsonDb.StoreClientsToJsonFile()
+				file.GetDb().JsonDb.StoreGlobalToJsonFile()
+			}
 		}
-	}
+	})
 }

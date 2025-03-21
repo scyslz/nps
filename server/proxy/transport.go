@@ -10,13 +10,14 @@ import (
 
 	"github.com/djylb/nps/lib/common"
 	"github.com/djylb/nps/lib/conn"
+	"github.com/djylb/nps/lib/file"
 )
 
 func HandleTrans(c *conn.Conn, s *TunnelModeServer) error {
 	if addr, err := getAddress(c.Conn); err != nil {
 		return err
 	} else {
-		return s.DealClient(c, s.task.Client, addr, nil, common.CONN_TCP, nil, s.task.Flow, s.task.Target.ProxyProtocol, s.task.Target.LocalProxy, nil)
+		return s.DealClient(c, s.task.Client, addr, nil, common.CONN_TCP, nil, []*file.Flow{s.task.Flow, s.task.Client.Flow}, s.task.Target.ProxyProtocol, s.task.Target.LocalProxy, nil)
 	}
 }
 

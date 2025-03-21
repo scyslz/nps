@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"context"
 	"crypto/tls"
+	"fmt"
 	"io"
 	"net"
 	"net/http"
@@ -26,55 +27,61 @@ import (
 
 var localTCPAddr = &net.TCPAddr{IP: net.ParseIP("127.0.0.1")}
 
-var bufferPool = sync.Pool{
-	New: func() interface{} {
-		return make([]byte, 32*1024)
-	},
-}
-
-type flowConn struct {
+type basicConn struct {
 	io.ReadWriteCloser
 	fakeAddr net.Addr
-	host     *file.Host
-	flowIn   int64
-	flowOut  int64
-	once     sync.Once
-	mu       sync.Mutex
+}
+
+func (c *basicConn) LocalAddr() net.Addr                { return c.fakeAddr }
+func (c *basicConn) RemoteAddr() net.Addr               { return c.fakeAddr }
+func (c *basicConn) SetDeadline(t time.Time) error      { return nil }
+func (c *basicConn) SetReadDeadline(t time.Time) error  { return nil }
+func (c *basicConn) SetWriteDeadline(t time.Time) error { return nil }
+
+type flowConn struct {
+	*basicConn
+	host       *file.Host
+}
+
+func checkFlowLimits(f *file.Flow, label string, now time.Time) error {
+	if f.FlowLimit > 0 && (f.InletFlow+f.ExportFlow) > (f.FlowLimit<<20) {
+		return fmt.Errorf("%s: flow limit exceeded", label)
+	}
+	if !f.TimeLimit.IsZero() && f.TimeLimit.Before(now) {
+		return fmt.Errorf("%s: time limit exceeded", label)
+	}
+	return nil
 }
 
 func (c *flowConn) Read(p []byte) (int, error) {
-	n, err := c.ReadWriteCloser.Read(p)
+	n, err := c.basicConn.Read(p)
 	n64 := int64(n)
-	c.mu.Lock()
-	c.flowIn += n64
-	c.mu.Unlock()
+	c.host.Flow.Add(0, n64)
 	c.host.Client.Flow.Add(n64, n64)
+	now := time.Now()
+	if err := checkFlowLimits(c.host.Flow, "Host", now); err != nil {
+		return n, err
+	}
+	if err := checkFlowLimits(c.host.Client.Flow, "Client", now); err != nil {
+		return n, err
+	}
 	return n, err
 }
 
 func (c *flowConn) Write(p []byte) (int, error) {
-	n, err := c.ReadWriteCloser.Write(p)
+	n, err := c.basicConn.Write(p)
 	n64 := int64(n)
-	c.mu.Lock()
-	c.flowOut += n64
-	c.mu.Unlock()
+	c.host.Flow.Add(n64, 0)
 	c.host.Client.Flow.Add(n64, n64)
+	now := time.Now()
+	if err := checkFlowLimits(c.host.Flow, "Host", now); err != nil {
+		return n, err
+	}
+	if err := checkFlowLimits(c.host.Client.Flow, "Client", now); err != nil {
+		return n, err
+	}
 	return n, err
 }
-
-func (c *flowConn) Close() error {
-	c.once.Do(func() {
-		//c.host.Client.Flow.Add(c.flowIn, c.flowOut)
-		c.host.Flow.Add(c.flowOut, c.flowIn)
-	})
-	return c.ReadWriteCloser.Close()
-}
-
-func (c *flowConn) LocalAddr() net.Addr              { return c.fakeAddr }
-func (c *flowConn) RemoteAddr() net.Addr             { return c.fakeAddr }
-func (*flowConn) SetDeadline(t time.Time) error      { return nil }
-func (*flowConn) SetReadDeadline(t time.Time) error  { return nil }
-func (*flowConn) SetWriteDeadline(t time.Time) error { return nil }
 
 type httpServer struct {
 	BaseServer
@@ -277,8 +284,10 @@ func (s *httpServer) handleProxy(w http.ResponseWriter, r *http.Request) {
 				}
 				rawConn := conn.GetConn(target, link.Crypt, link.Compress, host.Client.Rate, true)
 				return &flowConn{
-					ReadWriteCloser: rawConn,
-					fakeAddr:        localTCPAddr,
+					basicConn: &basicConn{
+						ReadWriteCloser: rawConn,
+						fakeAddr:        localTCPAddr,
+					},
 					host:            host,
 				}, nil
 			},
@@ -319,10 +328,9 @@ func (s *httpServer) handleWebsocket(w http.ResponseWriter, r *http.Request, hos
 		return
 	}
 	rawConn := conn.GetConn(targetConn, link.Crypt, link.Compress, host.Client.Rate, true)
-	wsConn := &flowConn{
+	wsConn := &basicConn{
 		ReadWriteCloser: rawConn,
 		fakeAddr:        localTCPAddr,
-		host:            host,
 	}
 	var netConn net.Conn = wsConn
 
@@ -396,21 +404,21 @@ func (s *httpServer) handleWebsocket(w http.ResponseWriter, r *http.Request, hos
 		return
 	}
 
-	join(clientConn, netConn, host.Flow, s.task, r.RemoteAddr)
+	join(clientConn, netConn, []*file.Flow{host.Flow, host.Client.Flow}, s.task, r.RemoteAddr)
 }
 
-func join(c1, c2 net.Conn, flow *file.Flow, task *file.Tunnel, remote string) {
+func join(c1, c2 net.Conn, flows []*file.Flow, task *file.Tunnel, remote string) {
 	var wg sync.WaitGroup
 	wg.Add(2)
 	go func() {
-		if err := goroutine.CopyBuffer(c1, c2, flow, task, remote); err != nil {
+		if err := goroutine.CopyBuffer(c1, c2, flows, task, remote); err != nil {
 			c1.Close()
 			c2.Close()
 		}
 		wg.Done()
 	}()
 	go func() {
-		if err := goroutine.CopyBuffer(c2, c1, flow, task, remote); err != nil {
+		if err := goroutine.CopyBuffer(c2, c1, flows, task, remote); err != nil {
 			c1.Close()
 			c2.Close()
 		}

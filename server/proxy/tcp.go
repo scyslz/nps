@@ -138,7 +138,7 @@ func ProcessTunnel(c *conn.Conn, s *TunnelModeServer) error {
 		return err
 	}
 
-	return s.DealClient(c, s.task.Client, targetAddr, nil, common.CONN_TCP, nil, s.task.Client.Flow, s.task.Target.ProxyProtocol, s.task.Target.LocalProxy, s.task)
+	return s.DealClient(c, s.task.Client, targetAddr, nil, common.CONN_TCP, nil, []*file.Flow{s.task.Flow, s.task.Client.Flow}, s.task.Target.ProxyProtocol, s.task.Target.LocalProxy, s.task)
 }
 
 // http proxy
@@ -159,5 +159,5 @@ func ProcessHttp(c *conn.Conn, s *TunnelModeServer) error {
 		rb = nil
 	}
 
-	return s.DealClient(c, s.task.Client, addr, rb, common.CONN_TCP, nil, s.task.Client.Flow, s.task.Target.ProxyProtocol, s.task.Target.LocalProxy, nil)
+	return s.DealClient(c, s.task.Client, addr, rb, common.CONN_TCP, nil, []*file.Flow{s.task.Flow, s.task.Client.Flow}, s.task.Target.ProxyProtocol, s.task.Target.LocalProxy, nil)
 }

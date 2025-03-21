@@ -20,9 +20,9 @@ type Flow struct {
 
 func (s *Flow) Add(in, out int64) {
 	s.Lock()
-	defer s.Unlock()
 	s.InletFlow += int64(in)
 	s.ExportFlow += int64(out)
+	s.Unlock()
 }
 
 type Config struct {

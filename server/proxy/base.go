@@ -111,7 +111,7 @@ func in(target string, str_array []string) bool {
 
 // 处理客户端连接
 func (s *BaseServer) DealClient(c *conn.Conn, client *file.Client, addr string,
-	rb []byte, tp string, f func(), flow *file.Flow, proxyProtocol int, localProxy bool, task *file.Tunnel) error {
+	rb []byte, tp string, f func(), flows []*file.Flow, proxyProtocol int, localProxy bool, task *file.Tunnel) error {
 
 	// 判断访问地址是否在全局黑名单内
 	if IsGlobalBlackIp(c.RemoteAddr().String()) {
@@ -142,7 +142,7 @@ func (s *BaseServer) DealClient(c *conn.Conn, client *file.Client, addr string,
 	}
 
 	// 开始数据转发
-	conn.CopyWaitGroup(target, c.Conn, link.Crypt, link.Compress, client.Rate, flow, true, proxyProtocol, rb, task)
+	conn.CopyWaitGroup(target, c.Conn, link.Crypt, link.Compress, client.Rate, flows, true, proxyProtocol, rb, task)
 	return nil
 }
 

@@ -377,9 +377,7 @@ func SetUdpSession(sess *kcp.UDPSession) {
 
 // conn1 mux conn
 func CopyWaitGroup(conn1, conn2 net.Conn, crypt bool, snappy bool, rate *rate.Rate,
-	flow *file.Flow, isServer bool, proxyProtocol int, rb []byte, task *file.Tunnel) {
-	//var in, out int64
-	//var wg sync.WaitGroup
+	flows []*file.Flow, isServer bool, proxyProtocol int, rb []byte, task *file.Tunnel) {
 	connHandle := GetConn(conn1, crypt, snappy, rate, isServer)
 	proxyHeader := BuildProxyProtocolHeader(conn2, proxyProtocol)
 	if proxyHeader != nil {
@@ -389,23 +387,9 @@ func CopyWaitGroup(conn1, conn2 net.Conn, crypt bool, snappy bool, rate *rate.Ra
 	if rb != nil {
 		connHandle.Write(rb)
 	}
-	//go func(in *int64) {
-	//	wg.Add(1)
-	//	*in, _ = common.CopyBuffer(connHandle, conn2)
-	//	connHandle.Close()
-	//	conn2.Close()
-	//	wg.Done()
-	//}(&in)
-	//out, _ = common.CopyBuffer(conn2, connHandle)
-	//connHandle.Close()
-	//conn2.Close()
-	//wg.Wait()
-	//if flow != nil {
-	//	flow.Add(in, out)
-	//}
 	wg := new(sync.WaitGroup)
 	wg.Add(1)
-	err := goroutine.CopyConnsPool.Invoke(goroutine.NewConns(connHandle, conn2, flow, wg, task))
+	err := goroutine.CopyConnsPool.Invoke(goroutine.NewConns(connHandle, conn2, flows, wg, task))
 	wg.Wait()
 	if err != nil {
 		logs.Error(err)

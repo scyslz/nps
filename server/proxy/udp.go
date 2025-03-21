@@ -75,7 +75,10 @@ func (s *UdpModeServer) process(addr *net.UDPAddr, data []byte) {
 				logs.Warn(err)
 				return
 			}
-			s.task.Client.Flow.Add(int64(len(data)), int64(len(data)))
+
+			dataLength := int64(len(data))
+			s.task.Flow.Add(dataLength, 0)
+			s.task.Client.Flow.Add(dataLength, dataLength)
 		}
 	} else {
 		if err := s.CheckFlowAndConnNum(s.task.Client); err != nil {
@@ -84,42 +87,43 @@ func (s *UdpModeServer) process(addr *net.UDPAddr, data []byte) {
 		}
 		defer s.task.Client.CutConn()
 		link := conn.NewLink(common.CONN_UDP, s.task.Target.TargetStr, s.task.Client.Cnf.Crypt, s.task.Client.Cnf.Compress, addr.String(), s.allowLocalProxy && s.task.Target.LocalProxy)
-		if clientConn, err := s.bridge.SendLinkInfo(s.task.Client.Id, link, s.task); err != nil {
+		clientConn, err := s.bridge.SendLinkInfo(s.task.Client.Id, link, s.task)
+		if err != nil {
 			return
-		} else {
-			target := conn.GetConn(clientConn, s.task.Client.Cnf.Crypt, s.task.Client.Cnf.Compress, nil, true)
-			s.addrMap.Store(addr.String(), target)
-			defer target.Close()
+		}
+		target := conn.GetConn(clientConn, s.task.Client.Cnf.Crypt, s.task.Client.Cnf.Compress, nil, true)
+		s.addrMap.Store(addr.String(), target)
+		defer target.Close()
 
-			_, err := target.Write(data)
+		_, err = target.Write(data)
+		if err != nil {
+			logs.Warn(err)
+			return
+		}
+		dataLength := int64(len(data))
+		s.task.Flow.Add(dataLength, 0)
+		s.task.Client.Flow.Add(dataLength, dataLength)
+
+		buf := common.BufPoolUdp.Get().([]byte)
+		defer common.BufPoolUdp.Put(buf)
+
+		for {
+			clientConn.SetReadDeadline(time.Now().Add(60 * time.Second))
+			n, err := target.Read(buf)
+			if err != nil {
+				s.addrMap.Delete(addr.String())
+				logs.Warn(err)
+				return
+			}
+			_, err = s.listener.WriteTo(buf[:n], addr)
 			if err != nil {
 				logs.Warn(err)
 				return
 			}
 
-			buf := common.BufPoolUdp.Get().([]byte)
-			defer common.BufPoolUdp.Put(buf)
-
-			s.task.Client.Flow.Add(int64(len(data)), int64(len(data)))
-			for {
-				clientConn.SetReadDeadline(time.Now().Add(time.Duration(60) * time.Second))
-				if n, err := target.Read(buf); err != nil {
-					s.addrMap.Delete(addr.String())
-					logs.Warn(err)
-					return
-				} else {
-					_, err := s.listener.WriteTo(buf[:n], addr)
-					if err != nil {
-						logs.Warn(err)
-						return
-					}
-					s.task.Client.Flow.Add(int64(n), int64(n))
-				}
-				//if err := s.CheckFlowAndConnNum(s.task.Client); err != nil {
-				//	logs.Warn("client id %d, task id %d,error %s, when udp connection", s.task.Client.Id, s.task.Id, err.Error())
-				//	return
-				//}
-			}
+			n64 := int64(n)
+			s.task.Flow.Add(0, n64)
+			s.task.Client.Flow.Add(n64, n64)
 		}
 	}
 }
