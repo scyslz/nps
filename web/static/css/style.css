@@ -1528,6 +1528,7 @@ body.mini-navbar .navbar-default .nav > li > .nav-second-level li a {
 
 .navbar-static-side {
     transition: width 0s;
+    position: relative;
 }
 
 .footer {
@@ -12020,5 +12021,19 @@ body.md-skin {
     left: 0;
     right: 0;
     margin: 0;
-    overflow: auto;
+    overflow-y: auto;
+}
+
+.sidebar-collapse {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.body-small .sidebar-collapse {
+    bottom: 40px;
 }
