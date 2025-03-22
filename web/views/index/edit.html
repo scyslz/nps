@@ -58,6 +58,31 @@
                             <input class="form-control" langtag="info-suchasport" name="port" placeholder="" type="text" value="{{.t.Port}}">
                         </div>
                     </div>
+                    <div class="form-group" id="flow_reset">
+                        <label class="control-label font-bold" langtag="word-flowreset"></label>
+                        <div class="col-sm-10">
+                            <input name="flow_reset" type="checkbox" value="1">
+                            <span class="help-block m-b-none" langtag="info-flowreset"></span>
+                        </div>
+                    </div>
+                    {{if eq true .allow_flow_limit}}
+                    <div class="form-group" id="flow_limit">
+                        <label class="control-label font-bold" langtag="word-flowlimit"></label>
+                        <div class="col-sm-10">
+                            <input class="form-control" langtag="info-unrestricted" name="flow_limit" placeholder="" type="text" value="{{.h.Flow.FlowLimit}}">
+                            <span class="help-block m-b-none" langtag="word-unit"></span>: M
+                        </div>
+                    </div>
+                    {{end}}
+                    {{if eq true .allow_time_limit}}
+                    <div class="form-group" id="time_limit">
+                        <label class="control-label font-bold" langtag="word-timelimit"></label>
+                        <div class="col-sm-10">
+                            <input class="form-control" id="time_limit_input" langtag="info-unrestricted" name="time_limit" placeholder="" type="text" value="{{.h.Flow.TimeLimit}}">
+                            <span class="help-block m-b-none" langtag="info-timelimit"></span>
+                        </div>
+                    </div>
+                    {{end}}
                     <div class="form-group" id="proxy_protocol">
                         <label class="control-label font-bold" langtag="word-proxyprotocol"></label>
                         <div class="col-sm-10">
@@ -128,14 +153,14 @@
 
 <script>
     var arr = []
-    arr["all"] = ["port", "target", "password", "local_path", "strip_pre", "proxy_protocol", "local_proxy"]
-    arr["tcp"] = ["client_id", "port", "target", "proxy_protocol", "local_proxy"]
-    arr["udp"] = ["client_id", "port", "target", "local_proxy"]
-    arr["socks5"] = ["client_id", "port"]
-    arr["httpProxy"] = ["client_id", "port"]
-    arr["secret"] = ["client_id", "target", "password"]
-    arr["p2p"] = ["client_id", "target", "password"]
-    arr["file"] = ["client_id", "port", "local_path", "strip_pre"]
+    arr["all"] = ["server_ip", "port", "target", "password", "flow_reset", "flow_limit", "time_limit", "local_path", "strip_pre", "proxy_protocol", "local_proxy"]
+    arr["tcp"] = ["client_id", "port", "target", "proxy_protocol", "local_proxy", "server_ip", "flow_reset", "flow_limit", "time_limit"]
+    arr["udp"] = ["client_id", "port", "target", "local_proxy", "server_ip", "flow_reset", "flow_limit", "time_limit"]
+    arr["socks5"] = ["client_id", "port", "server_ip", "flow_reset", "flow_limit", "time_limit"]
+    arr["httpProxy"] = ["client_id", "port", "server_ip", "flow_reset", "flow_limit", "time_limit"]
+    arr["secret"] = ["client_id", "target", "password", "flow_reset", "flow_limit", "time_limit"]
+    arr["p2p"] = ["client_id", "target", "password", "flow_reset", "flow_limit", "time_limit"]
+    arr["file"] = ["client_id", "port", "local_path", "strip_pre", "server_ip", "flow_reset", "flow_limit", "time_limit"]
 
     function resetForm() {
         $(".form-group[id]").css("display", "none");

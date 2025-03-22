@@ -33,6 +33,24 @@
                             </select>
                         </div>
                     </div>
+                    {{if eq true .allow_flow_limit}}
+                    <div class="form-group" id="flow_limit">
+                        <label class="control-label font-bold" langtag="word-flowlimit"></label>
+                        <div class="col-sm-10">
+                            <input class="form-control" langtag="info-unrestricted" name="flow_limit" placeholder="" type="text">
+                            <span class="help-block m-b-none" langtag="word-unit"></span>: M
+                        </div>
+                    </div>
+                    {{end}}
+                    {{if eq true .allow_time_limit}}
+                    <div class="form-group" id="time_limit">
+                        <label class="control-label font-bold" langtag="word-timelimit"></label>
+                        <div class="col-sm-10">
+                            <input class="form-control" id="time_limit_input" langtag="info-unrestricted" name="time_limit" placeholder="" type="datetime-local">
+                            <span class="help-block m-b-none" langtag="info-timelimit"></span>
+                        </div>
+                    </div>
+                    {{end}}
                     <div class="form-group" id="auto_https">
                         <label class="control-label font-bold" langtag="word-autohttps"></label>
                         <div class="col-sm-10">

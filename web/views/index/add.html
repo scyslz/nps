@@ -57,6 +57,24 @@
                             <input class="form-control" langtag="info-suchasport" name="port" placeholder="" type="text">
                         </div>
                     </div>
+                    {{if eq true .allow_flow_limit}}
+                    <div class="form-group" id="flow_limit">
+                        <label class="control-label font-bold" langtag="word-flowlimit"></label>
+                        <div class="col-sm-10">
+                            <input class="form-control" langtag="info-unrestricted" name="flow_limit" placeholder="" type="text">
+                            <span class="help-block m-b-none" langtag="word-unit"></span>: M
+                        </div>
+                    </div>
+                    {{end}}
+                    {{if eq true .allow_time_limit}}
+                    <div class="form-group" id="time_limit">
+                        <label class="control-label font-bold" langtag="word-timelimit"></label>
+                        <div class="col-sm-10">
+                            <input class="form-control" id="time_limit_input" langtag="info-unrestricted" name="time_limit" placeholder="" type="datetime-local">
+                            <span class="help-block m-b-none" langtag="info-timelimit"></span>
+                        </div>
+                    </div>
+                    {{end}}
                     <div class="form-group" id="proxy_protocol">
                         <label class="control-label font-bold" langtag="word-proxyprotocol"></label>
                         <div class="col-sm-10">
@@ -128,14 +146,14 @@
 
 <script>
     var arr = []
-    arr["all"] = ["port", "target", "password", "local_path", "strip_pre", "proxy_protocol", "local_proxy", "client_id", "server_ip"]
-    arr["tcp"] = ["port", "target", "proxy_protocol", "local_proxy", "client_id", "server_ip"]
-    arr["udp"] = ["port", "target", "local_proxy", "client_id", "server_ip"]
-    arr["socks5"] = ["port", "client_id", "server_ip"]
-    arr["httpProxy"] = ["port", "client_id", "server_ip"]
-    arr["secret"] = ["target", "password", "client_id", "server_ip"]
-    arr["p2p"] = ["target", "password", "client_id", "server_ip"]
-    arr["file"] = ["port", "local_path", "strip_pre", "client_id", "server_ip"]
+    arr["all"] = ["port", "target", "password", "flow_reset", "flow_limit", "time_limit", "local_path", "strip_pre", "proxy_protocol", "local_proxy", "client_id", "server_ip"]
+    arr["tcp"] = ["port", "target", "proxy_protocol", "local_proxy", "client_id", "server_ip", "flow_reset", "flow_limit", "time_limit"]
+    arr["udp"] = ["port", "target", "local_proxy", "client_id", "server_ip", "flow_reset", "flow_limit", "time_limit"]
+    arr["socks5"] = ["port", "client_id", "server_ip", "flow_reset", "flow_limit", "time_limit"]
+    arr["httpProxy"] = ["port", "client_id", "server_ip", "flow_reset", "flow_limit", "time_limit"]
+    arr["secret"] = ["target", "password", "client_id", "server_ip", "flow_reset", "flow_limit", "time_limit"]
+    arr["p2p"] = ["target", "password", "client_id", "server_ip", "flow_reset", "flow_limit", "time_limit"]
+    arr["file"] = ["port", "local_path", "strip_pre", "client_id", "server_ip", "flow_reset", "flow_limit", "time_limit"]
 
     function resetForm() {
         $(".form-group[id]").css("display", "none");

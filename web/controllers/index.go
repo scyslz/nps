@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/beego/beego"
+	"github.com/djylb/nps/lib/common"
 	"github.com/djylb/nps/lib/file"
 	"github.com/djylb/nps/server"
 	"github.com/djylb/nps/server/tool"
@@ -110,7 +111,10 @@ func (s *IndexController) Add() {
 			Password:  s.getEscapeString("password"),
 			LocalPath: s.getEscapeString("local_path"),
 			StripPre:  s.getEscapeString("strip_pre"),
-			Flow:      &file.Flow{},
+			Flow: &file.Flow{
+				FlowLimit:  int64(s.GetIntNoErr("flow_limit")),
+				TimeLimit:  common.GetTimeNoErrByStr(s.getEscapeString("time_limit")),
+			},
 		}
 
 		if t.Port <= 0 {
@@ -190,6 +194,12 @@ func (s *IndexController) Edit() {
 			t.LocalPath = s.getEscapeString("local_path")
 			t.StripPre = s.getEscapeString("strip_pre")
 			t.Remark = s.getEscapeString("remark")
+			t.Flow.FlowLimit = int64(s.GetIntNoErr("flow_limit"))
+			t.Flow.TimeLimit = common.GetTimeNoErrByStr(s.getEscapeString("time_limit"))
+			if s.GetBoolNoErr("flow_reset") {
+				t.Flow.ExportFlow = 0
+				t.Flow.InletFlow = 0
+			}
 			t.Target.ProxyProtocol = s.GetIntNoErr("proxy_protocol")
 			t.Target.LocalProxy = (clientId > 0 && s.GetBoolNoErr("local_proxy")) || clientId <= 0
 			file.GetDb().UpdateTask(t)
@@ -282,7 +292,10 @@ func (s *IndexController) AddHost() {
 			HostChange:     s.getEscapeString("hostchange"),
 			Remark:         s.getEscapeString("remark"),
 			Location:       s.getEscapeString("location"),
-			Flow:           &file.Flow{},
+			Flow: &file.Flow{
+				FlowLimit:  int64(s.GetIntNoErr("flow_limit")),
+				TimeLimit:  common.GetTimeNoErrByStr(s.getEscapeString("time_limit")),
+			},
 			Scheme:         s.getEscapeString("scheme"),
 			HttpsJustProxy: s.GetBoolNoErr("https_just_proxy"),
 			KeyFilePath:    s.getEscapeString("key_file_path"),
@@ -349,6 +362,12 @@ func (s *IndexController) EditHost() {
 			h.CertFilePath = s.getEscapeString("cert_file_path")
 			h.Target.ProxyProtocol = s.GetIntNoErr("proxy_protocol")
 			h.Target.LocalProxy = (clientId > 0 && s.GetBoolNoErr("local_proxy")) || clientId <= 0
+			h.Flow.FlowLimit = int64(s.GetIntNoErr("flow_limit"))
+			h.Flow.TimeLimit = common.GetTimeNoErrByStr(s.getEscapeString("time_limit"))
+			if s.GetBoolNoErr("flow_reset") {
+				h.Flow.ExportFlow = 0
+				h.Flow.InletFlow = 0
+			}
 			h.AutoHttps = s.GetBoolNoErr("auto_https")
 			h.AutoCORS = s.GetBoolNoErr("auto_cors")
 			h.TargetIsHttps = s.GetBoolNoErr("target_is_https")

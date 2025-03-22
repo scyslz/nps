@@ -42,7 +42,7 @@ var (
 	logDaily       = flag.String("log_daily", "false", "Rotate log daily (true or false)")
 	debug          = flag.Bool("debug", true, "Enable debug mode")
 	pprofAddr      = flag.String("pprof", "", "PProf debug address (ip:port)")
-	stunAddr       = flag.String("stun_addr", "stun.stunprotocol.org:3478", "STUN server address")
+	stunAddr       = flag.String("stun_addr", "stun.miwifi.com:3478", "STUN server address")
 	ver            = flag.Bool("version", false, "Show current version")
 	disconnectTime = flag.Int("disconnect_timeout", 60, "Disconnect timeout in seconds")
 	tlsEnable      = flag.Bool("tls_enable", false, "Enable TLS")
@@ -126,12 +126,18 @@ func main() {
 			c := stun.NewClient()
 			flag.CommandLine.Parse(os.Args[2:])
 			c.SetServerAddr(*stunAddr)
+			logs.Info(*stunAddr)
 			nat, host, err := c.Discover()
-			if err != nil || host == nil {
-				logs.Error("get nat type error", err)
+			if err != nil {
+				logs.Error("Error:", err)
 				return
 			}
-			fmt.Printf("nat type: %s \npublic address: %s\n", nat.String(), host.String())
+			fmt.Println("NAT Type:", nat)
+			if host != nil {
+				fmt.Println("External IP Family:", host.Family())
+				fmt.Println("External IP:", host.IP())
+				fmt.Println("External Port:", host.Port())
+			}
 			os.Exit(0)
 		case "start", "stop", "restart":
 			// support busyBox and sysV, for openWrt

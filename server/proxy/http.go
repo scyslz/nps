@@ -12,6 +12,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -311,7 +312,17 @@ func (s *httpServer) handleProxy(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 			logs.Warn("ErrorHandler: proxy error: method=%s, URL=%s, error=%v", req.Method, req.URL.String(), err)
-			http.Error(rw, "502 Bad Gateway", http.StatusBadGateway)
+
+			errMsg := err.Error()
+			idx := strings.Index(errMsg, "Host")
+			if idx == -1 {
+				idx = strings.Index(errMsg, "Client")
+			}
+			if idx != -1 {
+				http.Error(rw, errMsg[idx:], http.StatusTooManyRequests)
+			} else {
+				http.Error(rw, "502 Bad Gateway", http.StatusBadGateway)
+			}
 		},
 	}
 	proxy.ServeHTTP(w, r)
