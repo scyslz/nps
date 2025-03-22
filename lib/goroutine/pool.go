@@ -64,11 +64,12 @@ Loop:
 			}
 			nw, ew := dst.Write(buf[:nr])
 			if nw > 0 && len(flows) > 0 {
+				nw64 := int64(nw)
 				for _, f := range flows {
 					if f == nil {
 						continue
 					}
-					f.Add(int64(nw), int64(nw))
+					f.Add(nw64, nw64)
 					if f.FlowLimit > 0 && (f.FlowLimit<<20) < (f.ExportFlow+f.InletFlow) {
 						logs.Info("Flow limit exceeded")
 						break Loop
