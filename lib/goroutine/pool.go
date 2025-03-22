@@ -1,6 +1,7 @@
 package goroutine
 
 import (
+	"errors"
 	"io"
 	"net"
 	"strings"
@@ -40,7 +41,6 @@ func CopyBuffer(dst io.Writer, src io.Reader, flows []*file.Flow, task *file.Tun
 	defer common.CopyBuff.Put(buf)
 
 	checkedHTTP := false
-Loop:
 	for {
 		nr, er := src.Read(buf)
 		if nr > 0 {
@@ -74,11 +74,11 @@ Loop:
 						f.Add(nw64, nw64)
 						if f.FlowLimit > 0 && (f.FlowLimit<<20) < (f.ExportFlow+f.InletFlow) {
 							logs.Info("Flow limit exceeded")
-							break Loop
+							return written, errors.New("Flow limit exceeded")
 						}
 						if !f.TimeLimit.IsZero() && f.TimeLimit.Before(time.Now()) {
 							logs.Info("Time limit exceeded")
-							break Loop
+							return written, errors.New("Time limit exceeded")
 						}
 					}
 				}
