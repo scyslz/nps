@@ -25,6 +25,13 @@ func (s *Flow) Add(in, out int64) {
 	s.Unlock()
 }
 
+func (s *Flow) Sub(in, out int64) {
+	s.Lock()
+	s.InletFlow -= int64(in)
+	s.ExportFlow -= int64(out)
+	s.Unlock()
+}
+
 type Config struct {
 	U        string // username
 	P        string // password

@@ -137,6 +137,11 @@ func copyConns(group interface{}) {
 	_ = connCopyPool.Invoke(newConnGroup(conns.conn1, conns.conn2, wg, &in, conns.flows, conns.task, remoteAddr))
 	_ = connCopyPool.Invoke(newConnGroup(conns.conn2, conns.conn1, wg, &out, conns.flows, conns.task, remoteAddr))
 	wg.Wait()
+	if conns.task != nil {
+		if conns.task.flow != nil {
+			conns.task.flow.Sub(out, in)
+		}
+	}
 	conns.wg.Done()
 }
 
