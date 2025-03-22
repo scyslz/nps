@@ -50,7 +50,7 @@ NPS 是一款轻量高效的内网穿透代理服务器，支持多种协议（T
 #### NPS 服务端
 ```bash
 docker pull duan2001/nps
-docker run -d --restart=always --name nps --net=host -v <本机配置目录>:/conf -v /etc/localtime:/etc/localtime:ro duan2001/nps
+docker run -d --restart=always --name nps --net=host -v $(pwd)/conf:/conf -v /etc/localtime:/etc/localtime:ro duan2001/nps
 ```
 
 #### NPC 客户端
