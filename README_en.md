@@ -50,7 +50,7 @@ For more detailed configuration options, please refer to the [Documentation](htt
 #### NPS Server
 ```bash
 docker pull duan2001/nps
-docker run -d --restart=always --name nps --net=host -v <local config directory>:/conf -v /etc/localtime:/etc/localtime:ro duan2001/nps
+docker run -d --restart=always --name nps --net=host -v $(pwd)/conf:/conf -v /etc/localtime:/etc/localtime:ro duan2001/nps
 ```
 
 #### NPC Client
