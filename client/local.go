@@ -138,6 +138,7 @@ func handleUdpMonitor(config *config.CommonConfig, l *config.LocalServer) {
 					logs.Error(err)
 					return
 				}
+				logs.Debug(tmpConn.LocalAddr().String())
 				for i := 0; i < 10; i++ {
 					logs.Notice("try to connect to the server", i+1)
 					newUdpConn(tmpConn.LocalAddr().String(), config, l)
