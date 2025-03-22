@@ -1,11 +1,9 @@
 <div class="wrapper wrapper-content animated fadeInRight">
-
     <div class="row">
         <div class="col-lg-12">
             <div class="ibox float-e-margins">
                 <div class="ibox-title">
                     <h5><span id="langtag"></span><span></span></h5>
-
                     <div class="ibox-tools">
                         <a class="collapse-link">
                             <i class="fa fa-chevron-up"></i>
@@ -18,10 +16,12 @@
                 <div class="content">
                     <div class="table-responsive">
                         <div id="toolbar">
+                            {{ if ne .type "file" }}
                             <a class="btn btn-primary dim" href="{{.web_base_url}}/index/add?type={{.type}}&client_id={{.client_id}}">
                                 <i class="fa fa-fw fa-lg fa-plus"></i>
                                 <span langtag="word-add"></span>
                             </a>
+                            {{ end }}
                         </div>
                         <table class="table-striped table-hover" data-mobile-responsive="true" id="taskList_table"></table>
                     </div>
@@ -47,8 +47,8 @@
             return {
                 "offset": params.offset,
                 "limit": params.limit,
-                "type":{{.type}},
-                "client_id":{{.client_id}},
+                "type": {{.type}},
+                "client_id": {{.client_id}},
                 "search": params.search,
                 "sort": params.sort,
                 "order": params.order
@@ -60,10 +60,13 @@
         showHeader: true,
         showColumns: true,
         showRefresh: true,
-        pagination: true,//分页
-        sidePagination: 'server',//服务器端分页
+        pagination: true, //分页
+        sidePagination: 'server', //服务器端分页
         pageNumber: 1,
-        pageList: [5, 10, 20, 50],//分页步进值
+        pageList: [5, 10, 20, 50, 100, 'all'],
+        cookie: true,
+        cookieIdTable: '{{.type}}',
+        cookieStorage: 'localStorage',
         detailView: true,
         smartDisplay: true, // 智能显示 pagination 和 cardview 等
         onExpandRow: function () {$('body').setLang ('.detail-view');},
@@ -80,88 +83,88 @@
             if (row.Mode == "p2p") {
                 return tmp + "<br/><br>"
                     + '<b langtag="word-commandaccessp2p"></b>: ' + "<code>./npc{{.win}} -server={{.ip}}:{{.p}} -vkey=" + row.Client.VerifyKey
-                    + " -type=" +{{.bridgeType}} +" -password=" + row.Password + " -target=" + row.Target.TargetStr + "</code>" + "<br/><br>"
+                    + " -type=" + {{.bridgeType}} + " -password=" + row.Password + " -target=" + row.Target.TargetStr + "</code>" + "<br/><br>"
                     + '<b langtag="word-commandaccessp2ps"></b>: ' + "<code>./npc{{.win}} -server={{.ip}}:{{.p}} -vkey=" + row.Client.VerifyKey
-                    + " -type=" +{{.bridgeType}} +" -password=" + row.Password + " -local_type=p2ps" + "</code>" + "<br/><br>"
+                    + " -type=" + {{.bridgeType}} + " -password=" + row.Password + " -local_type=p2ps" + "</code>" + "<br/><br>"
                     + '<b langtag="word-commandaccessp2pt"></b>: ' + "<code>./npc{{.win}} -server={{.ip}}:{{.p}} -vkey=" + row.Client.VerifyKey
-                    + " -type=" +{{.bridgeType}} +" -password=" + row.Password + " -local_type=p2pt" + "</code>"
+                    + " -type=" + {{.bridgeType}} + " -password=" + row.Password + " -local_type=p2pt" + "</code>"
             }
             if (row.Mode == "secret") {
                 return tmp + "<br/><br>" + '<b langtag="word-commandaccess"></b>: ' + "<code>./npc{{.win}} -server={{.ip}}:{{.p}} -vkey=" + row.Client.VerifyKey
-                    + " -type=" +{{.bridgeType}} +" -password=" + row.Password + " -local_type=secret" + "</code>"
+                    + " -type=" + {{.bridgeType}} + " -password=" + row.Password + " -local_type=secret" + "</code>"
             }
             return tmp
         },
-        //表格的列
+        // 表格的列
         columns: [
             {
-                field: 'Id',//域值
-                title: '<span langtag="word-id"></span>',//标题
+                field: 'Id', //域值
+                title: '<span langtag="word-id"></span>', //标题
                 halign: 'center',
-                visible: true,//false表示不显示
-                sortable: true,//启用排序
+                visible: true, //false表示不显示
+                sortable: true, //启用排序
             },
             {
-                field: 'ClientId',//域值
-                title: '<span langtag="word-clientid"></span>',//标题
+                field: 'ClientId', //域值
+                title: '<span langtag="word-clientid"></span>', //标题
                 halign: 'center',
-                visible: true,//false表示不显示
+                visible: true, //false表示不显示
                 sortable: true, //启用排序
                 formatter: function (value, row, index) {
                     return row.Client.Id + '-' + row.Client.Remark
                 }
             },
             {
-                field: 'Remark',//域值
-                title: '<span langtag="word-remark"></span>',//标题
+                field: 'Remark', //域值
+                title: '<span langtag="word-remark"></span>', //标题
                 halign: 'center',
-                visible: true//false表示不显示
+                visible: true //false表示不显示
             },
             {
-                field: 'Client.VerifyKey',//域值
-                title: '<span langtag="word-verifykey"></span>',//标题
+                field: 'Client.VerifyKey', //域值
+                title: '<span langtag="word-verifykey"></span>', //标题
                 halign: 'center',
                 sortable: true, //启用排序
-                visible: true//false表示不显示
+                visible: true //false表示不显示
             },
             {
-                field: 'Mode',//域值
-                title: '<span langtag="word-scheme"></span>',//标题
+                field: 'Mode', //域值
+                title: '<span langtag="word-scheme"></span>', //标题
                 halign: 'center',
-                visible: true,//false表示不显示
+                visible: true, //false表示不显示
                 formatter: function (value, row, index) {
                     return '<span langtag="scheme-' + value + '"></span>'
                 }
             },
             {
-                field: 'Port',//域值
-                title: '<span langtag="word-port"></span>',//标题
+                field: 'Port', //域值
+                title: '<span langtag="word-port"></span>', //标题
                 halign: 'center',
                 sortable: true, //启用排序
-                visible: true//false表示不显示
+                visible: true //false表示不显示
             },
             {
-                field: 'Target',//域值
-                title: '<span langtag="word-target"></span>',//标题
+                field: 'Target', //域值
+                title: '<span langtag="word-target"></span>', //标题
                 halign: 'center',
-                visible: true,//false表示不显示
+                visible: true, //false表示不显示
                 sortable: true, //启用排序
                 formatter: function (value, row, index) {
                     return row.Target.TargetStr
                 }
             },
             {
-                field: 'Password',//域值
-                title: '<span langtag="word-identificationkey"></span>',//标题
+                field: 'Password', //域值
+                title: '<span langtag="word-identificationkey"></span>', //标题
                 halign: 'center',
-                visible: true//false表示不显示
+                visible: true //false表示不显示
             },
             {
-                field: 'Status',//域值
-                title: '<span langtag="word-status"></span>',//内容
+                field: 'Status', //域值
+                title: '<span langtag="word-status"></span>', //内容
                 align: 'center',
                 halign: 'center',
-                visible: true,//false表示不显示
+                visible: true, //false表示不显示
                 formatter: function (value, row, index) {
                     if (value) {
                         return '<span class="badge badge-primary" langtag="word-open"></span>'
@@ -171,11 +174,11 @@
                 }
             },
             {
-                field: 'RunStatus',//域值
-                title: '<span langtag="word-runstatus"></span>',//内容
+                field: 'RunStatus', //域值
+                title: '<span langtag="word-runstatus"></span>', //内容
                 align: 'center',
                 halign: 'center',
-                visible: true,//false表示不显示
+                visible: true, //false表示不显示
                 formatter: function (value, row, index) {
                     if (value) {
                         return '<span class="badge badge-primary" langtag="word-open"></span>'
@@ -185,11 +188,11 @@
                 }
             },
             {
-                field: '',//域值
-                title: '<span langtag="word-clientstatus"></span>',//内容
+                field: '', //域值
+                title: '<span langtag="word-clientstatus"></span>', //内容
                 align: 'center',
                 halign: 'center',
-                visible: true,//false表示不显示
+                visible: true, //false表示不显示
                 formatter: function (value, row, index) {
                     if (row.Client.IsConnect) {
                         return '<span class="badge badge-primary" langtag="word-online"></span>'
@@ -199,11 +202,11 @@
                 }
             },
             {
-                field: 'option',//域值
-                title: '<span langtag="word-option"></span>',//内容
+                field: 'option', //域值
+                title: '<span langtag="word-option"></span>', //内容
                 align: 'center',
                 halign: 'center',
-                visible: true,//false表示不显示
+                visible: true, //false表示不显示
                 formatter: function (value, row, index) {
                     btn_group = '<div class="btn-group">'
                     if (row.Status) {
@@ -215,8 +218,10 @@
                     }
                     btn_group += "<a onclick=\"submitform('delete', '{{.web_base_url}}/index/del', {'id':" + row.Id
                     btn_group += '})" class="btn btn-outline btn-danger"><i class="fa fa-trash"></i></a>'
-                    btn_group += '<a  href="{{.web_base_url}}/index/edit?id=' + row.Id
-                    btn_group += '" class="btn btn-outline btn-success"><i class="fa fa-edit"></i></a></div>'
+                    {{ if ne .type "file" }}
+                    btn_group += '<a href="{{.web_base_url}}/index/edit?id=' + row.Id + '" class="btn btn-outline btn-success"><i class="fa fa-edit"></i></a>'
+                    {{ end }}
+                    btn_group += '</div>'
                     return btn_group
                 }
             }

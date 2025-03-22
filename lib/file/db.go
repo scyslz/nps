@@ -50,6 +50,7 @@ func GetMapKeys(m sync.Map, isSort bool, sortKey, order string) (keys []int) {
 func (s *DbUtils) GetClientList(start, length int, search, sort, order string, clientId int) ([]*Client, int) {
 	list := make([]*Client, 0)
 	var cnt int
+	originLength := length
 	keys := GetMapKeys(s.JsonDb.Clients, true, sort, order)
 	for _, key := range keys {
 		if value, ok := s.JsonDb.Clients.Load(key); ok {
@@ -65,7 +66,9 @@ func (s *DbUtils) GetClientList(start, length int, search, sort, order string, c
 			}
 			cnt++
 			if start--; start < 0 {
-				if length--; length >= 0 {
+				if originLength == 0 {
+					list = append(list, v)
+				} else if length--; length >= 0 {
 					list = append(list, v)
 				}
 			}
@@ -213,6 +216,7 @@ func (s *DbUtils) NewHost(t *Host) error {
 func (s *DbUtils) GetHost(start, length int, id int, search string) ([]*Host, int) {
 	list := make([]*Host, 0)
 	var cnt int
+	originLength := length
 	keys := GetMapKeys(s.JsonDb.Hosts, false, "", "")
 	for _, key := range keys {
 		if value, ok := s.JsonDb.Hosts.Load(key); ok {
@@ -223,7 +227,9 @@ func (s *DbUtils) GetHost(start, length int, id int, search string) ([]*Host, in
 			if id == 0 || v.Client.Id == id {
 				cnt++
 				if start--; start < 0 {
-					if length--; length >= 0 {
+					if originLength == 0 {
+						list = append(list, v)
+					} else if length--; length >= 0 {
 						list = append(list, v)
 					}
 				}

@@ -58,7 +58,10 @@
         pagination: true,//分页
         sidePagination: 'server',//服务器端分页
         pageNumber: 1,
-        pageList: [5, 10, 20, 50],//分页步进值
+        pageList: [5, 10, 20, 50, 100, 'all'],
+        cookie: true,
+        cookieIdTable: 'host',
+        cookieStorage: 'localStorage',
         detailView: true,
         smartDisplay: true, // 智能显示 pagination 和 cardview 等
         onExpandRow: function () {$('body').setLang ('.detail-view');},

@@ -245,6 +245,7 @@ func DelTask(id int) error {
 func GetTunnel(start, length int, typeVal string, clientId int, search string, sortField string, order string) ([]*file.Tunnel, int) {
 	all_list := make([]*file.Tunnel, 0) //store all Tunnel
 	list := make([]*file.Tunnel, 0)
+	originLength := length
 	var cnt int
 	keys := file.GetMapKeys(file.GetDb().JsonDb.Tasks, false, "", "")
 
@@ -308,7 +309,14 @@ func GetTunnel(start, length int, typeVal string, clientId int, search string, s
 				v.Client.IsConnect = false
 			}
 			if start--; start < 0 {
-				if length--; length >= 0 {
+				if originLength == 0 {
+					if _, ok := RunList.Load(v.Id); ok {
+						v.RunStatus = true
+					} else {
+						v.RunStatus = false
+					}
+					list = append(list, v)
+				} else if length--; length >= 0 {
 					//if _, ok := RunList[v.Id]; ok {
 					if _, ok := RunList.Load(v.Id); ok {
 						v.RunStatus = true

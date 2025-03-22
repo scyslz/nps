@@ -133,9 +133,12 @@ type process func(c *conn.Conn, s *TunnelModeServer) error
 func ProcessTunnel(c *conn.Conn, s *TunnelModeServer) error {
 	targetAddr, err := s.task.Target.GetRandomTarget()
 	if err != nil {
-		c.Close()
-		logs.Warn("tcp port %d, client id %d, task id %d connect error %s", s.task.Port, s.task.Client.Id, s.task.Id, err.Error())
-		return err
+		if s.task.Mode != "file" {
+			c.Close()
+			logs.Warn("tcp port %d, client id %d, task id %d connect error %s", s.task.Port, s.task.Client.Id, s.task.Id, err.Error())
+			return err
+		}
+		targetAddr = ""
 	}
 
 	return s.DealClient(c, s.task.Client, targetAddr, nil, common.CONN_TCP, nil, []*file.Flow{s.task.Flow, s.task.Client.Flow}, s.task.Target.ProxyProtocol, s.task.Target.LocalProxy, s.task)

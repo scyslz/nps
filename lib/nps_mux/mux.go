@@ -101,7 +101,7 @@ func (s *Mux) NewConn() (*conn, error) {
 	case <-conn.connStatusOkCh:
 		return conn, nil
 	case <-timer.C:
-		s.connMap.Delete(conn.connId) // 删除未成功的连接
+		s.connMap.Delete(conn.connId)
 	}
 	return nil, errors.New("create connection fail, the server refused the connection")
 }
