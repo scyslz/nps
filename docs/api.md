@@ -104,6 +104,9 @@ curl -X POST \
   | `server_ip` | 服务器 IP 地址 |
   | `type` | 隧道类型（`tcp`, `udp`, `httpProxy`, `socks5`, `secret`, `p2p`） |
   | `target` | 目标地址（如 `127.0.0.1:8080`，支持多行换行 `\n`） |
+  | `flow_reset` | 是否重置流量（`0` 否，`1` 是） |
+  | `flow_limit` | 流量限制（单位 MB，空则不限制） |
+  | `time_limit` | 时间限制（字符串，空则不限制） |
   | `proxy_protocol` | 代理协议标识（整数） |
   | `local_proxy` | 是否启用本地代理（`0` 否，`1` 是） |
   | `remark` | 隧道备注（字符串） |
@@ -142,6 +145,9 @@ curl -X POST \
   | `client_id` | 关联的客户端 ID（整数） |
   | `host` | 域名（如 `example.com`） |
   | `target` | 内网目标（`ip:端口`，支持多个，用\n分隔） |
+  | `flow_reset` | 是否重置流量（`0` 否，`1` 是） |
+  | `flow_limit` | 流量限制（单位 MB，空则不限制） |
+  | `time_limit` | 时间限制（字符串，空则不限制） |
   | `proxy_protocol` | 代理协议标识（整数） |
   | `local_proxy` | 是否启用本地代理（`0` 否，`1` 是） |
   | `header` | 修改的请求头（字符串） |
@@ -189,8 +195,10 @@ curl -X POST \
   | `config_conn_allow` | 是否允许客户端以配置文件模式连接（`0` 否，`1` 是） |
   | `compress` | 是否启用数据压缩（`0` 否，`1` 是） |
   | `crypt` | 是否启用加密（`0` 否，`1` 是） |
-  | `rate_limit` | 带宽限制（单位 KB/s，空则不限制） |
+  | `flow_reset` | 是否重置流量（`0` 否，`1` 是） |
   | `flow_limit` | 流量限制（单位 MB，空则不限制） |
+  | `time_limit` | 时间限制（字符串，空则不限制） |
+  | `rate_limit` | 带宽限制（单位 KB/s，空则不限制） |
   | `max_conn` | 最大连接数量（整数，空则不限制） |
   | `max_tunnel` | 最大隧道数量（整数，空则不限制） |
   | `id` | 客户端 ID（修改时必填） |

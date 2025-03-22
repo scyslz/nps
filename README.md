@@ -120,6 +120,10 @@ npc start
 
 - **Main** 
   - 待定，优先修BUG，新功能随缘更新
+
+### Stable
+
+- **v0.26.41 (2025-03-22)** 
   - Docker自动创建NPS默认配置 **（一定要记得改配置）**
   - 修复页面滚动时，左侧菜单、顶部标题、底部footer一起滚动问题 [#49](https://github.com/djylb/nps/pull/49)
   - 优化运行速度
@@ -132,8 +136,6 @@ npc start
   - 单条隧道支持限制流量和时间
   - 调整隧道页面显示
   - 修复NPC客户端NAT检测
-
-### Stable
 
 - **v0.26.40 (2025-03-21)** 
   - 前端页面美化 [#47](https://github.com/djylb/nps/pull/47)
