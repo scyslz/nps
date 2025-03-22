@@ -35,7 +35,7 @@ func newConnGroup(dst, src io.ReadWriteCloser, wg *sync.WaitGroup, n *int64, flo
 	}
 }
 
-func CopyBuffer(dst io.Writer, src io.Reader, flows []*file.Flow, task *file.Tunnel, remote string) (err error) {
+func CopyBuffer(dst io.Writer, src io.Reader, flows []*file.Flow, task *file.Tunnel, remote string) (written int64, err error) {
 	buf := common.CopyBuff.Get()
 	defer common.CopyBuff.Put(buf)
 
@@ -63,20 +63,23 @@ Loop:
 				}
 			}
 			nw, ew := dst.Write(buf[:nr])
-			if nw > 0 && len(flows) > 0 {
-				nw64 := int64(nw)
-				for _, f := range flows {
-					if f == nil {
-						continue
-					}
-					f.Add(nw64, nw64)
-					if f.FlowLimit > 0 && (f.FlowLimit<<20) < (f.ExportFlow+f.InletFlow) {
-						logs.Info("Flow limit exceeded")
-						break Loop
-					}
-					if !f.TimeLimit.IsZero() && f.TimeLimit.Before(time.Now()) {
-						logs.Info("Time limit exceeded")
-						break Loop
+			if nw > 0 {
+				written += int64(nw)
+				if len(flows) > 0 {
+					nw64 := int64(nw)
+					for _, f := range flows {
+						if f == nil {
+							continue
+						}
+						f.Add(nw64, nw64)
+						if f.FlowLimit > 0 && (f.FlowLimit<<20) < (f.ExportFlow+f.InletFlow) {
+							logs.Info("Flow limit exceeded")
+							break Loop
+						}
+						if !f.TimeLimit.IsZero() && f.TimeLimit.Before(time.Now()) {
+							logs.Info("Time limit exceeded")
+							break Loop
+						}
 					}
 				}
 			}
@@ -94,7 +97,7 @@ Loop:
 			break
 		}
 	}
-	return err
+	return written, err
 }
 
 func copyConnGroup(group interface{}) {
@@ -102,7 +105,8 @@ func copyConnGroup(group interface{}) {
 	if !ok {
 		return
 	}
-	err := CopyBuffer(cg.dst, cg.src, cg.flows, cg.task, cg.remote)
+	var err error
+	*cg.n, err = CopyBuffer(cg.dst, cg.src, cg.flows, cg.task, cg.remote)
 	if err != nil {
 		cg.src.Close()
 		cg.dst.Close()

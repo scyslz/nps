@@ -411,14 +411,14 @@ func join(c1, c2 net.Conn, flows []*file.Flow, task *file.Tunnel, remote string)
 	var wg sync.WaitGroup
 	wg.Add(2)
 	go func() {
-		if err := goroutine.CopyBuffer(c1, c2, flows, task, remote); err != nil {
+		if _, err := goroutine.CopyBuffer(c1, c2, flows, task, remote); err != nil {
 			c1.Close()
 			c2.Close()
 		}
 		wg.Done()
 	}()
 	go func() {
-		if err := goroutine.CopyBuffer(c2, c1, flows, task, remote); err != nil {
+		if _, err := goroutine.CopyBuffer(c2, c1, flows, task, remote); err != nil {
 			c1.Close()
 			c2.Close()
 		}
