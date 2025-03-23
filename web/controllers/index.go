@@ -271,6 +271,30 @@ func (s *IndexController) DelHost() {
 	s.AjaxOk("delete success")
 }
 
+func (s *IndexController) StartHost() {
+	id := s.GetIntNoErr("id")
+	h, err := file.GetDb().GetHostById(id)
+	if err != nil {
+		s.error()
+		return
+	}
+	h.IsClose = false
+	file.GetDb().JsonDb.StoreHostToJsonFile()
+	s.AjaxOk("start success")
+}
+
+func (s *IndexController) StopHost() {
+	id := s.GetIntNoErr("id")
+	h, err := file.GetDb().GetHostById(id)
+	if err != nil {
+		s.error()
+		return
+	}
+	h.IsClose = true
+	file.GetDb().JsonDb.StoreHostToJsonFile()
+	s.AjaxOk("stop success")
+}
+
 func (s *IndexController) AddHost() {
 	if s.Ctx.Request.Method == "GET" {
 		s.Data["client_id"] = s.getEscapeString("client_id")

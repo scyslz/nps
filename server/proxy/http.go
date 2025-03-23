@@ -173,8 +173,15 @@ func (s *httpServer) handleProxy(w http.ResponseWriter, r *http.Request) {
 	// 获取 host 配置
 	host, err := file.GetDb().GetInfoByHost(r.Host, r)
 	if err != nil {
-		http.Error(w, "404 Host not found", http.StatusNotFound)
+		//http.Error(w, "404 Host not found", http.StatusNotFound)
+		//w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		//w.WriteHeader(http.StatusNotFound)
+		//w.Write(s.errorContent)
 		logs.Debug("Host not found: %s %s %s", r.URL.Scheme, r.Host, r.RequestURI)
+		if hj, ok := w.(http.Hijacker); ok {
+			conn, _, _ := hj.Hijack()
+			conn.Close()
+		}
 		return
 	}
 
@@ -183,6 +190,10 @@ func (s *httpServer) handleProxy(w http.ResponseWriter, r *http.Request) {
 	if IsGlobalBlackIp(clientIP) || common.IsBlackIp(clientIP, host.Client.VerifyKey, host.Client.BlackIpList) {
 		//http.Error(w, "403 Forbidden", http.StatusForbidden)
 		logs.Warn("Blocked IP: %s", clientIP)
+		if hj, ok := w.(http.Hijacker); ok {
+			conn, _, _ := hj.Hijack()
+			conn.Close()
+		}
 		return
 	}
 
@@ -224,7 +235,10 @@ func (s *httpServer) handleProxy(w http.ResponseWriter, r *http.Request) {
 	targetAddr, err := host.Target.GetRandomTarget()
 	if err != nil {
 		logs.Warn("No backend found for host: %s Err: %s", r.Host, err.Error())
-		http.Error(w, "502 Bad Gateway", http.StatusBadGateway)
+		//http.Error(w, "502 Bad Gateway", http.StatusBadGateway)
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		w.WriteHeader(http.StatusBadGateway)
+		w.Write(s.errorContent)
 		return
 	}
 
@@ -321,7 +335,10 @@ func (s *httpServer) handleProxy(w http.ResponseWriter, r *http.Request) {
 			if idx != -1 {
 				http.Error(rw, errMsg[idx:], http.StatusTooManyRequests)
 			} else {
-				http.Error(rw, "502 Bad Gateway", http.StatusBadGateway)
+				//http.Error(rw, "502 Bad Gateway", http.StatusBadGateway)
+				w.Header().Set("Content-Type", "text/html; charset=utf-8")
+				w.WriteHeader(http.StatusBadGateway)
+				w.Write(s.errorContent)
 			}
 		},
 	}
@@ -335,7 +352,10 @@ func (s *httpServer) handleWebsocket(w http.ResponseWriter, r *http.Request, hos
 	targetConn, err := s.bridge.SendLinkInfo(host.Client.Id, link, nil)
 	if err != nil {
 		logs.Notice("handleWebsocket: connection to target %s failed: %v", link.Host, err)
-		http.Error(w, "502 Bad Gateway", http.StatusBadGateway)
+		//http.Error(w, "502 Bad Gateway", http.StatusBadGateway)
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		w.WriteHeader(http.StatusBadGateway)
+		w.Write(s.errorContent)
 		return
 	}
 	rawConn := conn.GetConn(targetConn, link.Crypt, link.Compress, host.Client.Rate, true)
@@ -358,7 +378,10 @@ func (s *httpServer) handleWebsocket(w http.ResponseWriter, r *http.Request, hos
 		netConn = tls.Client(netConn, tlsConf)
 		if err := netConn.(*tls.Conn).Handshake(); err != nil {
 			logs.Error("handleWebsocket: TLS handshake with backend failed: %v", err)
-			http.Error(w, "502 Bad Gateway", http.StatusBadGateway)
+			//http.Error(w, "502 Bad Gateway", http.StatusBadGateway)
+			w.Header().Set("Content-Type", "text/html; charset=utf-8")
+			w.WriteHeader(http.StatusBadGateway)
+			w.Write(s.errorContent)
 			return
 		}
 		//logs.Debug("handleWebsocket: TLS handshake succeeded")
