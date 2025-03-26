@@ -7,7 +7,7 @@
                     <div class="form-group">
                         <label class="control-label font-bold" langtag="word-clientid"></label>
                         <div class="col-sm-10">
-                            <select class="form-control" name="client_id" placeholder="" langtag="word-belongclient"></select>
+                            <select class="form-control" id="client_id_select" name="client_id" placeholder="" langtag="word-belongclient"></select>
                             <!--<input value="{{.client_id}}" class="form-control" type="text" name="client_id" placeholder="" langtag="word-clientid">-->
                         </div>
                     </div>
@@ -233,30 +233,50 @@
                 $("#key_file").css("display", "block")
             }
         })
-        getClientList();
-    })
 
-    function getClientList() {
-        const clientId = "{{.client_id}}"; // 获取 client_id
-        $("select[name='client_id']").empty();
-        $.ajax({
-            type: "POST",
-            url: "{{.web_base_url}}/client/list", // 服务器数据的加载地址
-            data: {order: "asc", offset: 0, limit: 999},
-            dataType: "json",
-            success: function (data) {
-                if (data && data.rows.length > 0) {
-                    for (var i = 0; i < data.rows.length; i++) {
-                        var option = "<option value=\"" + data.rows[i].Id + "\"";
-                        option += ">" + data.rows[i].Id + '-' + data.rows[i].Remark + "</option>"; // 动态添加数据
-                        $("select[name='client_id']").append(option);
-                    }
-                    // 设置选中项
-                    if (clientId) {
-                        $("select[name='client_id']").val(clientId);
-                    }
+        var clientId = "{{.client_id}}";
+        $("#client_id_select").select2({
+            minimumInputLength: 0,
+            ajax: {
+                type: 'POST',
+                url: '{{.web_base_url}}/client/list',
+                dataType: 'json',
+                delay: 300,
+                data: function (params) {
+                    return {
+                        search: params.term || '',
+                        order: 'asc',
+                        offset: 0,
+                        limit: 0
+                    };
+                },
+                processResults: function (data) {
+                    return {
+                        results: data.rows.map(function (client) {
+                            return {
+                                id: client.Id,
+                                text: client.Id + ' - ' + client.Remark
+                            };
+                        })
+                    };
                 }
             }
         });
-    }
+
+        if (clientId) {
+            $.ajax({
+                type: 'POST',
+                url: '{{.web_base_url}}/client/list',
+                data: { clientId: clientId, offset: 0, limit: 0 },
+                dataType: 'json',
+                success: function (data) {
+                    if (data.rows && data.rows.length > 0) {
+                        var client = data.rows[0];
+                        var option = new Option(client.Id + ' - ' + client.Remark, client.Id, true, true);
+                        $("#client_id_select").append(option).trigger('change');
+                    }
+                }
+            });
+        }
+    });
 </script>

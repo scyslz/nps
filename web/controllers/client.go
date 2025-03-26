@@ -26,7 +26,7 @@ func (s *ClientController) List() {
 	clientIdSession := s.GetSession("clientId")
 	var clientId int
 	if clientIdSession == nil {
-		clientId = 0
+		clientId = s.GetIntNoErr("clientId")
 	} else {
 		clientId = clientIdSession.(int)
 	}
