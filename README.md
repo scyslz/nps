@@ -123,13 +123,16 @@ npc start
 
 - **Main** 
   - 待定，优先修BUG，新功能随缘更新
-  - 搜索功能匹配不限制大小写
-  - 修复HTTP代理认证头
-  - 添加编译架构
-  - 增加自定义DNS支持非标准系统
-  - 添加安卓客户端 https://github.com/djylb/npsclient
 
 ### Stable
+
+- **v0.26.45 (2025-04-09)** 
+  - 搜索功能匹配不限制大小写
+  - 修复HTTP代理认证头 [#55](https://github.com/djylb/nps/issues/55)
+  - 添加编译架构 [#53](https://github.com/djylb/nps/issues/53)
+  - 增加自定义DNS支持非标准系统
+  - 新增安卓客户端 [#53](https://github.com/djylb/nps/issues/53) https://github.com/djylb/npsclient
+  - 美化下拉框样式，使用标准JSON保存数据 [#51](https://github.com/djylb/nps/pull/51) 感谢[yhl452493373](https://github.com/yhl452493373)
 
 - **v0.26.44 (2025-03-26)** 
   - 修复客户端超过1000不显示问题
