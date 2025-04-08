@@ -142,7 +142,6 @@
                 field: 'Port', //域值
                 title: '<span langtag="word-port"></span>', //标题
                 halign: 'center',
-                sortable: true, //启用排序
                 visible: true //false表示不显示
             },
             {{ if or (not .type) (eq .type "tcp") (eq .type "udp") (eq .type "secret") (eq .type "p2p") }}
