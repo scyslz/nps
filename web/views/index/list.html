@@ -111,7 +111,9 @@
                 visible: true, //false表示不显示
                 sortable: true, //启用排序
                 formatter: function (value, row, index) {
-                    return row.Client.Id + '-' + row.Client.Remark
+                    return row.Client.Remark 
+                        ? row.Client.Id + ' · ' + row.Client.Remark 
+                        : row.Client.Id;
                 }
             },
             {
