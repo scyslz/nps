@@ -89,6 +89,19 @@ extern void SetTlsEnable(bool enable);
 
 ---
 
+### 7. SetDnsServer
+
+**功能描述：**  
+配置解析服务器域名的DNS 
+- 支持传入 `8.8.8.8` 或 `8.8.8.8:53`
+
+**接口原型：**
+```c
+extern void SetDnsServer(char* dns);
+```
+
+---
+
 ## 示例用法
 
 ```c

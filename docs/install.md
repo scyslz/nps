@@ -180,14 +180,30 @@ npc start
 
 ---
 
-## 3. 源码安装（Go 编译）
+## 3. Android 使用
 
-### **3.1 安装依赖**
+### **3.1 APK (仅限NPC)**
+#### [NPS Client](https://github.com/djylb/npsclient)
+- [全架构](https://github.com/djylb/npsclient/releases/latest/download/app-universal-release.apk)
+- [ARM64](https://github.com/djylb/npsclient/releases/latest/download/app-arm64-v8a-release.apk)
+- [ARM32](https://github.com/djylb/npsclient/releases/latest/download/app-armeabi-v7a-release.apk)
+- [X8664](https://github.com/djylb/npsclient/releases/latest/download/app-x86_64-release.apk)
+
+
+### **3.2 Termux 运行**
+- [ARM64（Server）](https://github.com/djylb/nps/releases/latest/download/android_arm64_server.tar.gz)
+- [ARM64（Client）](https://github.com/djylb/nps/releases/latest/download/android_arm64_client.tar.gz)。
+
+---
+
+## 4. 源码安装（Go 编译）
+
+### **4.1 安装依赖**
 ```bash
 go get -u github.com/djylb/nps
 ```
 
-### **3.2 编译**
+### **4.2 编译**
 #### **NPS 服务器**
 ```bash
 go build -o nps cmd/nps/nps.go
@@ -202,7 +218,7 @@ go build -o npc cmd/npc/npc.go
 
 ---
 
-## 4. 相关链接
+## 5. 相关链接
 
 - **最新发布版本**：[GitHub Releases](https://github.com/djylb/nps/releases/latest)
 - **DockerHub 镜像**

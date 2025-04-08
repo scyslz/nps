@@ -133,6 +133,7 @@ server_addr=127.0.0.1:8024
 conn_type=tcp
 vkey=123
 auto_reconnection=true
+dns_server=8.8.8.8
 tls_enable=true
 
 #max_conn=1000
