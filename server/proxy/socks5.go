@@ -205,7 +205,7 @@ func (s *Sock5ModeServer) handleUDP(c net.Conn) {
 	//读取端口
 	var port uint16
 	binary.Read(c, binary.BigEndian, &port)
-	logs.Warn(host, fmt.Sprint(port))
+	logs.Info(host, fmt.Sprint(port))
 	replyAddr, err := net.ResolveUDPAddr("udp", s.task.ServerIp+":0")
 	if err != nil {
 		logs.Error("build local reply addr error", err)
@@ -238,14 +238,14 @@ func (s *Sock5ModeServer) handleUDP(c net.Conn) {
 		for {
 			n, laddr, err := reply.ReadFrom(b)
 			if err != nil {
-				logs.Error("read data from %s err %s", reply.LocalAddr().String(), err.Error())
+				logs.Debug("read data from %s err %s", reply.LocalAddr().String(), err.Error())
 				return
 			}
 			if clientAddr == nil {
 				clientAddr = laddr
 			}
 			if _, err := target.Write(b[:n]); err != nil {
-				logs.Error("write data to client error", err.Error())
+				logs.Debug("write data to client error", err.Error())
 				return
 			}
 		}
@@ -258,7 +258,7 @@ func (s *Sock5ModeServer) handleUDP(c net.Conn) {
 		defer c.Close()
 		for {
 			if err := binary.Read(target, binary.LittleEndian, &l); err != nil || l >= common.PoolSizeUdp || l <= 0 {
-				logs.Warn("read len bytes error", err.Error())
+				logs.Debug("read len bytes error", err.Error())
 				return
 			}
 			binary.Read(target, binary.LittleEndian, b[:l])

@@ -242,7 +242,7 @@ func (s *httpServer) handleProxy(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	logs.Info("%s request, method %s, host %s, url %s, remote address %s, target %s", r.URL.Scheme, r.Method, r.Host, r.URL.Path, r.RemoteAddr, targetAddr)
+	logs.Debug("%s request, method %s, host %s, url %s, remote address %s, target %s", r.URL.Scheme, r.Method, r.Host, r.URL.Path, r.RemoteAddr, targetAddr)
 
 	// WebSocket 请求单独处理
 	if r.Method == "CONNECT" || r.Header.Get("Upgrade") != "" || r.Header.Get(":protocol") != "" {
