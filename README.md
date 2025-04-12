@@ -11,7 +11,7 @@
 
 ## 简介
 
-NPS 是一款轻量高效的内网穿透代理服务器，支持多种协议（TCP、UDP、HTTP、SOCKS5 等）转发。它提供直观的 Web 管理界面，使得内网资源能安全、便捷地在外网访问，同时满足多种复杂场景的需求。
+NPS 是一款轻量高效的内网穿透代理服务器，支持多种协议（TCP、UDP、HTTP、HTTPS、SOCKS5 等）转发。它提供直观的 Web 管理界面，使得内网资源能安全、便捷地在外网访问，同时满足多种复杂场景的需求。
 
 由于[NPS](https://github.com/ehang-io/nps)停更已久，本仓库基于 nps 0.26 整合社区更新二次开发而来。
 
@@ -25,7 +25,7 @@ NPS 是一款轻量高效的内网穿透代理服务器，支持多种协议（T
 ## 主要特性
 
 - **多协议支持**  
-  TCP/UDP 转发、HTTP/SOCKS5 代理、P2P 模式等，满足各种内网访问场景。
+  TCP/UDP 转发、HTTP/HTTPS 转发、HTTP/SOCKS5 代理、P2P 模式、Proxy Protocol支持等，满足各种内网访问场景。
 
 - **跨平台部署**  
   支持 Linux、Windows 等主流平台，可轻松安装为系统服务。
@@ -34,7 +34,7 @@ NPS 是一款轻量高效的内网穿透代理服务器，支持多种协议（T
   实时监控流量、连接情况以及客户端状态，操作简单直观。
 
 - **安全与扩展**  
-  内置加密传输、流量限制、证书管理等多重功能，保障数据安全。
+  内置加密传输、流量限制、到期限制、证书管理等多重功能，保障数据安全。
 
 ---
 
@@ -77,6 +77,7 @@ nps start
 ```
 
 #### Windows
+> Windows 7 用户请使用 old 结尾版本 [64](https://github.com/djylb/nps/releases/latest/download/windows_amd64_server_old.tar.gz) / [32](https://github.com/djylb/nps/releases/latest/download/windows_386_server_old.tar.gz) （需要手动更新）
 ```powershell
 .\nps.exe install
 .\nps.exe start|stop|restart|uninstall
@@ -102,6 +103,7 @@ npc start
 ```
 
 #### Windows
+> Windows 7 用户请使用 old 结尾版本 [64](https://github.com/djylb/nps/releases/latest/download/windows_amd64_client_old.tar.gz) / [32](https://github.com/djylb/nps/releases/latest/download/windows_386_client_old.tar.gz) （需要手动更新）
 ```powershell
 .\npc.exe install -server="xxx:123" -vkey="xxx" -type="tcp" -tls_enable="true" -log="off"
 .\npc.exe start|stop|restart|uninstall
@@ -125,6 +127,7 @@ npc start
   - 待定，优先修BUG，新功能随缘更新
   - 调整日志输出等级
   - 优化写入性能
+  - 修复端口复用时连接泄露和并发冲突
 
 ### Stable
 
