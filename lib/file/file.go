@@ -1,6 +1,7 @@
 package file
 
 import (
+	"bufio"
 	"encoding/json"
 	"errors"
 	"fmt"
