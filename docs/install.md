@@ -96,9 +96,11 @@ NPS 提供官方二进制安装包，适用于 **Windows、Linux、macOS、FreeB
 ### **2.2 Linux 安装**
 📌 **推荐使用 Docker 运行。**
 
-#### **AMD64**
+#### **X86/64**
 - [64 位（Server）](https://github.com/djylb/nps/releases/latest/download/linux_amd64_server.tar.gz)
 - [64 位（Client）](https://github.com/djylb/nps/releases/latest/download/linux_amd64_client.tar.gz)
+- [32 位（Server）](https://github.com/djylb/nps/releases/latest/download/linux_386_server.tar.gz)
+- [32 位（Client）](https://github.com/djylb/nps/releases/latest/download/linux_386_client.tar.gz)
 
 #### **ARM**
 - [ARM64（Server）](https://github.com/djylb/nps/releases/latest/download/linux_arm64_server.tar.gz)
