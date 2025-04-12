@@ -7,6 +7,7 @@ import (
 	"math"
 	"net"
 	"os"
+	"sync"
 	"sync/atomic"
 	"time"
 )
@@ -44,6 +45,7 @@ type Mux struct {
 	connType           string
 	writeQueue         priorityQueue
 	newConnQueue       connQueue
+	once sync.Once
 }
 
 func NewMux(c net.Conn, connType string, pingCheckThreshold int) *Mux {
@@ -326,17 +328,23 @@ func (s *Mux) Close() (err error) {
 	if s.IsClose {
 		return errors.New("the mux has closed")
 	}
-	s.IsClose = true
-	log.Println("close mux")
-	s.connMap.Close()
-	//s.connMap = nil
-	s.closeChan <- struct{}{}
-	close(s.newConnCh)
-	// while target host close socket without finish steps, conn.Close method maybe blocked
-	// and tcp status change to CLOSE WAIT or TIME WAIT, so we close it in other goroutine
-	_ = s.conn.SetDeadline(time.Now().Add(time.Second * 5))
-	go s.conn.Close()
-	s.release()
+
+	s.once.Do(func() {
+		s.IsClose = true
+		log.Println("close mux")
+		s.connMap.Close()
+		//s.connMap = nil
+		s.closeChan <- struct{}{}
+		close(s.newConnCh)
+		// while target host close socket without finish steps, conn.Close method maybe blocked
+		// and tcp status change to CLOSE WAIT or TIME WAIT, so we close it in other goroutine
+		_ = s.conn.SetDeadline(time.Now().Add(time.Second * 5))
+		go func() {
+			s.conn.Close()
+			s.bw.Close()
+		}()
+		s.release()
+	})
 	return
 }
 
@@ -427,6 +435,10 @@ func (Self *bandwidth) Get() (bw float64) {
 		bw = 0
 	}
 	return
+}
+
+func (Self *bandwidth) Close() error {
+	return Self.fd.Close()
 }
 
 const counterBits = 4
