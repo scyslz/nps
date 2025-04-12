@@ -128,6 +128,7 @@ npc start
   - 调整日志输出等级
   - 优化写入性能
   - 修复端口复用时连接泄露和并发冲突
+  - 清理代码更新相关依赖
 
 ### Stable
 
@@ -192,4 +193,4 @@ npc start
   - 整理仓库代码
   - 优化域名查找算法
 
-更多历史更新记录请参阅项目 [Releases](https://github.com/djylb/nps/releases)。
+更多历史更新记录请参阅项目 [Releases](https://github.com/djylb/nps/releases)

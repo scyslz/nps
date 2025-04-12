@@ -55,6 +55,8 @@ NPS 提供官方二进制安装包，适用于 **Windows、Linux、macOS、FreeB
 - [64 位（Client）](https://github.com/djylb/nps/releases/latest/download/windows_amd64_client.tar.gz)
 - [32 位（Server）](https://github.com/djylb/nps/releases/latest/download/windows_386_server.tar.gz)
 - [32 位（Client）](https://github.com/djylb/nps/releases/latest/download/windows_386_client.tar.gz)
+- [ARM64（Server）](https://github.com/djylb/nps/releases/latest/download/windows_arm64_server.tar.gz)
+- [ARM64（Client）](https://github.com/djylb/nps/releases/latest/download/windows_arm64_client.tar.gz)
 
 **Windows 7 用户（使用 `old` 结尾版本）**：
 - [64 位（Server）](https://github.com/djylb/nps/releases/latest/download/windows_amd64_server_old.tar.gz)
