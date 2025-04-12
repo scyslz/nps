@@ -317,7 +317,18 @@ func createEmptyFile(filePath string) error {
 }
 
 func storeSyncMapToFile(m sync.Map, filePath string) {
-	var objs []interface{}
+	tmpFilePath := filePath + ".tmp"
+	file, err := os.Create(tmpFilePath)
+	if err != nil {
+		panic(err)
+	}
+	writer := bufio.NewWriter(file)
+
+	if _, err = writer.WriteString("[\n"); err != nil {
+		panic(err)
+	}
+
+	first := true
 	m.Range(func(key, value interface{}) bool {
 		switch v := value.(type) {
 		case *Tunnel:
@@ -333,37 +344,44 @@ func storeSyncMapToFile(m sync.Map, filePath string) {
 				return true
 			}
 		}
-		objs = append(objs, value)
-		return true
-	})
 
-	// 使用缩进格式序列化整个对象数组
-	var elems []string
-	for _, obj := range objs {
-		// 使用 json.Marshal 产生紧凑格式的单行 JSON
-		b, err := json.Marshal(obj)
+		data, err := json.Marshal(value)
 		if err != nil {
 			panic(err)
 		}
-		// 在每个元素前加入两个空格缩进
-		elems = append(elems, "  "+string(b))
-	}
-	jsonStr := "[\n" + strings.Join(elems, ",\n") + "\n]"
 
-	// 写入临时文件
-	file, err := os.Create(filePath + ".tmp")
-	if err != nil {
+		if !first {
+			if _, err = writer.WriteString(",\n"); err != nil {
+				panic(err)
+			}
+		}
+		first = false
+
+		if _, err = writer.WriteString("  "); err != nil {
+			panic(err)
+		}
+		if _, err = writer.Write(data); err != nil {
+			panic(err)
+		}
+
+		return true
+	})
+
+	if _, err = writer.WriteString("\n]\n"); err != nil {
 		panic(err)
 	}
-	_, err = file.Write([]byte(jsonStr))
-	if err != nil {
+
+	if err = writer.Flush(); err != nil {
 		panic(err)
 	}
-	_ = file.Sync()
-	_ = file.Close()
+	if err = file.Sync(); err != nil {
+		panic(err)
+	}
+	if err = file.Close(); err != nil {
+		panic(err)
+	}
 
-	// must close file first, then rename it
-	err = os.Rename(filePath+".tmp", filePath)
+	err = os.Rename(tmpFilePath, filePath)
 	if err != nil {
 		logs.Error(err, "store to file err, data will lost")
 	}
