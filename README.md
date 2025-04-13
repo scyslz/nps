@@ -19,6 +19,7 @@ NPS 是一款轻量高效的内网穿透代理服务器，支持多种协议（T
 - **欢迎参与：**  提交 PR、反馈问题或建议，共同推动项目发展。
 - **讨论交流：**  加入 [Telegram 交流群](https://t.me/npsdev) 与其他用户交流经验。
 - **Android客户端:**  [djylb/npsclient](https://github.com/djylb/npsclient)
+- **OpenWRT:**  [djylb/nps-openwrt](https://github.com/djylb/nps-openwrt)
 
 ---
 
@@ -42,7 +43,7 @@ NPS 是一款轻量高效的内网穿透代理服务器，支持多种协议（T
 
 更多详细配置请参考 [文档](https://d-jy.net/docs/nps/)（部分内容可能未更新）。
 
-### [Android客户端](https://github.com/djylb/npsclient)
+### [Android](https://github.com/djylb/npsclient) | [OpenWRT](https://github.com/djylb/nps-openwrt)
 
 ### Docker 部署
 
@@ -129,6 +130,7 @@ npc start
   - 优化写入性能
   - 修复端口复用时连接泄露和并发冲突
   - 清理代码更新相关依赖
+  - 新增OpenWRT仓库 [djylb/nps-openwrt](https://github.com/djylb/nps-openwrt)
 
 ### Stable
 
