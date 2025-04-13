@@ -42,6 +42,13 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Trigger Update NPS Client
+        run: |
+          curl -X POST https://api.github.com/repos/djylb/npsclient/dispatches \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ secrets.NPSCLIENT_PAT }}" \
+            -d '{"event_type":"trigger-update-npc"}'
+
   build_assets_old:
     runs-on: ubuntu-latest
 
