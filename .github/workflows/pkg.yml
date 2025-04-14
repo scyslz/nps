@@ -54,7 +54,7 @@ jobs:
           curl -X POST https://api.github.com/repos/djylb/nps-openwrt/dispatches \
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: Bearer ${{ secrets.NPSCLIENT_PAT }}" \
-            -d '{"event_type":"trigger-update-npc"}'
+            -d '{"event_type":"trigger-update"}'
 
   build_assets_old:
     runs-on: ubuntu-latest
