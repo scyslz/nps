@@ -18,7 +18,7 @@ NPS 是一款轻量高效的内网穿透代理服务器，支持多种协议（T
 - **提问前请先查阅：**  [文档](https://d-jy.net/docs/nps/) 与 [Issues](https://github.com/djylb/nps/issues)
 - **欢迎参与：**  提交 PR、反馈问题或建议，共同推动项目发展。
 - **讨论交流：**  加入 [Telegram 交流群](https://t.me/npsdev) 与其他用户交流经验。
-- **Android客户端:**  [djylb/npsclient](https://github.com/djylb/npsclient)
+- **Android:**  [djylb/npsclient](https://github.com/djylb/npsclient)
 - **OpenWrt:**  [djylb/nps-openwrt](https://github.com/djylb/nps-openwrt)
 
 ---
@@ -126,13 +126,19 @@ npc start
 
 - **Main** 
   - 待定，优先修BUG，新功能随缘更新
+
+### Stable
+
+- **v0.26.46 (2025-04-14)** 
   - 调整日志输出等级
   - 优化写入性能
   - 修复端口复用时连接泄露和并发冲突
   - 清理代码更新相关依赖
   - 新增OpenWRT仓库 [djylb/nps-openwrt](https://github.com/djylb/nps-openwrt)
-
-### Stable
+  - 修复拼写错误
+  - 自动更新[Android](https://github.com/djylb/npsclient)和[OpenWrt](https://github.com/djylb/nps-openwrt)仓库
+  - 自动识别服务器IP [#59](https://github.com/djylb/nps/issues/59)
+  - P2P支持IPv6（需要纯IPv6网络环境）
 
 - **v0.26.45 (2025-04-09)** 
   - 搜索功能匹配不限制大小写

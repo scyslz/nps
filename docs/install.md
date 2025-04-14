@@ -188,6 +188,7 @@ npc start
 
 ### **3.1 APK (仅限NPC)**
 #### [NPS Client](https://github.com/djylb/npsclient)
+#### [Google Play](https://play.google.com/store/apps/details?id=com.duanlab.npsclient)
 - [全架构](https://github.com/djylb/npsclient/releases/latest/download/app-universal-release.apk)
 - [ARM64](https://github.com/djylb/npsclient/releases/latest/download/app-arm64-v8a-release.apk)
 - [ARM32](https://github.com/djylb/npsclient/releases/latest/download/app-armeabi-v7a-release.apk)
@@ -200,14 +201,20 @@ npc start
 
 ---
 
-## 4. 源码安装（Go 编译）
+## 4. OpenWrt 使用
 
-### **4.1 安装依赖**
+#### [djylb/nps-openwrt](https://github.com/djylb/nps-openwrt)
+
+---
+
+## 5. 源码安装（Go 编译）
+
+### **5.1 安装依赖**
 ```bash
 go get -u github.com/djylb/nps
 ```
 
-### **4.2 编译**
+### **5.2 编译**
 #### **NPS 服务器**
 ```bash
 go build -o nps cmd/nps/nps.go
@@ -222,9 +229,11 @@ go build -o npc cmd/npc/npc.go
 
 ---
 
-## 5. 相关链接
+## 6. 相关链接
 
 - **最新发布版本**：[GitHub Releases](https://github.com/djylb/nps/releases/latest)
+- **Android**：[djylb/npsclient](https://github.com/djylb/npsclient)
+- **OpenWrt**：[djylb/nps-openwrt](https://github.com/djylb/nps-openwrt)
 - **DockerHub 镜像**
   - [NPS Server](https://hub.docker.com/r/duan2001/nps)
   - [NPC Client](https://hub.docker.com/r/duan2001/npc)
