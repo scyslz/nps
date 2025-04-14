@@ -11,20 +11,22 @@
 
 ## Introduction
 
-NPS is a lightweight and efficient intranet tunneling proxy server that supports forwarding multiple protocols (TCP, UDP, HTTP, SOCKS5, etc.). It features an intuitive web management interface that allows secure and convenient access to intranet resources from external networks, addressing a wide range of complex scenarios.
+NPS is a lightweight and efficient intranet tunneling proxy server that supports forwarding multiple protocols (TCP, UDP, HTTP, HTTPS, SOCKS5, etc.). It features an intuitive web management interface that allows secure and convenient access to intranet resources from external networks, addressing a wide range of complex scenarios.
 
 Due to the long-term discontinuation of [NPS](https://github.com/ehang-io/nps), this repository is a community-driven, updated fork based on nps 0.26.
 
 - **Before asking questions, please check:** [Documentation](https://d-jy.net/docs/nps/) and [Issues](https://github.com/djylb/nps/issues)
 - **Contributions welcome:** Submit PRs, provide feedback or suggestions, and help drive the project forward.
 - **Join the discussion:** Connect with other users in our [Telegram Group](https://t.me/npsdev).
+- **Android:**  [djylb/npsclient](https://github.com/djylb/npsclient)
+- **OpenWrt:**  [djylb/nps-openwrt](https://github.com/djylb/nps-openwrt)
 
 ---
 
 ## Key Features
 
 - **Multi-Protocol Support**  
-  Offers TCP/UDP forwarding, HTTP/SOCKS5 proxy, P2P mode, and more to suit various intranet access scenarios.
+  Offers TCP/UDP forwarding, HTTP/HTTPS forwarding, HTTP/SOCKS5 proxy, P2P mode, and more to suit various intranet access scenarios.
 
 - **Cross-Platform Deployment**  
   Compatible with major platforms like Linux and Windows, with easy installation as a system service.
@@ -40,6 +42,8 @@ Due to the long-term discontinuation of [NPS](https://github.com/ehang-io/nps), 
 ## Installation and Usage
 
 For more detailed configuration options, please refer to the [Documentation](https://d-jy.net/docs/nps/) (some sections may be outdated).
+
+### [Android](https://github.com/djylb/npsclient) | [OpenWrt](https://github.com/djylb/nps-openwrt)
 
 ### Docker Deployment
 
@@ -74,6 +78,7 @@ nps start
 ```
 
 #### Windows
+> Windows 7 users should use the version ending with old: [64](https://github.com/djylb/nps/releases/latest/download/windows_amd64_server_old.tar.gz) / [32](https://github.com/djylb/nps/releases/latest/download/windows_386_server_old.tar.gz) (manual updates required)
 ```powershell
 .\nps.exe install
 .\nps.exe start|stop|restart|uninstall
@@ -99,6 +104,7 @@ npc start
 ```
 
 #### Windows
+> Windows 7 users should use the version ending with old: [64](https://github.com/djylb/nps/releases/latest/download/windows_amd64_client_old.tar.gz) / [32](https://github.com/djylb/nps/releases/latest/download/windows_386_client_old.tar.gz) (manual updates required)
 ```powershell
 .\npc.exe install -server="xxx:123" -vkey="xxx" -type="tcp" -tls_enable="true" -log="off"
 .\npc.exe start|stop|restart|uninstall
