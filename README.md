@@ -19,7 +19,7 @@ NPS 是一款轻量高效的内网穿透代理服务器，支持多种协议（T
 - **欢迎参与：**  提交 PR、反馈问题或建议，共同推动项目发展。
 - **讨论交流：**  加入 [Telegram 交流群](https://t.me/npsdev) 与其他用户交流经验。
 - **Android客户端:**  [djylb/npsclient](https://github.com/djylb/npsclient)
-- **OpenWRT:**  [djylb/nps-openwrt](https://github.com/djylb/nps-openwrt)
+- **OpenWrt:**  [djylb/nps-openwrt](https://github.com/djylb/nps-openwrt)
 
 ---
 
@@ -43,7 +43,7 @@ NPS 是一款轻量高效的内网穿透代理服务器，支持多种协议（T
 
 更多详细配置请参考 [文档](https://d-jy.net/docs/nps/)（部分内容可能未更新）。
 
-### [Android](https://github.com/djylb/npsclient) | [OpenWRT](https://github.com/djylb/nps-openwrt)
+### [Android](https://github.com/djylb/npsclient) | [OpenWrt](https://github.com/djylb/nps-openwrt)
 
 ### Docker 部署
 
@@ -139,7 +139,7 @@ npc start
   - 修复HTTP代理认证头 [#55](https://github.com/djylb/nps/issues/55)
   - 添加编译架构 [#53](https://github.com/djylb/nps/issues/53)
   - 增加自定义DNS支持非标准系统
-  - 新增安卓客户端 [#53](https://github.com/djylb/nps/issues/53) https://github.com/djylb/npsclient
+  - 新增安卓客户端 [#53](https://github.com/djylb/nps/issues/53) [djylb/npsclient](https://github.com/djylb/npsclient)
   - 美化下拉框样式，使用标准JSON保存数据 [#51](https://github.com/djylb/nps/pull/51) (感谢[yhl452493373](https://github.com/yhl452493373))
 
 - **v0.26.44 (2025-03-26)** 
