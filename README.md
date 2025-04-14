@@ -18,8 +18,8 @@ NPS 是一款轻量高效的内网穿透代理服务器，支持多种协议（T
 - **提问前请先查阅：**  [文档](https://d-jy.net/docs/nps/) 与 [Issues](https://github.com/djylb/nps/issues)
 - **欢迎参与：**  提交 PR、反馈问题或建议，共同推动项目发展。
 - **讨论交流：**  加入 [Telegram 交流群](https://t.me/npsdev) 与其他用户交流经验。
-- **Android:**  [djylb/npsclient](https://github.com/djylb/npsclient)
-- **OpenWrt:**  [djylb/nps-openwrt](https://github.com/djylb/nps-openwrt)
+- **Android：**  [djylb/npsclient](https://github.com/djylb/npsclient)
+- **OpenWrt：**  [djylb/nps-openwrt](https://github.com/djylb/nps-openwrt)
 
 ---
 
