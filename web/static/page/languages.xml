@@ -486,10 +486,6 @@
 		<zh-CN>服务端 IP</zh-CN>
 		<en-US>Server IP</en-US>
 	</lang>
-	<lang id="word-serveriP">
-		<zh-CN>服务端 IP</zh-CN>
-		<en-US>Server IP</en-US>
-	</lang>
 	<lang id="word-serverport">
 		<zh-CN>服务端端口(留空自动生成)</zh-CN>
 		<en-US>Server Port</en-US>

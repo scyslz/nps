@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/binary"
-	"errors"
 	"fmt"
 	"html/template"
 	"io"
@@ -508,7 +507,7 @@ func CopyBuffer(dst io.Writer, src io.Reader, label ...string) (written int64, e
 
 // send this ip forget to get a local udp port
 func GetLocalUdpAddr() (net.Conn, error) {
-	tmpConn, err := net.Dial("udp", "114.114.114.114:53")
+	tmpConn, err := net.Dial("udp", GetCustomDNS())
 	if err != nil {
 		return nil, err
 	}
@@ -606,36 +605,86 @@ func GetExtFromPath(path string) string {
 	return string(re.Find([]byte(s[0])))
 }
 
+func GetCustomDNS() string {
+	dnsAddr := beego.AppConfig.String("dns_server")
+	if dnsAddr == "" {
+		dnsAddr = "8.8.8.8"
+	}
+	if !strings.Contains(dnsAddr, ":") {
+		dnsAddr += ":53"
+	}
+	return dnsAddr
+}
+
 var externalIp string
+var ipApis = []string{
+	"https://4.ipw.cn",
+	"https://api.ipify.org",
+	"http://ipinfo.io/ip",
+	"https://api64.ipify.org",
+	"https://6.ipw.cn",
+	"http://api.ip.sb",
+	"http://myexternalip.com/raw",
+	"http://ifconfig.me/ip",
+	"http://ident.me",
+	"https://d-jy.net/ip",
+}
+
+func FetchExternalIp() string {
+	for _, api := range ipApis {
+		resp, err := http.Get(api)
+		if err != nil {
+			continue
+		}
+		defer resp.Body.Close()
+		content, _ := ioutil.ReadAll(resp.Body)
+		ip := string(content)
+		if IsValidIP(ip) {
+			externalIp = ip
+			return ip
+		}
+	}
+
+	return ""
+}
 
 func GetExternalIp() string {
 	if externalIp != "" {
 		return externalIp
 	}
-	resp, err := http.Get("http://myexternalip.com/raw")
-	if err != nil {
-		return ""
-	}
-	defer resp.Body.Close()
-	content, _ := ioutil.ReadAll(resp.Body)
-	externalIp = string(content)
-	return externalIp
+	return FetchExternalIp()
 }
 
-func GetIntranetIp() (error, string) {
+func GetIntranetIp() string {
 	addrs, err := net.InterfaceAddrs()
 	if err != nil {
-		return nil, ""
+		return "127.0.0.1"
 	}
 	for _, address := range addrs {
 		// 检查 IP 地址判断是否为回环地址
 		if ipnet, ok := address.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
 			if ipnet.IP.To4() != nil || ipnet.IP.To16() != nil {
-				return nil, ipnet.IP.String()
+				return ipnet.IP.String()
 			}
 		}
 	}
-	return errors.New("get intranet ip error"), ""
+	return "127.0.0.1"
+}
+
+func GetOutboundIP() net.IP {
+	conn, err := net.Dial("udp", GetCustomDNS())
+	if err != nil {
+		return net.ParseIP("127.0.0.1")
+	}
+	defer conn.Close()
+
+	localAddr := conn.LocalAddr().(*net.UDPAddr)
+	return localAddr.IP
+}
+
+func IsValidIP(ip string) bool {
+	parsedIP := net.ParseIP(ip)
+	return parsedIP != nil
 }
 
 func IsPublicIP(IP net.IP) bool {
@@ -664,12 +713,20 @@ func IsPublicIP(IP net.IP) bool {
 	return false
 }
 
+func GetServerIp() string {
+	p2pIP := beego.AppConfig.String("p2p_ip")
+	if p2pIP != "" && p2pIP != "0.0.0.0" {
+		return p2pIP
+	}
+
+	return GetOutboundIP().String()
+}
+
 func GetServerIpByClientIp(clientIp net.IP) string {
 	if IsPublicIP(clientIp) {
 		return GetExternalIp()
 	}
-	_, ip := GetIntranetIp()
-	return ip
+	return GetIntranetIp()
 }
 
 func PrintVersion() {

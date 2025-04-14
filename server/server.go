@@ -485,7 +485,8 @@ func GetDashboardData() map[string]interface{} {
 	data["httpsProxyPort"] = beego.AppConfig.String("https_proxy_port")
 	data["ipLimit"] = beego.AppConfig.String("ip_limit")
 	data["flowStoreInterval"] = beego.AppConfig.String("flow_store_interval")
-	data["serverIp"] = beego.AppConfig.String("p2p_ip")
+	//data["serverIp"] = beego.AppConfig.String("p2p_ip")
+	data["serverIp"] = common.GetServerIp()
 	data["p2pPort"] = beego.AppConfig.String("p2p_port")
 	data["logLevel"] = beego.AppConfig.String("log_level")
 	tcpCount := 0

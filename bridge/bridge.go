@@ -354,7 +354,14 @@ func (s *Bridge) typeDeal(typeVal string, c *conn.Conn, id int, vs string) {
 			logs.Error("p2p error, failed to match the key successfully")
 		} else if v, ok := s.Client.Load(t.Client.Id); ok {
 			//向密钥对应的客户端发送与服务端udp建立连接信息，地址，密钥
-			svrAddr := beego.AppConfig.String("p2p_ip") + ":" + beego.AppConfig.String("p2p_port")
+			serverIP := common.GetServerIp()
+
+			// 检查是否是 IPv6 地址
+			if strings.Contains(serverIP, ":") {
+				serverIP = "[" + serverIP + "]"
+			}
+
+			svrAddr := serverIP + ":" + beego.AppConfig.String("p2p_port")
 			if err != nil {
 				logs.Warn("get local udp addr error")
 				return
