@@ -102,12 +102,21 @@ func (s *TRPClient) handleMain() {
 				var localAddr string
 				//The local port remains unchanged for a certain period of time
 				if v, ok := s.p2pAddr[crypt.Md5(string(pwd)+strconv.Itoa(int(time.Now().Unix()/100)))]; !ok {
-					tmpConn, err := common.GetLocalUdpAddr()
-					if err != nil {
-						logs.Error(err)
-						return
+					if strings.Contains(string(lAddr), "]:") {
+						tmpConn, err := common.GetLocalUdp6Addr()
+						if err != nil {
+							logs.Error(err)
+							return
+						}
+						localAddr = tmpConn.LocalAddr().String()
+					} else {
+						tmpConn, err := common.GetLocalUdp4Addr()
+						if err != nil {
+							logs.Error(err)
+							return
+						}
+						localAddr = tmpConn.LocalAddr().String()
 					}
-					localAddr = tmpConn.LocalAddr().String()
 				} else {
 					localAddr = v
 				}
@@ -122,6 +131,7 @@ func (s *TRPClient) newUdpConn(localAddr, rAddr string, md5Password string) {
 	var localConn net.PacketConn
 	var err error
 	var remoteAddress string
+	logs.Debug("newUdpConn %s %s", localAddr, rAddr)
 	if remoteAddress, localConn, err = handleP2PUdp(localAddr, rAddr, md5Password, common.WORK_P2P_PROVIDER); err != nil {
 		logs.Error(err)
 		return

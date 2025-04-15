@@ -514,6 +514,22 @@ func GetLocalUdpAddr() (net.Conn, error) {
 	return tmpConn, tmpConn.Close()
 }
 
+func GetLocalUdp4Addr() (net.Conn, error) {
+	tmpConn, err := net.Dial("udp4", "8.8.8.8:53")
+	if err != nil {
+		return nil, err
+	}
+	return tmpConn, tmpConn.Close()
+}
+
+func GetLocalUdp6Addr() (net.Conn, error) {
+	tmpConn, err := net.Dial("udp6", "[2400:3200::1]:53")
+	if err != nil {
+		return nil, err
+	}
+	return tmpConn, tmpConn.Close()
+}
+
 // parse template
 func ParseStr(str string) (string, error) {
 	tmp := template.New("npc")
@@ -605,15 +621,14 @@ func GetExtFromPath(path string) string {
 	return string(re.Find([]byte(s[0])))
 }
 
-func GetCustomDNS() string {
-	dnsAddr := beego.AppConfig.String("dns_server")
-	if dnsAddr == "" {
-		dnsAddr = "8.8.8.8"
+func IsSameIPType(addr1, addr2 string) bool {
+	ip1 := strings.Contains(addr1, "[")
+	ip2 := strings.Contains(addr2, "[")
+
+	if ip1 == ip2 {
+		return true
 	}
-	if !strings.Contains(dnsAddr, ":") {
-		dnsAddr += ":53"
-	}
-	return dnsAddr
+	return false
 }
 
 var externalIp string

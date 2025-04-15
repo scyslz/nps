@@ -392,6 +392,8 @@ func handleP2PUdp(localAddr, rAddr, md5Password, role string) (remoteAddress str
 				remoteAddr3 = string(buf[:n])
 			}
 		}
+		//logs.Debug("buf: %s", buf)
+		logs.Debug("remoteAddr1: %s remoteAddr2: %s remoteAddr3: %s", remoteAddr1, remoteAddr2, remoteAddr3)
 		if remoteAddr1 != "" && remoteAddr2 != "" && remoteAddr3 != "" {
 			break
 		}
@@ -437,9 +439,15 @@ func sendP2PTestMsg(localConn *net.UDPConn, remoteAddr1, remoteAddr2, remoteAddr
 		}
 	}()
 	if interval != 0 {
-		ip := common.GetIpByAddr(remoteAddr2)
+		ip := common.RemovePortFromHost(remoteAddr2)
 		go func() {
-			ports := getRandomPortArr(common.GetPortByAddr(remoteAddr3), common.GetPortByAddr(remoteAddr3)+interval*50)
+			minPort := common.GetPortByAddr(remoteAddr3)
+			maxPort := minPort + interval*50
+			if maxPort > 65535 {
+			    maxPort = 65535
+			}
+			logs.Debug("minPort: %d, maxPort: %d", minPort, maxPort)
+			ports := getRandomPortArr(minPort, maxPort)
 			for i := 0; i <= 50; i++ {
 				go func(port int) {
 					trueAddress := ip + ":" + strconv.Itoa(port)
@@ -517,41 +525,34 @@ func newUdpConnByAddr(addr string) (*net.UDPConn, error) {
 }
 
 func getNextAddr(addr string, n int) (string, error) {
-	arr := strings.Split(addr, ":")
-	if len(arr) != 2 {
-		return "", errors.New(fmt.Sprintf("the format of %s incorrect", addr))
+	lastColonIndex := strings.LastIndex(addr, ":")
+	if lastColonIndex == -1 {
+		return "", fmt.Errorf("the format of %s is incorrect", addr)
 	}
-	if p, err := strconv.Atoi(arr[1]); err != nil {
+
+	host := addr[:lastColonIndex]
+	portStr := addr[lastColonIndex+1:]
+
+	port, err := strconv.Atoi(portStr)
+	if err != nil {
 		return "", err
-	} else {
-		return arr[0] + ":" + strconv.Itoa(p+n), nil
 	}
+
+	return host + ":" + strconv.Itoa(port+n), nil
 }
 
 func getAddrInterval(addr1, addr2, addr3 string) (int, error) {
-	arr1 := strings.Split(addr1, ":")
-	if len(arr1) != 2 {
-		return 0, errors.New(fmt.Sprintf("the format of %s incorrect", addr1))
+	p1 := common.GetPortByAddr(addr1)
+	if p1 == 0 {
+		return 0, fmt.Errorf("the format of %s incorrect", addr1)
 	}
-	arr2 := strings.Split(addr2, ":")
-	if len(arr2) != 2 {
-		return 0, errors.New(fmt.Sprintf("the format of %s incorrect", addr2))
+	p2 := common.GetPortByAddr(addr2)
+	if p2 == 0 {
+		return 0, fmt.Errorf("the format of %s incorrect", addr2)
 	}
-	arr3 := strings.Split(addr3, ":")
-	if len(arr3) != 2 {
-		return 0, errors.New(fmt.Sprintf("the format of %s incorrect", addr3))
-	}
-	p1, err := strconv.Atoi(arr1[1])
-	if err != nil {
-		return 0, err
-	}
-	p2, err := strconv.Atoi(arr2[1])
-	if err != nil {
-		return 0, err
-	}
-	p3, err := strconv.Atoi(arr3[1])
-	if err != nil {
-		return 0, err
+	p3 := common.GetPortByAddr(addr3)
+	if p3 == 0 {
+		return 0, fmt.Errorf("the format of %s incorrect", addr3)
 	}
 	interVal := int(math.Floor(math.Min(math.Abs(float64(p3-p2)), math.Abs(float64(p2-p1)))))
 	if p3-p1 < 0 {

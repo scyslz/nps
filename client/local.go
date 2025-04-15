@@ -133,18 +133,41 @@ func handleUdpMonitor(config *config.CommonConfig, l *config.LocalServer) {
 		case <-ticker.C:
 			if !udpConnStatus {
 				udpConn = nil
-				tmpConn, err := common.GetLocalUdpAddr()
-				if err != nil {
-					logs.Error(err)
+
+				tmpConnV4, errV4 := common.GetLocalUdp4Addr()
+				if errV4 != nil {
+					logs.Warn("Failed to get local IPv4 address: %s", errV4.Error())
+				} else {
+					logs.Debug("IPv4 address: %s", tmpConnV4.LocalAddr().String())
+				}
+
+				tmpConnV6, errV6 := common.GetLocalUdp6Addr()
+				if errV6 != nil {
+					logs.Warn("Failed to get local IPv6 address: %s", errV6.Error())
+				} else {
+					logs.Debug("IPv6 address: %s", tmpConnV6.LocalAddr().String())
+				}
+
+				if errV4 != nil && errV6 != nil {
+					logs.Error("Both IPv4 and IPv6 address retrieval failed, exiting.")
 					return
 				}
-				logs.Debug(tmpConn.LocalAddr().String())
+
 				for i := 0; i < 10; i++ {
 					logs.Notice("try to connect to the server", i+1)
-					newUdpConn(tmpConn.LocalAddr().String(), config, l)
-					if udpConn != nil {
-						udpConnStatus = true
-						break
+					if errV4 == nil {
+						newUdpConn(tmpConnV4.LocalAddr().String(), config, l)
+						if udpConn != nil {
+							udpConnStatus = true
+							break
+						}
+					}
+					if errV6 == nil {
+						newUdpConn(tmpConnV6.LocalAddr().String(), config, l)
+						if udpConn != nil {
+							udpConnStatus = true
+							break
+						}
 					}
 				}
 			}
@@ -201,12 +224,21 @@ func newUdpConn(localAddr string, config *config.CommonConfig, l *config.LocalSe
 		logs.Error(err)
 		return
 	}
+
+	if !common.IsSameIPType(localAddr, string(rAddr)) {
+		logs.Debug("IP type mismatch: localAddr is %s, rAddr is %s", localAddr, rAddr)
+		return
+	}
+	//logs.Debug("localAddr is %s, rAddr is %s", localAddr, rAddr)
+
 	var localConn net.PacketConn
 	var remoteAddress string
 	if remoteAddress, localConn, err = handleP2PUdp(localAddr, string(rAddr), crypt.Md5(l.Password), common.WORK_P2P_VISITOR); err != nil {
 		logs.Error(err)
 		return
 	}
+	logs.Debug("remoteAddress: %s", remoteAddress)
+
 	udpTunnel, err := kcp.NewConn(remoteAddress, nil, 150, 3, localConn)
 	if err != nil || udpTunnel == nil {
 		logs.Warn(err)

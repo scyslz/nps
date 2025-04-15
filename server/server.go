@@ -95,9 +95,15 @@ func StartNewServer(bridgePort int, cnf *file.Tunnel, bridgeType string, bridgeD
 		}
 	}()
 	if p, err := beego.AppConfig.Int("p2p_port"); err == nil {
-		go proxy.NewP2PServer(p).Start()
-		go proxy.NewP2PServer(p + 1).Start()
-		go proxy.NewP2PServer(p + 2).Start()
+		for i := 0; i < 3; i++ {
+			port := p + i
+			if common.TestUdpPort(port) {
+				go proxy.NewP2PServer(port).Start()
+				logs.Info("Started P2P Server on port %d", port)
+			} else {
+				logs.Error("Port %d is unavailable.", port)
+			}
+		}
 	}
 	go DealBridgeTask()
 	go dealClientFlow()
