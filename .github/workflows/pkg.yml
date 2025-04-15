@@ -40,14 +40,14 @@ jobs:
           if [ -f "lib/version/version.go" ]; then
             version=$(grep -oP '(?<=const VERSION = ")[^"]*' lib/version/version.go)
             echo "NPS version: $version"
-            echo "VERSION=$version" >> $GITHUB_ENV
+            echo "NPS_VERSION=$version" >> $GITHUB_ENV
           fi
 
       - name: Upload
         uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
         with:
-          tag_name: v${{ env.CURRENT_VERSION }}
+          tag_name: v${{ env.NPS_VERSION }}
           files: "*.tar.gz"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -108,14 +108,14 @@ jobs:
           if [ -f "lib/version/version.go" ]; then
             version=$(grep -oP '(?<=const VERSION = ")[^"]*' lib/version/version.go)
             echo "NPS version: $version"
-            echo "VERSION=$version" >> $GITHUB_ENV
+            echo "NPS_VERSION=$version" >> $GITHUB_ENV
           fi
 
       - name: Upload
         uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
         with:
-          tag_name: v${{ env.CURRENT_VERSION }}
+          tag_name: v${{ env.NPS_VERSION }}
           files: "*.tar.gz"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
