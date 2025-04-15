@@ -730,8 +730,15 @@ func IsPublicIP(IP net.IP) bool {
 
 func GetServerIp() string {
 	p2pIP := beego.AppConfig.String("p2p_ip")
-	if p2pIP != "" && p2pIP != "0.0.0.0" {
+	if p2pIP != "" && p2pIP != "0.0.0.0" && p2pIP != "::" {
 		return p2pIP
+	}
+
+	if p2pIP == "::" {
+		tmpConn, err := common.GetLocalUdp6Addr()
+		if err != nil {
+			return tmpConn.LocalAddr().String()
+		}
 	}
 
 	return GetOutboundIP().String()
