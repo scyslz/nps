@@ -261,6 +261,7 @@ func dealTunnel(s string) *file.Tunnel {
 					if content, err := common.ParseStr(string(b)); err != nil {
 						panic(err)
 					} else {
+						t.MultiAccount.Content = content
 						t.MultiAccount.AccountMap = dealMultiUser(content)
 					}
 				}

@@ -418,6 +418,10 @@
 		<zh-CN>端口</zh-CN>
 		<en-US>Port</en-US>
 	</lang>
+	<lang id="word-auth">
+		<zh-CN>密码认证</zh-CN>
+		<en-US>Password Authentication</en-US>
+	</lang>
 	<lang id="word-accessaddress">
 		<zh-CN>访问地址</zh-CN>
 		<en-US>Access address</en-US>
@@ -737,6 +741,10 @@
 		<zh-CN>例如&#10;10.1.50.203:80&#10;10.1.50.202:80</zh-CN>
 		<en-US>such as&#10;10.1.50.203:80&#10;10.1.50.202:80</en-US>
 	</lang>
+	<lang id="info-suchasauth">
+		<zh-CN>例如&#10;用户1=密码1&#10;用户2=密码2</zh-CN>
+		<en-US>such as&#10;User1=Password1&#10;User2=Password2</en-US>
+	</lang>
 	<lang id="info-suchaslocalpath">
 		<zh-CN>例如 /tmp</zh-CN>
 		<en-US>such as /tmp</en-US>
@@ -760,6 +768,10 @@
 	<lang id="info-targettunnel">
 		<zh-CN>代理到本地可以只填写端口号，只有TCP模式支持负载均衡</zh-CN>
 		<en-US>Can only fill in ports if it is local machine proxy, only tcp supports load balancing</en-US>
+	</lang>
+	<lang id="info-targetauth">
+		<zh-CN>密码认证留空不启用</zh-CN>
+		<en-US>Leave the password authentication blank to disable it</en-US>
 	</lang>
 	<lang id="info-pemtext">
 		<zh-CN>支持填写证书路径或证书文本内容（支持拖拽填写），证书文件格式为：xxxx.pem</zh-CN>

@@ -69,14 +69,8 @@ func (s *BaseServer) writeConnFail(c net.Conn) {
 }
 
 // auth check
-func (s *BaseServer) auth(r *http.Request, c *conn.Conn, u, p string, task *file.Tunnel) error {
-	var accountMap map[string]string
-	if task.MultiAccount == nil {
-		accountMap = nil
-	} else {
-		accountMap = task.MultiAccount.AccountMap
-	}
-	if !common.CheckAuth(r, u, p, accountMap) {
+func (s *BaseServer) auth(r *http.Request, c *conn.Conn, u, p string, multiAccount, userAuth *file.MultiAccount) error {
+	if !common.CheckAuth(r, u, p, file.GetAccountMap(multiAccount), file.GetAccountMap(userAuth)) {
 		if c != nil {
 			c.Write([]byte(common.UnauthorizedBytes))
 			c.Close()

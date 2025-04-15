@@ -164,6 +164,7 @@ type Tunnel struct {
 	LocalPath    string
 	StripPre     string
 	Target       *Target
+	UserAuth     *MultiAccount
 	MultiAccount *MultiAccount
 	Health
 	sync.RWMutex
@@ -201,6 +202,7 @@ type Host struct {
 	Client         *Client
 	TargetIsHttps  bool
 	Target         *Target //目标
+	UserAuth       *MultiAccount
 	Health         `json:"-"`
 	sync.RWMutex
 }
@@ -215,7 +217,18 @@ type Target struct {
 }
 
 type MultiAccount struct {
+	Content    string
 	AccountMap map[string]string // multi account and pwd
+}
+
+func GetAccountMap(multiAccount *MultiAccount) map[string]string {
+	var accountMap map[string]string
+	if multiAccount == nil {
+		accountMap = nil
+	} else {
+		accountMap = multiAccount.AccountMap
+	}
+	return accountMap
 }
 
 func (s *Target) GetRandomTarget() (string, error) {

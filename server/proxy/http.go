@@ -41,7 +41,7 @@ func (c *basicConn) SetWriteDeadline(t time.Time) error { return nil }
 
 type flowConn struct {
 	*basicConn
-	host       *file.Host
+	host *file.Host
 }
 
 func checkFlowLimits(f *file.Flow, label string, now time.Time) error {
@@ -223,7 +223,7 @@ func (s *httpServer) handleProxy(w http.ResponseWriter, r *http.Request) {
 
 	// HTTP 认证
 	if r.Header.Get("Upgrade") == "" {
-		if err := s.auth(r, nil, host.Client.Cnf.U, host.Client.Cnf.P, s.task); err != nil {
+		if err := s.auth(r, nil, host.Client.Cnf.U, host.Client.Cnf.P, s.task.MultiAccount, host.UserAuth); err != nil {
 			logs.Warn("Unauthorized request from %s", r.RemoteAddr)
 			w.Header().Set("WWW-Authenticate", `Basic realm="Restricted"`)
 			http.Error(w, "401 Unauthorized", http.StatusUnauthorized)
@@ -303,7 +303,7 @@ func (s *httpServer) handleProxy(w http.ResponseWriter, r *http.Request) {
 						ReadWriteCloser: rawConn,
 						fakeAddr:        localTCPAddr,
 					},
-					host:            host,
+					host: host,
 				}, nil
 			},
 		},

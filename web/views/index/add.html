@@ -93,6 +93,13 @@
                         </div>
                     </div>
                     {{end}}
+                    <div class="form-group" id="auth">
+                        <label class="control-label font-bold" langtag="word-auth"></label>
+                        <div class="col-sm-12">
+                            <textarea class="form-control" langtag="info-suchasauth" name="auth" placeholder="" rows="4"></textarea>
+                            <span class="help-block m-b-none" langtag="info-targetauth"></span>
+                        </div>
+                    </div>
                     <div class="form-group" id="target">
                         <label class="control-label font-bold" langtag="word-target"></label>
                         <div class="col-sm-12">
@@ -138,11 +145,11 @@
 
 <script>
     var arr = []
-    arr["all"] = ["port", "target", "password", "flow_reset", "flow_limit", "time_limit", "local_path", "strip_pre", "proxy_protocol", "local_proxy", "client_id", "server_ip"]
+    arr["all"] = ["auth", "port", "target", "password", "flow_reset", "flow_limit", "time_limit", "local_path", "strip_pre", "proxy_protocol", "local_proxy", "client_id", "server_ip"]
     arr["tcp"] = ["port", "target", "proxy_protocol", "local_proxy", "client_id", "server_ip", "flow_reset", "flow_limit", "time_limit"]
     arr["udp"] = ["port", "target", "local_proxy", "client_id", "server_ip", "flow_reset", "flow_limit", "time_limit"]
-    arr["socks5"] = ["port", "client_id", "server_ip", "flow_reset", "flow_limit", "time_limit"]
-    arr["httpProxy"] = ["port", "client_id", "server_ip", "flow_reset", "flow_limit", "time_limit"]
+    arr["socks5"] = ["auth", "port", "client_id", "server_ip", "flow_reset", "flow_limit", "time_limit"]
+    arr["httpProxy"] = ["auth", "port", "client_id", "server_ip", "flow_reset", "flow_limit", "time_limit"]
     arr["secret"] = ["target", "password", "client_id", "server_ip", "flow_reset", "flow_limit", "time_limit"]
     arr["p2p"] = ["target", "password", "client_id", "server_ip", "flow_reset", "flow_limit", "time_limit"]
     arr["file"] = ["port", "local_path", "strip_pre", "client_id", "server_ip", "flow_reset", "flow_limit", "time_limit"]

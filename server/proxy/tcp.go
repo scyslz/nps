@@ -153,7 +153,7 @@ func ProcessHttp(c *conn.Conn, s *TunnelModeServer) error {
 		return err
 	}
 
-	if err := s.auth(r, nil, s.task.Client.Cnf.U, s.task.Client.Cnf.P, s.task); err != nil {
+	if err := s.auth(r, nil, s.task.Client.Cnf.U, s.task.Client.Cnf.P, s.task.MultiAccount, s.task.UserAuth); err != nil {
 		c.Write([]byte(common.ProxyAuthRequiredBytes))
 		c.Close()
 		return err

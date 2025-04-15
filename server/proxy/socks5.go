@@ -307,7 +307,7 @@ func (s *Sock5ModeServer) handleConn(c net.Conn) {
 		c.Close()
 		return
 	}
-	if (s.task.Client.Cnf.U != "" && s.task.Client.Cnf.P != "") || (s.task.MultiAccount != nil && len(s.task.MultiAccount.AccountMap) > 0) {
+	if (s.task.Client.Cnf.U != "" && s.task.Client.Cnf.P != "") || (s.task.MultiAccount != nil && len(s.task.MultiAccount.AccountMap) > 0) || (s.task.UserAuth != nil && len(s.task.UserAuth.AccountMap) > 0) {
 		buf[1] = UserPassAuth
 		c.Write(buf)
 		if err := s.Auth(c); err != nil {
@@ -344,13 +344,8 @@ func (s *Sock5ModeServer) Auth(c net.Conn) error {
 	if _, err := io.ReadAtLeast(c, pass, passLen); err != nil {
 		return err
 	}
-	var accountMap map[string]string
-	if s.task.MultiAccount == nil {
-		accountMap = nil
-	} else {
-		accountMap = s.task.MultiAccount.AccountMap
-	}
-	if common.CheckAuthWithAccountMap(string(user), string(pass), s.task.Client.Cnf.U, s.task.Client.Cnf.P, accountMap) {
+
+	if common.CheckAuthWithAccountMap(string(user), string(pass), s.task.Client.Cnf.U, s.task.Client.Cnf.P, file.GetAccountMap(s.task.MultiAccount), file.GetAccountMap(s.task.UserAuth)) {
 		if _, err := c.Write([]byte{userAuthVersion, authSuccess}); err != nil {
 			return err
 		}

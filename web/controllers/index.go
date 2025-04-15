@@ -105,6 +105,10 @@ func (s *IndexController) Add() {
 				ProxyProtocol: s.GetIntNoErr("proxy_protocol"),
 				LocalProxy:    (clientId > 0 && s.GetBoolNoErr("local_proxy")) || clientId <= 0,
 			},
+			UserAuth: &file.MultiAccount{
+				Content:    s.getEscapeString("auth"),
+				AccountMap: common.DealMultiUser(s.getEscapeString("auth")),
+			},
 			Id:        id,
 			Status:    true,
 			Remark:    s.getEscapeString("remark"),
@@ -112,8 +116,8 @@ func (s *IndexController) Add() {
 			LocalPath: s.getEscapeString("local_path"),
 			StripPre:  s.getEscapeString("strip_pre"),
 			Flow: &file.Flow{
-				FlowLimit:  int64(s.GetIntNoErr("flow_limit")),
-				TimeLimit:  common.GetTimeNoErrByStr(s.getEscapeString("time_limit")),
+				FlowLimit: int64(s.GetIntNoErr("flow_limit")),
+				TimeLimit: common.GetTimeNoErrByStr(s.getEscapeString("time_limit")),
 			},
 		}
 
@@ -160,6 +164,11 @@ func (s *IndexController) Edit() {
 			s.error()
 		} else {
 			s.Data["t"] = t
+			if t.UserAuth == nil {
+				s.Data["auth"] = ""
+			} else {
+				s.Data["auth"] = t.UserAuth.Content
+			}
 		}
 		s.SetInfo("edit tunnel")
 		s.display()
@@ -189,6 +198,7 @@ func (s *IndexController) Edit() {
 			t.ServerIp = s.getEscapeString("server_ip")
 			t.Mode = s.getEscapeString("type")
 			t.Target = &file.Target{TargetStr: strings.ReplaceAll(s.getEscapeString("target"), "\r\n", "\n")}
+			t.UserAuth = &file.MultiAccount{Content: s.getEscapeString("auth"), AccountMap: common.DealMultiUser(s.getEscapeString("auth"))}
 			t.Password = s.getEscapeString("password")
 			t.Id = id
 			t.LocalPath = s.getEscapeString("local_path")
@@ -312,13 +322,17 @@ func (s *IndexController) AddHost() {
 				ProxyProtocol: s.GetIntNoErr("proxy_protocol"),
 				LocalProxy:    (clientId > 0 && s.GetBoolNoErr("local_proxy")) || clientId <= 0,
 			},
-			HeaderChange:   s.getEscapeString("header"),
-			HostChange:     s.getEscapeString("hostchange"),
-			Remark:         s.getEscapeString("remark"),
-			Location:       s.getEscapeString("location"),
+			UserAuth: &file.MultiAccount{
+				Content:    s.getEscapeString("auth"),
+				AccountMap: common.DealMultiUser(s.getEscapeString("auth")),
+			},
+			HeaderChange: s.getEscapeString("header"),
+			HostChange:   s.getEscapeString("hostchange"),
+			Remark:       s.getEscapeString("remark"),
+			Location:     s.getEscapeString("location"),
 			Flow: &file.Flow{
-				FlowLimit:  int64(s.GetIntNoErr("flow_limit")),
-				TimeLimit:  common.GetTimeNoErrByStr(s.getEscapeString("time_limit")),
+				FlowLimit: int64(s.GetIntNoErr("flow_limit")),
+				TimeLimit: common.GetTimeNoErrByStr(s.getEscapeString("time_limit")),
 			},
 			Scheme:         s.getEscapeString("scheme"),
 			HttpsJustProxy: s.GetBoolNoErr("https_just_proxy"),
@@ -351,6 +365,11 @@ func (s *IndexController) EditHost() {
 			s.error()
 		} else {
 			s.Data["h"] = h
+			if h.UserAuth == nil {
+				s.Data["auth"] = ""
+			} else {
+				s.Data["auth"] = h.UserAuth.Content
+			}
 		}
 		s.SetInfo("edit")
 		s.display("index/hedit")
@@ -376,6 +395,7 @@ func (s *IndexController) EditHost() {
 			}
 			h.Host = s.getEscapeString("host")
 			h.Target = &file.Target{TargetStr: strings.ReplaceAll(s.getEscapeString("target"), "\r\n", "\n")}
+			h.UserAuth = &file.MultiAccount{Content: s.getEscapeString("auth"), AccountMap: common.DealMultiUser(s.getEscapeString("auth"))}
 			h.HeaderChange = s.getEscapeString("header")
 			h.HostChange = s.getEscapeString("hostchange")
 			h.Remark = s.getEscapeString("remark")

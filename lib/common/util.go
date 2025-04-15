@@ -146,9 +146,11 @@ func DomainCheck(domain string) bool {
 // user global user
 // passwd global passwd
 // accountMap enable multi user auth
-func CheckAuthWithAccountMap(u, p, user, passwd string, accountMap map[string]string) bool {
+func CheckAuthWithAccountMap(u, p, user, passwd string, accountMap, authMap map[string]string) bool {
 	// Single account check
-	if accountMap == nil || len(accountMap) == 0 {
+	noAccountMap := (accountMap == nil || len(accountMap) == 0)
+	noAuthMap := (authMap == nil || len(authMap) == 0)
+	if noAccountMap && noAuthMap {
 		return u == user && p == passwd
 	}
 
@@ -161,17 +163,25 @@ func CheckAuthWithAccountMap(u, p, user, passwd string, accountMap map[string]st
 		return true
 	}
 
-	if P, ok := accountMap[u]; ok && p == P {
-		return true
+	if !noAccountMap {
+		if P, ok := accountMap[u]; ok && p == P {
+			return true
+		}
+	}
+
+	if !noAuthMap {
+		if P, ok := authMap[u]; ok && p == P {
+			return true
+		}
 	}
 
 	return false
 }
 
 // Check if the Request request is validated
-func CheckAuth(r *http.Request, user, passwd string, accountMap map[string]string) bool {
+func CheckAuth(r *http.Request, user, passwd string, accountMap, authMap map[string]string) bool {
 	// Bypass authentication only if user, passwd are empty and multiAccount is nil or empty
-	if user == "" && passwd == "" && (accountMap == nil || len(accountMap) == 0) {
+	if user == "" && passwd == "" && (accountMap == nil || len(accountMap) == 0) && (authMap == nil || len(authMap) == 0) {
 		return true
 	}
 
@@ -193,7 +203,27 @@ func CheckAuth(r *http.Request, user, passwd string, accountMap map[string]strin
 		return false
 	}
 
-	return CheckAuthWithAccountMap(pair[0], pair[1], user, passwd, accountMap)
+	return CheckAuthWithAccountMap(pair[0], pair[1], user, passwd, accountMap, authMap)
+}
+
+func DealMultiUser(s string) map[string]string {
+	s = strings.TrimSpace(s)
+	if s == "" {
+		return nil
+	}
+
+	s = strings.ReplaceAll(s, "\r\n", "\n")
+	multiUserMap := make(map[string]string)
+	for _, v := range strings.Split(s, "\n") {
+		item := strings.SplitN(v, "=", 2)
+		if len(item) == 0 {
+			continue
+		} else if len(item) == 1 {
+			item = append(item, "")
+		}
+		multiUserMap[strings.TrimSpace(item[0])] = strings.TrimSpace(item[1])
+	}
+	return multiUserMap
 }
 
 // get bool by str
