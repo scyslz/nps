@@ -225,3 +225,13 @@ function changeunit(limit) {
     }
     return size;
 }
+
+function oCopy(obj){
+    var tempInput = document.createElement("input");
+    document.body.appendChild(tempInput);
+    tempInput.value = obj.innerText || obj.textContent;
+    tempInput.select();
+    document.execCommand('copy');
+    document.body.removeChild(tempInput);
+    msg.success('Copied!');
+}

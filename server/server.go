@@ -295,6 +295,12 @@ func GetTunnel(start, length int, typeVal string, clientId int, search string, s
 		} else {
 			sort.SliceStable(all_list, func(i, j int) bool { return all_list[i].Target.TargetStr > all_list[j].Target.TargetStr })
 		}
+	} else if sortField == "Port" {
+		if order == "asc" {
+			sort.SliceStable(all_list, func(i, j int) bool { return all_list[i].Port < all_list[j].Port })
+		} else {
+			sort.SliceStable(all_list, func(i, j int) bool { return all_list[i].Port > all_list[j].Port })
+		}
 	}
 
 	//search

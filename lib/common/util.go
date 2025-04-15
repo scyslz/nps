@@ -769,8 +769,8 @@ func GetServerIp() string {
 
 	if p2pIP == "::" {
 		tmpConn, err := GetLocalUdp6Addr()
-		if err != nil {
-			return tmpConn.LocalAddr().String()
+		if err == nil {
+			return tmpConn.LocalAddr().(*net.UDPAddr).IP.String()
 		}
 	}
 
