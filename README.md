@@ -126,7 +126,7 @@ npc start
 
 - **Main** 
   - 待定，优先修BUG，新功能随缘更新
-  - 添加点击自动复制命令行
+  - 添加点击自动复制命令行 [#62](https://github.com/djylb/nps/issues/62)
   - 密码认证配置内容忽略空行
   - 修复NPS的IPv6自动识别
   - 修复管理页面显示
