@@ -304,6 +304,16 @@ func run() {
 		verifyKeys := strings.Split(*verifyKey, ",")
 		connTypes := strings.Split(*connType, ",")
 
+		for len(serverAddrs) > 0 && (serverAddrs[len(serverAddrs)-1] == "" || strings.TrimSpace(serverAddrs[len(serverAddrs)-1]) == "") {
+			serverAddrs = serverAddrs[:len(serverAddrs)-1]
+		}
+		for len(verifyKeys) > 0 && (verifyKeys[len(verifyKeys)-1] == "" || strings.TrimSpace(verifyKeys[len(verifyKeys)-1]) == "") {
+			verifyKeys = verifyKeys[:len(verifyKeys)-1]
+		}
+		for len(connTypes) > 0 && (connTypes[len(connTypes)-1] == "" || strings.TrimSpace(connTypes[len(connTypes)-1]) == "") {
+			connTypes = connTypes[:len(connTypes)-1]
+		}
+
 		for i := 0; i < len(serverAddrs); i++ {
 			serverAddrs[i] = strings.TrimSpace(serverAddrs[i])
 			if i > 0 && serverAddrs[i] == "" {
@@ -323,23 +333,13 @@ func run() {
 			}
 		}
 
-		for len(serverAddrs) > 0 && serverAddrs[len(serverAddrs)-1] == "" {
-			serverAddrs = serverAddrs[:len(serverAddrs)-1]
-		}
-		for len(verifyKeys) > 0 && verifyKeys[len(verifyKeys)-1] == "" {
-			verifyKeys = verifyKeys[:len(verifyKeys)-1]
-		}
-		for len(connTypes) > 0 && connTypes[len(connTypes)-1] == "" {
-			connTypes = connTypes[:len(connTypes)-1]
-		}
-
 		if len(connTypes) == 0 {
 			connTypes = append(connTypes, "tcp")
 		}
 
 		if len(serverAddrs) == 0 || len(verifyKeys) == 0 {
 			logs.Error("serverAddr or verifyKey cannot be empty")
-			return
+			os.Exit(1)
 		}
 
 		maxLength := len(serverAddrs)
