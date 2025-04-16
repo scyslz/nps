@@ -30,16 +30,6 @@ import (
 	"golang.org/x/net/proxy"
 )
 
-var tlsEnable1 = false
-
-func SetTlsEnable(tlsEnable11 bool) {
-	tlsEnable1 = tlsEnable11
-}
-
-func GetTlsEnable() bool {
-	return tlsEnable1
-}
-
 func GetTaskStatus(path string) {
 	cnf, err := config.NewConfig(path)
 	if err != nil {
@@ -108,8 +98,8 @@ func StartFromFile(path string) {
 	logs.Info("Loading configuration file %s successfully", path)
 
 	common.SetCustomDNS(cnf.CommonConfig.DnsServer)
-	SetTlsEnable(cnf.CommonConfig.TlsEnable)
-	logs.Info("the version of client is %s, the core version of client is %s,tls enable is %t", version.VERSION, version.GetVersion(), GetTlsEnable())
+
+	logs.Info("the version of client is %s, the core version of client is %s", version.VERSION, version.GetVersion())
 
 	for {
 		if !first && !cnf.CommonConfig.AutoReconnection {
@@ -120,7 +110,9 @@ func StartFromFile(path string) {
 			time.Sleep(time.Second * 5)
 		}
 		first = false
-
+		if cnf.CommonConfig.TlsEnable {
+			cnf.CommonConfig.Tp = "tls"
+		}
 		c, err := NewConn(cnf.CommonConfig.Tp, cnf.CommonConfig.VKey, cnf.CommonConfig.Server, common.WORK_CONFIG, cnf.CommonConfig.ProxyUrl)
 		if err != nil {
 			logs.Error(err)
@@ -203,6 +195,7 @@ func StartFromFile(path string) {
 
 // Create a new connection with the server and verify it
 func NewConn(tp string, vkey string, server string, connType string, proxyUrl string) (*conn.Conn, error) {
+	//logs.Debug("NewConn: %s %s %s %s %s", tp, vkey, server, connType, proxyUrl)
 	var err error
 	var connection net.Conn
 	var sess *kcp.UDPSession
@@ -210,7 +203,9 @@ func NewConn(tp string, vkey string, server string, connType string, proxyUrl st
 	timeout := time.Second * 10
 	dialer := net.Dialer{Timeout: timeout}
 
-	if tp == "tcp" {
+	if tp == "tcp" || tp == "tls" {
+		var rawConn net.Conn
+
 		if proxyUrl != "" {
 			u, er := url.Parse(proxyUrl)
 			if er != nil {
@@ -222,35 +217,22 @@ func NewConn(tp string, vkey string, server string, connType string, proxyUrl st
 				if er != nil {
 					return nil, er
 				}
-				connection, err = n.Dial("tcp", server)
+				rawConn, err = n.Dial("tcp", server)
 			default:
-				connection, err = NewHttpProxyConn(u, server)
+				rawConn, err = NewHttpProxyConn(u, server)
 			}
 		} else {
-			if GetTlsEnable() {
-				//tls 流量加密
-				conf := &tls.Config{InsecureSkipVerify: true}
-				connection, err = tls.DialWithDialer(&dialer, "tcp", server, conf)
-			} else {
-				connection, err = dialer.Dial("tcp", server)
-			}
-
-			//header := &proxyproto.Header{
-			//	Version:           1,
-			//	Command:           proxyproto.PROXY,
-			//	TransportProtocol: proxyproto.TCPv4,
-			//	SourceAddr: &net.TCPAddr{
-			//		IP:   net.ParseIP("10.1.1.1"),
-			//		Port: 1000,
-			//	},
-			//	DestinationAddr: &net.TCPAddr{
-			//		IP:   net.ParseIP("20.2.2.2"),
-			//		Port: 2000,
-			//	},
-			//}
-			//
-			//_, err = header.WriteTo(connection)
-			//_, err = io.WriteString(connection, "HELO")
+			rawConn, err = dialer.Dial("tcp", server)
+		}
+		if err != nil {
+			return nil, err
+		}
+		if tp == "tls" {
+			//logs.Debug("GetTls")
+			conf := &tls.Config{InsecureSkipVerify: true}
+			connection, err = conn.NewTlsConn(rawConn, timeout, conf)
+		} else {
+			connection = rawConn
 		}
 	} else {
 		sess, err = kcp.DialWithOptions(server, nil, 10, 3)
@@ -264,6 +246,7 @@ func NewConn(tp string, vkey string, server string, connType string, proxyUrl st
 		return nil, err
 	}
 
+	//logs.Debug("SetDeadline")
 	connection.SetDeadline(time.Now().Add(timeout))
 	defer connection.SetDeadline(time.Time{}) // 解除超时限制
 
@@ -284,7 +267,7 @@ func NewConn(tp string, vkey string, server string, connType string, proxyUrl st
 		return nil, err
 	}
 	if crypt.Md5(version.GetVersion()) != string(b) {
-		//logs.Error("The client does not match the server version. The current core version of the client is", version.GetVersion())
+		logs.Warn("The client does not match the server version. The current core version of the client is", version.GetVersion())
 		//return nil, err
 	}
 
@@ -444,7 +427,7 @@ func sendP2PTestMsg(localConn *net.UDPConn, remoteAddr1, remoteAddr2, remoteAddr
 			minPort := common.GetPortByAddr(remoteAddr3)
 			maxPort := minPort + interval*50
 			if maxPort > 65535 {
-			    maxPort = 65535
+				maxPort = 65535
 			}
 			logs.Debug("minPort: %d, maxPort: %d", minPort, maxPort)
 			ports := getRandomPortArr(minPort, maxPort)

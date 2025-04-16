@@ -12,7 +12,7 @@
 **参数：**  
 - **p0 (char\*)** ：连接地址，格式示例 `"192.168.1.100:8080"`。
 - **p1 (char\*)** ：验证密钥（vkey），用于身份认证。
-- **p2 (char\*)** ：连接类型，支持 `"tcp"` 或 `"udp"`。
+- **p2 (char\*)** ：连接类型，支持 `"tcp"`、`"tls"`、`"udp"`。
 - **p3 (char\*)** ：连接代理地址，格式示例 `"socks5://user:password@127.0.0.1:9007"`。如不使用代理，请传入空字符串。
 
 **返回值：**  
@@ -75,21 +75,7 @@ extern char* Logs();
 
 ---
 
-### 6. SetTlsEnable
-
-**功能描述：**  
-设置是否启用 TLS 加密传输。需要在启动客户端前调用配置。  
-- 传入 `true`：启用 TLS。  
-- 传入 `false`：禁用 TLS （默认）。
-
-**接口原型：**
-```c
-extern void SetTlsEnable(bool enable);
-```
-
----
-
-### 7. SetDnsServer
+### 6. SetDnsServer
 
 **功能描述：**  
 配置解析服务器域名的DNS 

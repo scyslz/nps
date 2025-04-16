@@ -44,11 +44,6 @@ func Logs() *C.char {
 	return C.CString(common.GetLogMsg())
 }
 
-//export SetTlsEnable
-func SetTlsEnable(enable bool) {
-	client.SetTlsEnable(enable)
-}
-
 //export SetDnsServer
 func SetDnsServer(dnsServer *C.char) {
 	common.SetCustomDNS(C.GoString(dnsServer))

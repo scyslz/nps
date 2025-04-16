@@ -27,7 +27,7 @@ var (
 	configPath     = flag.String("config", "", "Configuration file path")
 	verifyKey      = flag.String("vkey", "", "Authentication key")
 	logType        = flag.String("log", "file", "Log output mode (stdout|file|both|off)")
-	connType       = flag.String("type", "tcp", "Connection type with the server (kcp|tcp)")
+	connType       = flag.String("type", "tcp", "Connection type with the server (kcp|tcp|tls)")
 	proxyUrl       = flag.String("proxy", "", "Proxy socks5 URL (eg: socks5://user:pass@127.0.0.1:9007)")
 	logLevel       = flag.String("log_level", "7", "Log level 0~7")
 	registerTime   = flag.Int("time", 2, "Register time in hours")
@@ -39,14 +39,14 @@ var (
 	logMaxSize     = flag.Int("log_max_size", 5, "Maximum log file size in MB before rotation (0 to disable)")
 	logMaxDays     = flag.String("log_max_days", "7", "Number of days to retain old log files (0 to disable)")
 	logMaxFiles    = flag.String("log_max_files", "10", "Maximum number of log files to retain (0 to disable)")
-	logDaily       = flag.String("log_daily", "false", "Rotate log daily (true or false)")
+	logDaily       = flag.String("log_daily", "true", "Rotate log daily (true or false)")
 	debug          = flag.Bool("debug", true, "Enable debug mode")
 	pprofAddr      = flag.String("pprof", "", "PProf debug address (ip:port)")
 	stunAddr       = flag.String("stun_addr", "stun.miwifi.com:3478", "STUN server address")
 	ver            = flag.Bool("version", false, "Show current version")
 	disconnectTime = flag.Int("disconnect_timeout", 60, "Disconnect timeout in seconds")
 	dnsServer      = flag.String("dns_server", "8.8.8.8", "DNS server for domain lookup")
-	tlsEnable      = flag.Bool("tls_enable", false, "Enable TLS")
+	tlsEnable      = flag.Bool("tls_enable", false, "Enable TLS (Deprecated)")
 )
 
 func main() {
@@ -194,6 +194,11 @@ func main() {
 func configureLogging() {
 	// 关闭日志输出
 	if strings.EqualFold(*logType, "off") || strings.EqualFold(*logType, "false") {
+		if common.IsWindows() {
+			logs.SetLogger(logs.AdapterFile, `{"filename":"NUL"}`)
+		} else {
+			logs.SetLogger(logs.AdapterFile, `{"filename":"/dev/null"}`)
+		}
 		return
 	}
 
@@ -207,8 +212,12 @@ func configureLogging() {
 	// 处理日志路径默认值
 	if *logPath == "" {
 		*logPath = common.GetNpcLogPath() // 使用默认路径
-	} else if strings.EqualFold(*logPath, "off") || strings.EqualFold(*logPath, "false") || strings.EqualFold(*logPath, "/dev/null") {
-		return // 禁用文件日志输出
+	} else if strings.EqualFold(*logPath, "off") || strings.EqualFold(*logPath, "false") {
+		if common.IsWindows() {
+			logs.SetLogger(logs.AdapterFile, `{"filename":"NUL"}`)
+		} else {
+			logs.SetLogger(logs.AdapterFile, `{"filename":"/dev/null"}`)
+		}
 	}
 
 	// 针对 Windows 系统调整日志路径中的反斜杠
@@ -259,9 +268,11 @@ func (p *npc) run() error {
 // 主运行逻辑
 func run() {
 	common.InitPProfFromArg(*pprofAddr)
+	if *tlsEnable {
+		*connType = "tls"
+	}
 	//p2p or secret command
 	if *password != "" {
-		client.SetTlsEnable(*tlsEnable)
 		commonConfig := new(config.CommonConfig)
 		commonConfig.Server = *serverAddr
 		commonConfig.VKey = *verifyKey
@@ -284,16 +295,52 @@ func run() {
 		*verifyKey, _ = env["NPC_SERVER_VKEY"]
 	}
 	if *verifyKey != "" && *serverAddr != "" && *configPath == "" {
-		client.SetTlsEnable(*tlsEnable)
-		logs.Info("the version of client is %s, the core version of client is %s, tls enable is %t", version.VERSION, version.GetVersion(), client.GetTlsEnable())
+		logs.Info("the version of client is %s, the core version of client is %s", version.VERSION, version.GetVersion())
+		*serverAddr = strings.ReplaceAll(*serverAddr, "，", ",")
+		*verifyKey = strings.ReplaceAll(*verifyKey, "，", ",")
+		*connType = strings.ReplaceAll(*connType, "，", ",")
 
-		vkeys := strings.Split(*verifyKey, `,`)
-		for _, key := range vkeys {
-			key := key
+		serverAddrs := strings.Split(*serverAddr, ",")
+		verifyKeys := strings.Split(*verifyKey, ",")
+		connTypes := strings.Split(*connType, ",")
+
+		for i := range serverAddrs {
+			serverAddrs[i] = strings.TrimSpace(serverAddrs[i])
+		}
+		for i := range verifyKeys {
+			verifyKeys[i] = strings.TrimSpace(verifyKeys[i])
+		}
+		for i := range connTypes {
+			connTypes[i] = strings.TrimSpace(connTypes[i])
+		}
+
+		maxLength := len(serverAddrs)
+		if len(verifyKeys) > maxLength {
+			maxLength = len(verifyKeys)
+		}
+		if len(connTypes) > maxLength {
+			maxLength = len(connTypes)
+		}
+
+		for len(serverAddrs) < maxLength {
+			serverAddrs = append(serverAddrs, serverAddrs[len(serverAddrs)-1])
+		}
+		for len(verifyKeys) < maxLength {
+			verifyKeys = append(verifyKeys, verifyKeys[len(verifyKeys)-1])
+		}
+		for len(connTypes) < maxLength {
+			connTypes = append(connTypes, connTypes[len(connTypes)-1])
+		}
+
+		for i := 0; i < maxLength; i++ {
+			serverAddr := serverAddrs[i]
+			verifyKey := verifyKeys[i]
+			connType := connTypes[i]
+
 			go func() {
 				for {
-					logs.Info("start vkey:" + key)
-					client.NewRPClient(*serverAddr, key, *connType, *proxyUrl, nil, *disconnectTime).Start()
+					logs.Info("Start server: " + serverAddr + " vkey: " + verifyKey + " type: " + connType)
+					client.NewRPClient(serverAddr, verifyKey, connType, *proxyUrl, nil, *disconnectTime).Start()
 					logs.Info("Client closed! It will be reconnected in five seconds")
 					time.Sleep(time.Second * 5)
 				}
@@ -303,6 +350,14 @@ func run() {
 		if *configPath == "" {
 			*configPath = common.GetConfigPath()
 		}
-		go client.StartFromFile(*configPath)
+
+		configPaths := strings.Split(*configPath, ",")
+		for i := range configPaths {
+			configPaths[i] = strings.TrimSpace(configPaths[i])
+		}
+
+		for _, path := range configPaths {
+			go client.StartFromFile(path)
+		}
 	}
 }
