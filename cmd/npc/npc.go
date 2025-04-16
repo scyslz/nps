@@ -304,62 +304,24 @@ func run() {
 		verifyKeys := strings.Split(*verifyKey, ",")
 		connTypes := strings.Split(*connType, ",")
 
-		for len(serverAddrs) > 0 && (serverAddrs[len(serverAddrs)-1] == "" || strings.TrimSpace(serverAddrs[len(serverAddrs)-1]) == "") {
-			serverAddrs = serverAddrs[:len(serverAddrs)-1]
-		}
-		for len(verifyKeys) > 0 && (verifyKeys[len(verifyKeys)-1] == "" || strings.TrimSpace(verifyKeys[len(verifyKeys)-1]) == "") {
-			verifyKeys = verifyKeys[:len(verifyKeys)-1]
-		}
-		for len(connTypes) > 0 && (connTypes[len(connTypes)-1] == "" || strings.TrimSpace(connTypes[len(connTypes)-1]) == "") {
-			connTypes = connTypes[:len(connTypes)-1]
-		}
-
-		for i := 0; i < len(serverAddrs); i++ {
-			serverAddrs[i] = strings.TrimSpace(serverAddrs[i])
-			if i > 0 && serverAddrs[i] == "" {
-				serverAddrs[i] = serverAddrs[i-1]
-			}
-		}
-		for i := 0; i < len(verifyKeys); i++ {
-			verifyKeys[i] = strings.TrimSpace(verifyKeys[i])
-			if i > 0 && verifyKeys[i] == "" {
-				verifyKeys[i] = verifyKeys[i-1]
-			}
-		}
-		for i := 0; i < len(connTypes); i++ {
-			connTypes[i] = strings.TrimSpace(connTypes[i])
-			if i > 0 && connTypes[i] == "" {
-				connTypes[i] = connTypes[i-1]
-			}
-		}
+		serverAddrs = common.HandleArrEmptyVal(serverAddrs)
+		verifyKeys = common.HandleArrEmptyVal(verifyKeys)
+		connTypes = common.HandleArrEmptyVal(connTypes)
 
 		if len(connTypes) == 0 {
 			connTypes = append(connTypes, "tcp")
+			logs.Info(connTypes)
 		}
+		logs.Debug(connTypes)
 
-		if len(serverAddrs) == 0 || len(verifyKeys) == 0 {
+		if len(serverAddrs) == 0 || len(verifyKeys) == 0 || serverAddrs[0] == "" || verifyKeys[0] == "" {
 			logs.Error("serverAddr or verifyKey cannot be empty")
 			os.Exit(1)
 		}
 
-		maxLength := len(serverAddrs)
-		if len(verifyKeys) > maxLength {
-			maxLength = len(verifyKeys)
-		}
-		if len(connTypes) > maxLength {
-			maxLength = len(connTypes)
-		}
-
-		for len(serverAddrs) < maxLength {
-			serverAddrs = append(serverAddrs, serverAddrs[len(serverAddrs)-1])
-		}
-		for len(verifyKeys) < maxLength {
-			verifyKeys = append(verifyKeys, verifyKeys[len(verifyKeys)-1])
-		}
-		for len(connTypes) < maxLength {
-			connTypes = append(connTypes, connTypes[len(connTypes)-1])
-		}
-
+		maxLength := common.ExtendArrs(&serverAddrs, &verifyKeys, &connTypes)
+		logs.Debug("max length: %d", maxLength)
+		logs.Debug(serverAddrs, verifyKeys, connTypes)
 		for i := 0; i < maxLength; i++ {
 			serverAddr := serverAddrs[i]
 			verifyKey := verifyKeys[i]

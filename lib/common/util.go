@@ -625,6 +625,46 @@ func RemoveArrVal(arr []string, val string) []string {
 	return arr
 }
 
+func HandleArrEmptyVal(list []string) []string {
+	for len(list) > 0 && (list[len(list)-1] == "" || strings.TrimSpace(list[len(list)-1]) == "") {
+		list = list[:len(list)-1]
+	}
+
+	for i := 0; i < len(list); i++ {
+		list[i] = strings.TrimSpace(list[i])
+		if i > 0 && list[i] == "" {
+			list[i] = list[i-1]
+		}
+	}
+
+	return list
+}
+
+func ExtendArrs(arrays ...*[]string) int {
+	maxLength := 0
+	for _, arr := range arrays {
+		if len(*arr) > maxLength {
+			maxLength = len(*arr)
+		}
+	}
+
+	if maxLength == 0 {
+		return 0
+	}
+
+	for _, arr := range arrays {
+		for len(*arr) < maxLength {
+			if len(*arr) == 0 {
+				*arr = append(*arr, "")
+			} else {
+				*arr = append(*arr, (*arr)[len(*arr)-1])
+			}
+		}
+	}
+
+	return maxLength
+}
+
 // convert bytes to num
 func BytesToNum(b []byte) int {
 	var str string
