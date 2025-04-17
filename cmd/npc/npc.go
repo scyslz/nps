@@ -326,6 +326,7 @@ func run() {
 			serverAddr := serverAddrs[i]
 			verifyKey := verifyKeys[i]
 			connType := connTypes[i]
+			connType = strings.ToLower(connType)
 
 			go func() {
 				for {
