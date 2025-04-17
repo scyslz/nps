@@ -116,7 +116,7 @@ npc.exe -server="xxx:123,yyy:456" -vkey="xxx,yyy" -type="tcp,tls" -log="off"
 
 ---
 
-### **2.3 安装服务并启动 (多开支持)**
+### **2.3 安装服务并启动 (支持连接多个服务端)**
 #### **Linux**
 ```bash
 ./npc install -server=xxx:123,yyy:456 -vkey=xxx,yyy -type=tls,tcp -log=off
@@ -207,54 +207,7 @@ sc delete Npc1
 
 ---
 
-## 3. 多开客户端（多个 NPC 实例）
-📌 **现在支持单NPC实例命令行传入参数多开了，以下旧方式仅作参考**
-### **3.1 Windows 多开**
-```powershell
-cmd /c 'sc create Npc2 binPath= "D:\tools\npc.exe -server=xxx:123,yyy:456 -vkey=xxx,yyy -type=tcp,tls -log=off -debug=false" DisplayName= "NPS Client 2" start= auto'
-```
-**启用并启动服务**
-```powershell
-sc start Npc2
-```
-📌 **删除多开服务**
-```powershell
-sc stop Npc2
-sc delete Npc2
-```
-> 📌 **多个客户端实例** 需要 **不同的 `vkey`** 。
-
----
-
-### **3.2 Linux 多开**
-**创建 `systemd` 配置文件** ，例如 `/etc/systemd/system/npc2.service`：
-```ini
-[Unit]
-Description=NPS 内网穿透客户端 2
-ConditionFileIsExecutable=/usr/bin/npc
-Requires=network.target
-After=network-online.target syslog.target
-
-[Service]
-LimitNOFILE=65536
-StartLimitInterval=5
-StartLimitBurst=10
-ExecStart=/usr/bin/npc "-server=xxx:123,yyy:456" "-vkey=xxx,yyy" "-type=tcp,tls" "-debug=false" "-log=off"
-Restart=always
-RestartSec=120
-
-[Install]
-WantedBy=multi-user.target
-```
-**启用并启动**
-```bash
-systemctl enable npc2
-systemctl start npc2
-```
-
----
-
-## 4. 版本检查
+## 3. 版本检查
 - 服务器端版本：
   ```bash
   nps -version
@@ -266,7 +219,7 @@ systemctl start npc2
   
 ---
 
-## 5. 配置管理
+## 4. 配置管理
 - **客户端连接后，在 Web 界面配置穿透服务**
 - 参考 [使用示例](/example)
 
