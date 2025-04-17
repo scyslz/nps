@@ -1,5 +1,5 @@
-//go:build !windows && !386
-// +build !windows,!386
+//go:build 386
+// +build 386
 
 package proxy
 
@@ -43,13 +43,13 @@ func getAddress(conn net.Conn) (string, error) {
 		var sa4 syscall.RawSockaddrInet4
 		sz4 := uint32(unsafe.Sizeof(sa4))
 		_, _, errno4 := syscall.Syscall6(
-			syscall.SYS_GETSOCKOPT,
-			fd,
+			syscall.SYS_SOCKETCALL,
+			6, // 6 corresponds to getsockopt
+			uintptr(unsafe.Pointer(&fd)),
 			uintptr(syscall.SOL_IP),
 			uintptr(SO_ORIGINAL_DST),
 			uintptr(unsafe.Pointer(&sa4)),
 			uintptr(unsafe.Pointer(&sz4)),
-			0,
 		)
 		if errno4 == 0 {
 			ip := net.IPv4(sa4.Addr[0], sa4.Addr[1], sa4.Addr[2], sa4.Addr[3])
@@ -62,13 +62,13 @@ func getAddress(conn net.Conn) (string, error) {
 		var sa6 syscall.RawSockaddrInet6
 		sz6 := uint32(unsafe.Sizeof(sa6))
 		_, _, errno6 := syscall.Syscall6(
-			syscall.SYS_GETSOCKOPT,
-			fd,
+			syscall.SYS_SOCKETCALL,
+			6, // 6 corresponds to getsockopt
+			uintptr(unsafe.Pointer(&fd)),
 			uintptr(syscall.SOL_IPV6),
 			uintptr(SO_ORIGINAL_DST),
 			uintptr(unsafe.Pointer(&sa6)),
 			uintptr(unsafe.Pointer(&sz6)),
-			0,
 		)
 		if errno6 == 0 {
 			ip := net.IP(sa6.Addr[:])
