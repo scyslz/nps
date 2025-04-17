@@ -7,26 +7,35 @@ import (
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"encoding/pem"
-	"log"
 	"math/big"
 	"net"
 	"os"
 	"time"
 
 	"github.com/beego/beego/logs"
+	"github.com/brianvoe/gofakeit/v7"
 )
 
 var (
 	cert tls.Certificate
 )
 
-func InitTls() {
-	c, k, err := generateKeyPair("NPS Org")
+func InitTls(customCert tls.Certificate) {
+	if len(customCert.Certificate) > 0 {
+		cert = customCert
+		logs.Info("Custom certificate loaded successfully.")
+		return
+	}
+	commonName := gofakeit.DomainName()
+	organization := gofakeit.Company()
+	c, k, err := generateKeyPair(commonName, organization)
+	if err != nil {
+	}
 	if err == nil {
 		cert, err = tls.X509KeyPair(c, k)
 	}
 	if err != nil {
-		log.Fatalln("Error initializing crypto certs", err)
+		logs.Error("Error initializing crypto certs", err)
 	}
 }
 
@@ -52,7 +61,7 @@ func NewTlsClientConn(conn net.Conn) net.Conn {
 	return tls.Client(conn, conf)
 }
 
-func generateKeyPair(CommonName string) (rawCert, rawKey []byte, err error) {
+func generateKeyPair(commonName, organization string) (rawCert, rawKey []byte, err error) {
 	// Create private key and self-signed certificate
 	// Adapted from https://golang.org/src/crypto/tls/generate_cert.go
 
@@ -68,8 +77,8 @@ func generateKeyPair(CommonName string) (rawCert, rawKey []byte, err error) {
 	template := x509.Certificate{
 		SerialNumber: serialNumber,
 		Subject: pkix.Name{
-			Organization: []string{"My Company Name LTD."},
-			CommonName:   CommonName,
+			Organization: []string{organization},
+			CommonName:   commonName,
 			Country:      []string{"US"},
 		},
 		NotBefore: notBefore,

@@ -131,7 +131,7 @@ func (https *HttpsServer) cleanupEntry(hostId int, entry *HttpsEntry) {
 
 func (https *HttpsServer) Start() error {
 	conn.Accept(https.listener, func(c net.Conn) {
-		helloInfo, rb, err := crypt.ReadClientHello(c)
+		helloInfo, rb, err := crypt.ReadClientHello(c, nil)
 		if err != nil || helloInfo == nil {
 			logs.Warn("Failed to read clientHello from %s, err=%v", c.RemoteAddr(), err)
 			// Check if the request is an HTTP request.
@@ -224,7 +224,7 @@ func checkHTTPAndRedirect(c net.Conn, rb []byte) {
 }
 
 func (https *HttpsServer) getCertAndKey(host *file.Host) (string, string) {
-	certContent, keyContent, ok := loadCertPair(host.CertFilePath, host.KeyFilePath)
+	certContent, keyContent, ok := common.LoadCertPair(host.CertFilePath, host.KeyFilePath)
 	if !ok {
 		return https.loadDefaultCert()
 	}
@@ -233,32 +233,11 @@ func (https *HttpsServer) getCertAndKey(host *file.Host) (string, string) {
 
 func (https *HttpsServer) loadDefaultCert() (string, string) {
 	logs.Debug("Loading default certificate")
-	certContent, keyContent, ok := loadCertPair(https.defaultCertFile, https.defaultKeyFile)
+	certContent, keyContent, ok := common.LoadCertPair(https.defaultCertFile, https.defaultKeyFile)
 	if !ok {
 		return "", ""
 	}
 	return certContent, keyContent
-}
-
-func loadCertPair(certFile, keyFile string) (certContent, keyContent string, ok bool) {
-	var wg sync.WaitGroup
-	var certErr, keyErr error
-
-	wg.Add(2)
-	go func() {
-		defer wg.Done()
-		certContent, certErr = common.GetCertContent(certFile, "CERTIFICATE")
-	}()
-	go func() {
-		defer wg.Done()
-		keyContent, keyErr = common.GetCertContent(keyFile, "PRIVATE")
-	}()
-	wg.Wait()
-
-	if certErr != nil || keyErr != nil || certContent == "" || keyContent == "" {
-		return "", "", false
-	}
-	return certContent, keyContent, true
 }
 
 func (https *HttpsServer) NewHttps(l net.Listener, certText string, keyText string) {

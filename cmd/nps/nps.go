@@ -74,7 +74,7 @@ func main() {
 	}
 	logDaily := beego.AppConfig.String("log_daily")
 	if logDaily == "" {
-		logDaily = "false"
+		logDaily = "true"
 	}
 	logMaxFiles := beego.AppConfig.String("log_max_files")
 	if logMaxFiles == "" {
@@ -98,7 +98,8 @@ func main() {
 		Option:      options,
 	}
 
-	bridge.ServerTlsEnable = beego.AppConfig.DefaultBool("tls_enable", false)
+	bridgeTlsPort, _ := beego.AppConfig.Int("tls_bridge_port")
+	bridge.ServerTlsEnable = beego.AppConfig.DefaultBool("tls_enable", true) && bridgeTlsPort != 0
 
 	for _, v := range os.Args[1:] {
 		switch v {
@@ -116,6 +117,7 @@ func main() {
 	} else {
 		_ = logs.SetLogger(logs.AdapterConsole, `{"level":`+level+`,"color":true}`)
 	}
+	logs.Debug("confPath: ", confPath)
 	if !common.IsWindows() {
 		svcConfig.Dependencies = []string{
 			"Requires=network.target",
@@ -252,7 +254,11 @@ func run() {
 	logs.Info("the version of server is %s ,allow client core version to be %s,tls enable is %t", version.VERSION, version.GetVersion(), bridge.ServerTlsEnable)
 	connection.InitConnectionService()
 	//crypt.InitTls(filepath.Join(common.GetRunPath(), "conf", "server.pem"), filepath.Join(common.GetRunPath(), "conf", "server.key"))
-	crypt.InitTls()
+	cert, ok := common.LoadCert(beego.AppConfig.String("tls_bridge_cert_file"), beego.AppConfig.String("tls_bridge_key_file"))
+	if !ok {
+		logs.Info("Using randomly generated certificate.")
+	}
+	crypt.InitTls(cert)
 	tool.InitAllowPort()
 	tool.StartSystemInfo()
 	timeout, err := beego.AppConfig.Int("disconnect_timeout")

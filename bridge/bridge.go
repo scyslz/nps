@@ -82,7 +82,7 @@ func (s *Bridge) StartTunnel() error {
 	} else {
 
 		go func() {
-			listener, err := connection.GetBridgeListener(s.tunnelType)
+			listener, err := connection.GetBridgeTcpListener()
 			if err != nil {
 				logs.Error(err)
 				os.Exit(0)
@@ -96,16 +96,7 @@ func (s *Bridge) StartTunnel() error {
 		// tls
 		if ServerTlsEnable {
 			go func() {
-				// 监听TLS 端口
-				tlsBridgePort := beego.AppConfig.DefaultInt("tls_bridge_port", 8025)
-
-				logs.Info("tls server start, the bridge type is %s, the tls bridge port is %d", "tcp", tlsBridgePort)
-				tlsListener, tlsErr := net.ListenTCP("tcp", &net.TCPAddr{
-					IP:   net.ParseIP(beego.AppConfig.String("bridge_ip")),
-					Port: tlsBridgePort,
-					Zone: "",
-				})
-
+				tlsListener, tlsErr := connection.GetBridgeTlsListener()
 				if tlsErr != nil {
 					logs.Error(tlsErr)
 					os.Exit(0)

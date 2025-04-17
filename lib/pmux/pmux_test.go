@@ -12,7 +12,7 @@ func TestPortMux_Close(t *testing.T) {
 	logs.EnableFuncCallDepth(true)
 	logs.SetLogFuncCallDepth(3)
 
-	pMux := NewPortMux(8888, "Ds")
+	pMux := NewPortMux(8888, "Ds", "Cs")
 	go func() {
 		if pMux.Start() != nil {
 			logs.Warn("Error")

@@ -2,6 +2,7 @@ package common
 
 import (
 	"bytes"
+	"crypto/tls"
 	"encoding/base64"
 	"encoding/binary"
 	"fmt"
@@ -363,6 +364,38 @@ func GetCertContent(filePath, header string) (string, error) {
 		return "", err
 	}
 	return string(content), nil
+}
+
+func LoadCertPair(certFile, keyFile string) (certContent, keyContent string, ok bool) {
+	var wg sync.WaitGroup
+	var certErr, keyErr error
+
+	wg.Add(2)
+	go func() {
+		defer wg.Done()
+		certContent, certErr = GetCertContent(certFile, "CERTIFICATE")
+	}()
+	go func() {
+		defer wg.Done()
+		keyContent, keyErr = GetCertContent(keyFile, "PRIVATE")
+	}()
+	wg.Wait()
+
+	if certErr != nil || keyErr != nil || certContent == "" || keyContent == "" {
+		return "", "", false
+	}
+	return certContent, keyContent, true
+}
+
+func LoadCert(certFile, keyFile string) (tls.Certificate, bool) {
+	certContent, keyContent, ok := LoadCertPair(certFile, keyFile)
+	if ok {
+		certificate, err := tls.X509KeyPair([]byte(certContent), []byte(keyContent))
+		if err == nil {
+			return certificate, true
+		}
+	}
+	return tls.Certificate{}, false
 }
 
 // FileExists reports whether the named file or directory exists.

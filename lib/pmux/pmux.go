@@ -5,6 +5,7 @@ package pmux
 import (
 	"bufio"
 	"bytes"
+	"github.com/djylb/nps/lib/crypt"
 	"io"
 	"net"
 	"os"
@@ -32,23 +33,27 @@ const (
 
 type PortMux struct {
 	net.Listener
-	port        int
-	isClose     bool
-	managerHost string
-	clientConn  chan *PortConn
-	httpConn    chan *PortConn
-	httpsConn   chan *PortConn
-	managerConn chan *PortConn
+	port          int
+	isClose       bool
+	managerHost   string
+	clientHost    string
+	clientConn    chan *PortConn
+	clientTlsConn chan *PortConn
+	httpConn      chan *PortConn
+	httpsConn     chan *PortConn
+	managerConn   chan *PortConn
 }
 
-func NewPortMux(port int, managerHost string) *PortMux {
+func NewPortMux(port int, managerHost, clientHost string) *PortMux {
 	pMux := &PortMux{
-		managerHost: managerHost,
-		port:        port,
-		clientConn:  make(chan *PortConn),
-		httpConn:    make(chan *PortConn),
-		httpsConn:   make(chan *PortConn),
-		managerConn: make(chan *PortConn),
+		managerHost:   managerHost,
+		clientHost:    clientHost,
+		port:          port,
+		clientConn:    make(chan *PortConn),
+		clientTlsConn: make(chan *PortConn),
+		httpConn:      make(chan *PortConn),
+		httpsConn:     make(chan *PortConn),
+		managerConn:   make(chan *PortConn),
 	}
 	pMux.Start()
 	return pMux
@@ -123,9 +128,15 @@ func (pMux *PortMux) process(conn net.Conn) {
 		}
 	case CLIENT: // client connection
 		ch = pMux.clientConn
-	default: // https
+	default: // https or clientTls
+		helloInfo, rawData, err := crypt.ReadClientHello(conn, buf)
+		if err == nil && helloInfo != nil && (helloInfo.ServerName == "" || helloInfo.ServerName == pMux.clientHost) {
+			ch = pMux.clientTlsConn
+		} else {
+			ch = pMux.httpsConn
+		}
+		rs = rawData
 		readMore = true
-		ch = pMux.httpsConn
 	}
 	if len(rs) == 0 {
 		rs = buf
@@ -143,6 +154,7 @@ func (pMux *PortMux) Close() error {
 	}
 	pMux.isClose = true
 	close(pMux.clientConn)
+	close(pMux.clientTlsConn)
 	close(pMux.httpsConn)
 	close(pMux.httpConn)
 	close(pMux.managerConn)
@@ -151,6 +163,10 @@ func (pMux *PortMux) Close() error {
 
 func (pMux *PortMux) GetClientListener() net.Listener {
 	return NewPortListener(pMux.clientConn, pMux.Listener.Addr())
+}
+
+func (pMux *PortMux) GetClientTlsListener() net.Listener {
+	return NewPortListener(pMux.clientTlsConn, pMux.Listener.Addr())
 }
 
 func (pMux *PortMux) GetHttpListener() net.Listener {
