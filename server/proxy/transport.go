@@ -1,5 +1,5 @@
-//go:build !windows && !386
-// +build !windows,!386
+//go:build !windows
+// +build !windows
 
 package proxy
 
@@ -13,6 +13,7 @@ import (
 	"github.com/djylb/nps/lib/common"
 	"github.com/djylb/nps/lib/conn"
 	"github.com/djylb/nps/lib/file"
+	"golang.org/x/sys/unix"
 )
 
 func HandleTrans(c *conn.Conn, s *TunnelModeServer) error {
@@ -40,12 +41,12 @@ func getAddress(conn net.Conn) (string, error) {
 
 	err = raw.Control(func(fd uintptr) {
 		// IPv4
-		var sa4 syscall.RawSockaddrInet4
+		var sa4 unix.RawSockaddrInet4
 		sz4 := uint32(unsafe.Sizeof(sa4))
-		_, _, errno4 := syscall.Syscall6(
-			syscall.SYS_GETSOCKOPT,
+		_, _, errno4 := unix.Syscall6(
+			unix.SYS_GETSOCKOPT,
 			fd,
-			uintptr(syscall.SOL_IP),
+			uintptr(unix.SOL_IP),
 			uintptr(SO_ORIGINAL_DST),
 			uintptr(unsafe.Pointer(&sa4)),
 			uintptr(unsafe.Pointer(&sz4)),
@@ -59,12 +60,12 @@ func getAddress(conn net.Conn) (string, error) {
 		}
 
 		// IPv6
-		var sa6 syscall.RawSockaddrInet6
+		var sa6 unix.RawSockaddrInet6
 		sz6 := uint32(unsafe.Sizeof(sa6))
-		_, _, errno6 := syscall.Syscall6(
-			syscall.SYS_GETSOCKOPT,
+		_, _, errno6 := unix.Syscall6(
+			unix.SYS_GETSOCKOPT,
 			fd,
-			uintptr(syscall.SOL_IPV6),
+			uintptr(unix.SOL_IPV6),
 			uintptr(SO_ORIGINAL_DST),
 			uintptr(unsafe.Pointer(&sa6)),
 			uintptr(unsafe.Pointer(&sz6)),
