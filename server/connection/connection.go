@@ -54,7 +54,7 @@ func GetBridgeTlsListener() (net.Listener, error) {
 	if p, err = strconv.Atoi(bridgeTlsPort); err != nil {
 		return nil, err
 	}
-	if pMux != nil {
+	if pMux != nil && bridgeTlsPort == bridgePort {
 		return pMux.GetClientTlsListener(), nil
 	}
 	return net.ListenTCP("tcp", &net.TCPAddr{net.ParseIP(beego.AppConfig.String("bridge_ip")), p, ""})
