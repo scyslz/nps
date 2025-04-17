@@ -104,7 +104,7 @@
                 visible: true,//false表示不显示
                 formatter: function (value, row, index) {
                     if (!row.NoStore) {
-                        return value
+                        return '<span onclick="oCopy(this)">' + value + '</span>'
                     } else {
                         return '<span langtag="word-publicvkey"></span>'
                     }

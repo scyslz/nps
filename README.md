@@ -127,7 +127,7 @@ npc start
 
 - **Main** 
   - 待定，优先修BUG，新功能随缘更新
-
+  - vkey添加点击复制
 
 ### Stable
 
