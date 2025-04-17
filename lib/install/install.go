@@ -210,6 +210,10 @@ func copyStaticFile(srcPath, bin string) string {
 			log.Fatalln(err)
 		}
 		chMod(filepath.Join(path, "web", "static"), 0766)
+		if _, err := copyFile(filepath.Join(srcPath, "conf", "nps.conf"), filepath.Join(path, "conf", "nps.conf.default")); err != nil {
+			log.Fatalln(err)
+		}
+		chMod(filepath.Join(path, "conf", "nps.conf.new"), 0766)
 	}
 	binPath, _ := filepath.Abs(os.Args[0])
 	if !common.IsWindows() {

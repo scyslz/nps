@@ -90,6 +90,67 @@ nps uninstall
 
 ---
 
+### **1.5 手动注册为系统服务（多开适用）**
+📌 **直接执行 `install` 命令即可** **自动注册 NPS 为系统服务**。只有需要运行多个实例才需要参考以下内容。
+
+#### **Linux（Systemd）**
+📌 **自动安装的服务文件为 `Nps.service`**
+创建 `systemd` 配置文件（路径：`/etc/systemd/system/nps.service`）：
+```ini
+[Unit]
+Description=NPS 内网穿透服务端
+ConditionFileIsExecutable=/usr/bin/nps
+Requires=network.target
+After=network-online.target syslog.target
+
+[Service]
+LimitNOFILE=65536
+StartLimitInterval=5
+StartLimitBurst=10
+ExecStart=/usr/bin/nps "service"
+Restart=always
+RestartSec=120
+
+[Install]
+WantedBy=multi-user.target
+```
+**启用并启动服务**
+```bash
+systemctl enable nps
+systemctl start nps
+```
+📌 **卸载 NPS 服务**
+```bash
+systemctl stop nps
+systemctl disable nps
+rm /etc/systemd/system/nps.service
+systemctl daemon-reload
+```
+> **不会使用 `systemctl`？** 请参考 [Systemd 官方文档](https://docs.redhat.com/zh-cn/documentation/red_hat_enterprise_linux/9/html/configuring_basic_system_settings/managing-system-services-with-systemctl_managing-systemd#starting-a-system-service_managing-system-services-with-systemctl)。
+
+---
+
+#### **Windows（SC 命令）**
+📌 **Windows 手动注册服务**
+以 **管理员身份** 运行 `PowerShell`：
+```powershell
+cmd /c 'sc create Nps1 binPath= "D:\NPS\nps.exe -conf_path=D:\NPS\" DisplayName= "NPS内网穿透服务端1" start= auto'
+```
+**启动服务**
+```powershell
+sc start Nps1
+```
+**删除服务**
+```powershell
+sc stop Nps1
+sc delete Nps1
+```
+> **Windows 注册系统服务后，如需更新，必须先手动停止所有运行的服务。**
+> 
+> **[微软SC命令指南](https://learn.microsoft.com/zh-cn/windows-server/administration/windows-commands/sc-create)**
+
+---
+
 ## 2. NPC 客户端
 
 下载并解压 **NPC 客户端** 压缩包，进入解压目录。
@@ -190,7 +251,7 @@ systemctl daemon-reload
 📌 **Windows 手动注册服务**
 以 **管理员身份** 运行 `PowerShell`：
 ```powershell
-cmd /c 'sc create Npc1 binPath= "D:\tools\npc.exe -server=xxx:123,yyy:456 -vkey=xxx,yyy -type=tls,tcp -log=off -debug=false" DisplayName= "nps内网穿透客户端1" start= auto'
+cmd /c 'sc create Npc1 binPath= "D:\tools\npc.exe -server=xxx:123,yyy:456 -vkey=xxx,yyy -type=tls,tcp -log=off -debug=false" DisplayName= "NPS内网穿透客户端1" start= auto'
 ```
 **启动服务**
 ```powershell
