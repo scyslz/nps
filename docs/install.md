@@ -29,13 +29,13 @@ docker run -d --restart=always --name nps --net=host -v <本机conf目录>:/conf
 #### **DockerHub（推荐）**
 ```bash
 docker pull duan2001/npc
-docker run -d --restart=always --name npc --net=host duan2001/npc -server=xxxx:123 -vkey=xxxx,xxxx -tls_enable=true -log=off
+docker run -d --restart=always --name npc --net=host duan2001/npc -server=xxx:123,yyy:456 -vkey=xxx,yyy -type=tls,tcp -log=off
 ```
 
 #### **GHCR（可选）**
 ```bash
 docker pull ghcr.io/djylb/npc
-docker run -d --restart=always --name npc --net=host ghcr.io/djylb/npc -server=xxxx:123 -vkey=xxxx,xxxx -tls_enable=true -log=off
+docker run -d --restart=always --name npc --net=host ghcr.io/djylb/npc -server=xxx:123,yyy:456 -vkey=xxx,yyy -type=tls,tcp -log=off
 ```
 
 ---
@@ -80,7 +80,7 @@ NPS 提供官方二进制安装包，适用于 **Windows、Linux、macOS、FreeB
 .\nps.exe start
 
 # NPC 客户端
-.\npc.exe install -server="xxx:123" -vkey="xxx" -type="tcp" -tls_enable="true" -log="off"
+.\npc.exe install -server="xxx:123,yyy:456" -vkey="xxx,yyy" -type="tcp,tls" -log="off"
 .\npc.exe start|stop|restart|uninstall
 
 # 更新
@@ -129,7 +129,7 @@ nps start
 
 # NPC 客户端
 ./npc install
-/usr/bin/npc install -server=xxx:123 -vkey=xxx -type=tcp -tls_enable=true -log=off
+/usr/bin/npc install -server=xxx:123,yyy:456 -vkey=xxx,yyy -type=tcp,tls -log=off
 npc start|stop|restart|uninstall
 
 # 更新
@@ -163,7 +163,7 @@ nps start
 
 # NPC 客户端
 ./npc install
-/usr/bin/npc install -server=xxx:123 -vkey=xxx -type=tcp -tls_enable=true -log=off
+/usr/bin/npc install -server=xxx:123,yyy:123 -vkey=xxx,yyy -type=tcp,tls -log=off
 npc start|stop|restart|uninstall
 
 # 更新

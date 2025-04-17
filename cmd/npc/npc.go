@@ -23,11 +23,11 @@ import (
 
 // 全局配置变量
 var (
-	serverAddr     = flag.String("server", "", "Server addr (ip:port)")
-	configPath     = flag.String("config", "", "Configuration file path")
-	verifyKey      = flag.String("vkey", "", "Authentication key")
+	serverAddr     = flag.String("server", "", "Server addr (ip1:port1,ip2:port2)")
+	configPath     = flag.String("config", "", "Configuration file path (path1,path2)")
+	verifyKey      = flag.String("vkey", "", "Authentication key (eg: vkey1,vkey2)")
 	logType        = flag.String("log", "file", "Log output mode (stdout|file|both|off)")
-	connType       = flag.String("type", "tcp", "Connection type with the server (kcp|tcp|tls)")
+	connType       = flag.String("type", "tcp", "Connection type with the server (kcp|tcp|tls) (eg: tcp,tls)")
 	proxyUrl       = flag.String("proxy", "", "Proxy socks5 URL (eg: socks5://user:pass@127.0.0.1:9007)")
 	logLevel       = flag.String("log_level", "7", "Log level 0~7")
 	registerTime   = flag.Int("time", 2, "Register time in hours")

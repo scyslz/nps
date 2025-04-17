@@ -73,7 +73,7 @@ proxy_url=socks5://111:222@127.0.0.1:8024
 📌 **所有参数可与启动命令组合使用** ：
 
 ```bash
-./npc -server=xxx:123 -vkey=xxx -tls_enable -log=off -debug=false
+./npc -server=xxx:123,yyy:456 -vkey=xxx,yyy -type=tls,tcp -log=off -debug=false
 ```
 
 | 参数 | 说明 | 默认值 |
@@ -82,7 +82,6 @@ proxy_url=socks5://111:222@127.0.0.1:8024
 | `-vkey` | 客户端认证密钥 | 无 |
 | `-config` | 指定配置文件路径 | 无 |
 | `-proxy` | 通过代理连接 NPS（支持 Socks5 / HTTP） | 无 |
-| `-tls_enable` | 启用 TLS 加密连接 | `false` |
 | `-debug` | 是否启用调试模式 | `true` |
 | `-log` | 日志输出模式（`stdout` / `file` / `both` / `off`） | `file` |
 | `-log_path` | NPC 日志路径（为空使用默认路径，`off` 禁用日志） | `npc.log` |
@@ -99,7 +98,7 @@ proxy_url=socks5://111:222@127.0.0.1:8024
 | `-stun_addr` | STUN 服务器地址 | `stun.stunprotocol.org:3478` |
 | `-dns_server` | 配置 DNS 服务器 | `8.8.8.8` |
 | `-time` | 客户端注册时间（小时） | `2` |
-| `-type` | 服务器连接方式（`tcp` / `kcp`） | `tcp` |
+| `-type` | 服务器连接方式（`tcp` / `tls` / `kcp`） | `tcp` |
 | `-version` | 显示当前版本 | 无 |
 
 ---
@@ -109,9 +108,10 @@ proxy_url=socks5://111:222@127.0.0.1:8024
 📌 **推荐使用 Docker 部署**
 ```bash
 docker pull duan2001/npc
-docker run -d --restart=always --name npc --net=host duan2001/npc -server=xxxx:123 -vkey=xxxx -tls_enable=true -log=off
+docker run -d --restart=always --name npc --net=host duan2001/npc -server=xxx:123,yyy:456 -vkey=xxx,yyy -type=tls,tcp -log=off
 ```
-~~曾提供 `.spk` 群晖套件，但已不再维护，建议使用 Docker 方式运行。~~ ✅
+~~曾提供 `.spk` 群晖套件，但已不再维护，建议使用 Docker 方式运行。~~ 
+✅[Telegram](https://t.me/npsdev) 内有第三方提供的群晖套件。
 
 ---
 

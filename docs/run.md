@@ -106,25 +106,25 @@ nps uninstall
 ### **2.2 直接运行（测试用）**
 #### **Linux**
 ```bash
-./npc -server=xxx:123 -vkey=xxx -type=tcp -tls_enable=true -log=off
+./npc -server=xxx:123,yyy:456 -vkey=xxx,yyy -type=tls,tcp -log=off
 ```
 #### **Windows**
 ```powershell
-npc.exe -server="xxx:123" -vkey="xxx" -type="tcp" -tls_enable="true" -log="off"
+npc.exe -server="xxx:123,yyy:456" -vkey="xxx,yyy" -type="tcp,tls" -log="off"
 ```
 > **⚠️ PowerShell 运行时，请用双引号括起命令参数！**
 
 ---
 
-### **2.3 安装服务并启动**
+### **2.3 安装服务并启动 (多开支持)**
 #### **Linux**
 ```bash
-./npc install -server=xxx:123 -vkey=xxx -type=tcp -tls_enable=true -log=off
+./npc install -server=xxx:123,yyy:456 -vkey=xxx,yyy -type=tls,tcp -log=off
 ./npc start
 ```
 #### **Windows**
 ```powershell
-npc.exe install -server="xxx:123" -vkey="xxx" -type="tcp" -tls_enable="true" -log="off"
+npc.exe install -server="xxx:123,yyy:456" -vkey="xxx,yyy" -type="tcp,tls" -log="off"
 npc.exe start
 ```
 > **⚠️ PowerShell 运行时，请用双引号括起命令参数！**
@@ -147,7 +147,7 @@ npc uninstall
 ---
 
 ### **2.4 手动注册为系统服务（多开适用）**
-📌 **直接执行 `install` 命令即可** **自动注册 NPC 为系统服务**。只有需要 **多开** 才需手动管理多个实例。
+📌 **直接执行 `install` 命令即可** **自动注册 NPC 为系统服务**。现在支持单实例命令行配置 **多开** 不需要下面手动管理多个实例了。
 
 #### **Linux（Systemd）**
 📌 **自动安装的服务文件为 `Npc.service`**
@@ -163,7 +163,7 @@ After=network-online.target syslog.target
 LimitNOFILE=65536
 StartLimitInterval=5
 StartLimitBurst=10
-ExecStart=/usr/bin/npc "-server=xxx:123" "-vkey=xxx" "-type=tcp" "-debug=false" "-log=off"
+ExecStart=/usr/bin/npc "-server=xxx:123,yyy:456" "-vkey=xxx,yyy" "-type=tcp,tls" "-debug=false" "-log=off"
 Restart=always
 RestartSec=120
 
@@ -190,7 +190,7 @@ systemctl daemon-reload
 📌 **Windows 手动注册服务**
 以 **管理员身份** 运行 `PowerShell`：
 ```powershell
-cmd /c 'sc create Npc1 binPath= "D:\tools\npc.exe -server=xxx:123 -vkey=xxx -type=tcp -tls_enable=true -log=off -debug=false" DisplayName= "nps内网穿透客户端1" start= auto'
+cmd /c 'sc create Npc1 binPath= "D:\tools\npc.exe -server=xxx:123,yyy:456 -vkey=xxx,yyy -type=tls,tcp -log=off -debug=false" DisplayName= "nps内网穿透客户端1" start= auto'
 ```
 **启动服务**
 ```powershell
@@ -208,10 +208,10 @@ sc delete Npc1
 ---
 
 ## 3. 多开客户端（多个 NPC 实例）
-
+📌 **现在支持单NPC实例命令行传入参数多开了，以下旧方式仅作参考**
 ### **3.1 Windows 多开**
 ```powershell
-cmd /c 'sc create Npc2 binPath= "D:\tools\npc.exe -server=xxx:123 -vkey=yyy -type=tcp -tls_enable=true -log=off -debug=false" DisplayName= "NPS Client 2" start= auto'
+cmd /c 'sc create Npc2 binPath= "D:\tools\npc.exe -server=xxx:123,yyy:456 -vkey=xxx,yyy -type=tcp,tls -log=off -debug=false" DisplayName= "NPS Client 2" start= auto'
 ```
 **启用并启动服务**
 ```powershell
@@ -239,7 +239,7 @@ After=network-online.target syslog.target
 LimitNOFILE=65536
 StartLimitInterval=5
 StartLimitBurst=10
-ExecStart=/usr/bin/npc "-server=xxx:123" "-vkey=yyy" "-type=tcp" "-debug=false" "-log=off"
+ExecStart=/usr/bin/npc "-server=xxx:123,yyy:456" "-vkey=xxx,yyy" "-type=tcp,tls" "-debug=false" "-log=off"
 Restart=always
 RestartSec=120
 

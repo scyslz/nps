@@ -60,7 +60,7 @@ docker run -d --restart=always --name nps --net=host -v $(pwd)/conf:/conf -v /et
 #### NPC Client
 ```bash
 docker pull duan2001/npc
-docker run -d --restart=always --name npc --net=host duan2001/npc -server=xxx:123 -vkey=key1,key2 -tls_enable=true -log=off
+docker run -d --restart=always --name npc --net=host duan2001/npc -server=xxx:123,yyy:456 -vkey=key1,key2 -type=tls,tcp -log=off
 ```
 
 ### Server Installation
@@ -94,7 +94,7 @@ nps start
 #### Linux
 ```bash
 ./npc install
-/usr/bin/npc install -server=xxx:123 -vkey=xxx -type=tcp -tls_enable=true -log=off
+/usr/bin/npc install -server=xxx:123,yyy:456 -vkey=xxx,yyy -type=tls -log=off
 npc start|stop|restart|uninstall
 
 # Update
@@ -106,7 +106,7 @@ npc start
 #### Windows
 > Windows 7 users should use the version ending with old: [64](https://github.com/djylb/nps/releases/latest/download/windows_amd64_client_old.tar.gz) / [32](https://github.com/djylb/nps/releases/latest/download/windows_386_client_old.tar.gz) (manual updates required)
 ```powershell
-.\npc.exe install -server="xxx:123" -vkey="xxx" -type="tcp" -tls_enable="true" -log="off"
+.\npc.exe install -server="xxx:123,yyy:456" -vkey="xxx,yyy" -type="tls,tcp" -log="off"
 .\npc.exe start|stop|restart|uninstall
 
 # Update
@@ -115,5 +115,6 @@ npc start
 .\npc.exe start
 ```
 
-> **Note:** The client supports passing multiple tunnel IDs simultaneously, e.g.:  
-> `npc -server=xxx:8024 -vkey=key1,key2`
+> **Tip:** The client supports connecting to multiple servers simultaneously. Example:  
+> `npc -server=xxx:123,yyy:456,zzz:789 -vkey=key1,key2,key3 -type=tcp,tls`  
+> Here, `xxx:123` uses TCP, and `yyy:456` and `zzz:789` use TLS.

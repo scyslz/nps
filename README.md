@@ -60,7 +60,7 @@ docker run -d --restart=always --name nps --net=host -v $(pwd)/conf:/conf -v /et
 #### NPC 客户端
 ```bash
 docker pull duan2001/npc
-docker run -d --restart=always --name npc --net=host duan2001/npc -server=xxx:123 -vkey=key1,key2 -tls_enable=true -log=off
+docker run -d --restart=always --name npc --net=host duan2001/npc -server=xxx:123,yyy:456 -vkey=key1,key2 -type=tls,tcp -log=off
 ```
 
 ### 服务端安装
@@ -94,7 +94,7 @@ nps start
 #### Linux
 ```bash
 ./npc install
-/usr/bin/npc install -server=xxx:123 -vkey=xxx -type=tcp -tls_enable=true -log=off
+/usr/bin/npc install -server=xxx:123,yyy:456 -vkey=xxx,yyy -type=tls -log=off
 npc start|stop|restart|uninstall
 
 # 更新
@@ -106,7 +106,7 @@ npc start
 #### Windows
 > Windows 7 用户请使用 old 结尾版本 [64](https://github.com/djylb/nps/releases/latest/download/windows_amd64_client_old.tar.gz) / [32](https://github.com/djylb/nps/releases/latest/download/windows_386_client_old.tar.gz) （需要手动更新）
 ```powershell
-.\npc.exe install -server="xxx:123" -vkey="xxx" -type="tcp" -tls_enable="true" -log="off"
+.\npc.exe install -server="xxx:123,yyy:456" -vkey="xxx,yyy" -type="tls,tcp" -log="off"
 .\npc.exe start|stop|restart|uninstall
 
 # 更新
@@ -115,8 +115,9 @@ npc start
 .\npc.exe start
 ```
 
-> **提示：** 客户端支持同时传入多个隧道 ID，示例：  
-> `npc -server=xxx:8024 -vkey=key1,key2`
+> **提示：** 客户端支持同时连接多个服务器，示例：  
+> `npc -server=xxx:123,yyy:456,zzz:789 -vkey=key1,key2,key3 -type=tcp,tls`  
+> 这里 `xxx:123` 使用 tcp, `yyy:456` 和 `zzz:789` 使用tls
 
 ---
 
@@ -126,13 +127,20 @@ npc start
 
 - **Main** 
   - 待定，优先修BUG，新功能随缘更新
+
+
+### Stable
+
+- **v0.26.48 (2025-04-17)**
   - 添加点击自动复制命令行 [#62](https://github.com/djylb/nps/issues/62)
   - 密码认证配置内容忽略空行
   - 修复NPS的IPv6自动识别
   - 修复管理页面显示
   - 隧道列表支持端口号排序
-
-### Stable
+  - 重写客户端TLS功能，支持使用type传入tls （已弃用tls_enable）
+  - 重写服务端TLS功能，支持TLS端口复用 （已弃用tls_enable）
+  - 客户端支持连接多个服务器 [#9](https://github.com/djylb/nps/issues/9)
+  - 更新证书随机生成
 
 - **v0.26.47 (2025-04-14)** 
   - 优化P2P处理逻辑

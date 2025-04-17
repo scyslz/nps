@@ -180,11 +180,18 @@ allow_time_limit=true
 
 ### **TLS 端口设置**
 ```
-`nps.conf` 新增 `tls_bridge_port=8025`，当 `tls_enable=true` 时，NPS 会监听 8025 端口。
+`nps.conf` 新增 `tls_bridge_port=8025`，当 `tls_bridge_port` 不为 `0` 时，NPS 会监听 8025 端口。
 
 客户端可选择连接 TLS 端口或非 TLS 端口：
 - `npc.exe -server=xxx:8024 -vkey=xxx`
-- `npc.exe -server=xxx:8025 -vkey=xxx -tls_enable=true`
+- `npc.exe -server=xxx:8025 -vkey=xxx -type=tls`
+```
+
+### **同时连接多台服务器**
+```
+客户端支持同时连接多个服务器，示例：  
+`npc -server=xxx:123,yyy:456,zzz:789 -vkey=key1,key2,key3 -type=tcp,tls`  
+这里 `xxx:123` 使用 tcp, `yyy:456` 和 `zzz:789` 使用tls
 ```
 
 ### **NPS 读取指定配置文件**
