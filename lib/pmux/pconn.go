@@ -9,7 +9,6 @@ type PortConn struct {
 	Conn     net.Conn
 	rs       []byte
 	readMore bool
-	start    int
 }
 
 func newPortConn(conn net.Conn, rs []byte, readMore bool) *PortConn {
@@ -19,27 +18,16 @@ func newPortConn(conn net.Conn, rs []byte, readMore bool) *PortConn {
 		readMore: readMore,
 	}
 }
-
 func (pConn *PortConn) Read(b []byte) (n int, err error) {
-	if len(b) < len(pConn.rs)-pConn.start {
-		defer func() {
-			pConn.start = pConn.start + len(b)
-		}()
-		return copy(b, pConn.rs), nil
-	}
-	if pConn.start < len(pConn.rs) {
-		defer func() {
-			pConn.start = len(pConn.rs)
-		}()
-		n = copy(b, pConn.rs[pConn.start:])
-		if !pConn.readMore {
-			return
+	if pConn.rs != nil {
+		if len(pConn.rs) > 0 {
+			n := copy(b, pConn.rs)
+			pConn.rs = pConn.rs[n:]
+			return n, nil
 		}
+		pConn.rs = nil
 	}
-	var n2 = 0
-	n2, err = pConn.Conn.Read(b[n:])
-	n = n + n2
-	return
+	return pConn.Conn.Read(b[n:])
 }
 
 func (pConn *PortConn) Write(b []byte) (n int, err error) {

@@ -310,9 +310,9 @@ func run() {
 
 		if len(connTypes) == 0 {
 			connTypes = append(connTypes, "tcp")
-			logs.Info(connTypes)
+			//logs.Info(connTypes)
 		}
-		logs.Debug(connTypes)
+		//logs.Debug(connTypes)
 
 		if len(serverAddrs) == 0 || len(verifyKeys) == 0 || serverAddrs[0] == "" || verifyKeys[0] == "" {
 			logs.Error("serverAddr or verifyKey cannot be empty")
@@ -320,8 +320,8 @@ func run() {
 		}
 
 		maxLength := common.ExtendArrs(&serverAddrs, &verifyKeys, &connTypes)
-		logs.Debug("max length: %d", maxLength)
-		logs.Debug(serverAddrs, verifyKeys, connTypes)
+		//logs.Debug("max length: %d", maxLength)
+		//logs.Debug(serverAddrs, verifyKeys, connTypes)
 		for i := 0; i < maxLength; i++ {
 			serverAddr := serverAddrs[i]
 			verifyKey := verifyKeys[i]

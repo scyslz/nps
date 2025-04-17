@@ -49,11 +49,11 @@ func NewPortMux(port int, managerHost, clientHost string) *PortMux {
 		managerHost:   managerHost,
 		clientHost:    clientHost,
 		port:          port,
-		clientConn:    make(chan *PortConn),
-		clientTlsConn: make(chan *PortConn),
-		httpConn:      make(chan *PortConn),
-		httpsConn:     make(chan *PortConn),
-		managerConn:   make(chan *PortConn),
+		clientConn:    nil,
+		clientTlsConn: nil,
+		httpConn:      nil,
+		httpsConn:     nil,
+		managerConn:   nil,
 	}
 	pMux.Start()
 	return pMux
@@ -97,45 +97,72 @@ func (pMux *PortMux) process(conn net.Conn) {
 	var readMore = false
 	switch common.BytesToNum(buf) {
 	case HTTP_CONNECT, HTTP_DELETE, HTTP_GET, HTTP_HEAD, HTTP_OPTIONS, HTTP_POST, HTTP_PUT, HTTP_TRACE: //http and manager
-		buffer.Reset()
-		r := bufio.NewReader(conn)
-		buffer.Write(buf)
-		for {
-			b, _, err := r.ReadLine()
-			if err != nil {
-				logs.Warn("read line error", err.Error())
-				conn.Close()
-				break
-			}
-			buffer.Write(b)
-			buffer.Write([]byte("\r\n"))
-			if strings.Index(string(b), "Host:") == 0 || strings.Index(string(b), "host:") == 0 {
-				// Remove host and space effects
-				str := strings.Replace(string(b), "Host:", "", -1)
-				str = strings.Replace(str, "host:", "", -1)
-				str = strings.TrimSpace(str)
-				// Determine whether it is the same as the manager domain name
-				if common.GetIpByAddr(str) == pMux.managerHost {
-					ch = pMux.managerConn
-				} else {
-					ch = pMux.httpConn
+		if pMux.managerConn != nil && pMux.httpConn != nil {
+			buffer.Reset()
+			r := bufio.NewReader(conn)
+			buffer.Write(buf)
+			for {
+				b, _, err := r.ReadLine()
+				if err != nil {
+					logs.Warn("read line error", err.Error())
+					conn.Close()
+					break
 				}
-				b, _ := r.Peek(r.Buffered())
 				buffer.Write(b)
-				rs = buffer.Bytes()
-				break
+				buffer.Write([]byte("\r\n"))
+				if strings.Index(string(b), "Host:") == 0 || strings.Index(string(b), "host:") == 0 {
+					// Remove host and space effects
+					str := strings.Replace(string(b), "Host:", "", -1)
+					str = strings.Replace(str, "host:", "", -1)
+					str = strings.TrimSpace(str)
+					// Determine whether it is the same as the manager domain name
+					if common.GetIpByAddr(str) == pMux.managerHost {
+						ch = pMux.managerConn
+					} else {
+						ch = pMux.httpConn
+					}
+					b, _ := r.Peek(r.Buffered())
+					buffer.Write(b)
+					rs = buffer.Bytes()
+					break
+				}
 			}
+		} else if pMux.httpConn != nil {
+			ch = pMux.httpConn
+			readMore = true
+			//logs.Debug("Only use httpConn")
+		} else if pMux.managerConn != nil {
+			ch = pMux.managerConn
+			readMore = true
+			//logs.Debug("Only use managerConn")
+		} else {
+			return
 		}
 	case CLIENT: // client connection
+		if pMux.clientConn == nil {
+			return
+		}
 		ch = pMux.clientConn
 	default: // https or clientTls
-		helloInfo, rawData, err := crypt.ReadClientHello(conn, buf)
-		if err == nil && helloInfo != nil && (helloInfo.ServerName == "" || helloInfo.ServerName == pMux.clientHost) {
-			ch = pMux.clientTlsConn
-		} else {
+		if pMux.httpsConn != nil && pMux.clientTlsConn != nil {
+			helloInfo, rawData, err := crypt.ReadClientHello(conn, buf)
+			if err == nil && helloInfo != nil && (helloInfo.ServerName == "" || helloInfo.ServerName == pMux.clientHost) {
+				ch = pMux.clientTlsConn
+				//logs.Debug("Use clientTlsConn")
+			} else {
+				ch = pMux.httpsConn
+				//logs.Debug("Use httpsConn")
+			}
+			rs = rawData
+		} else if pMux.httpsConn != nil {
 			ch = pMux.httpsConn
+			//logs.Debug("Only use httpsConn")
+		} else if pMux.clientTlsConn != nil {
+			ch = pMux.clientTlsConn
+			//logs.Debug("Only use clientTlsConn")
+		} else {
+			return
 		}
-		rs = rawData
 		readMore = true
 	}
 	if len(rs) == 0 {
@@ -162,21 +189,26 @@ func (pMux *PortMux) Close() error {
 }
 
 func (pMux *PortMux) GetClientListener() net.Listener {
+	pMux.clientConn = make(chan *PortConn)
 	return NewPortListener(pMux.clientConn, pMux.Listener.Addr())
 }
 
 func (pMux *PortMux) GetClientTlsListener() net.Listener {
+	pMux.clientTlsConn = make(chan *PortConn)
 	return NewPortListener(pMux.clientTlsConn, pMux.Listener.Addr())
 }
 
 func (pMux *PortMux) GetHttpListener() net.Listener {
+	pMux.httpConn = make(chan *PortConn)
 	return NewPortListener(pMux.httpConn, pMux.Listener.Addr())
 }
 
 func (pMux *PortMux) GetHttpsListener() net.Listener {
+	pMux.httpsConn = make(chan *PortConn)
 	return NewPortListener(pMux.httpsConn, pMux.Listener.Addr())
 }
 
 func (pMux *PortMux) GetManagerListener() net.Listener {
+	pMux.managerConn = make(chan *PortConn)
 	return NewPortListener(pMux.managerConn, pMux.Listener.Addr())
 }

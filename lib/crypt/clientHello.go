@@ -86,7 +86,8 @@ func (c *ReadOnlyConn) SetWriteDeadline(_ time.Time) error { return nil }
 
 func ReadClientHello(clientConn net.Conn, prefix []byte) (helloInfo *tls.ClientHelloInfo, rawData []byte, err error) {
 	sconn := NewSniffConn(clientConn, defaultMaxSize)
-	sconn.buf = prefix
+	//copy(sconn.buf, prefix)
+	sconn.buf = append(sconn.buf, prefix...)
 	sconn.Rb = prefix
 
 	roc := &ReadOnlyConn{
