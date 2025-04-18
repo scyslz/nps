@@ -46,7 +46,10 @@
             return {
                 "offset": params.offset,
                 "limit": params.limit,
-                "search": params.search
+                "client_id": {{.client_id}},
+                "search": params.search,
+                "sort": params.sort,
+                "order": params.order
             }
         },
         search: true,

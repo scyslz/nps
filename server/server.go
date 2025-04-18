@@ -271,7 +271,7 @@ func GetTunnel(start, length int, typeVal string, clientId int, search string, s
 		} else {
 			sort.SliceStable(all_list, func(i, j int) bool { return all_list[i].Id > all_list[j].Id })
 		}
-	} else if sortField == "ClientId" {
+	} else if sortField == "Client.Id" {
 		if order == "asc" {
 			sort.SliceStable(all_list, func(i, j int) bool { return all_list[i].Client.Id < all_list[j].Client.Id })
 		} else {
@@ -289,7 +289,7 @@ func GetTunnel(start, length int, typeVal string, clientId int, search string, s
 		} else {
 			sort.SliceStable(all_list, func(i, j int) bool { return all_list[i].Client.VerifyKey > all_list[j].Client.VerifyKey })
 		}
-	} else if sortField == "Target" {
+	} else if sortField == "Target.TargetStr" {
 		if order == "asc" {
 			sort.SliceStable(all_list, func(i, j int) bool { return all_list[i].Target.TargetStr < all_list[j].Target.TargetStr })
 		} else {
