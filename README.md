@@ -133,6 +133,7 @@ npc start
 - **v0.26.49 (2025-04-18)**
   - vkey添加点击复制
   - 重写透明代理逻辑 [#59](https://github.com/djylb/nps/issues/59)
+  - 修复linux、darwin、freebsd的透明代理
 
 - **v0.26.48 (2025-04-17)**
   - 添加点击自动复制命令行 [#62](https://github.com/djylb/nps/issues/62)
