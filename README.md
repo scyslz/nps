@@ -130,6 +130,11 @@ npc start
 
 ### Stable
 
+- **v0.26.50 (2025-04-19)**
+  - 优化P2P探测和连接速度
+  - 隧道编辑页面支持保存为新配置 [#8](https://github.com/djylb/nps/issues/8)
+  - 调整页面显示，添加排序支持
+
 - **v0.26.49 (2025-04-18)**
   - vkey添加点击复制
   - 重写透明代理逻辑 [#59](https://github.com/djylb/nps/issues/59)
