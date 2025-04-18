@@ -70,7 +70,13 @@
             return '<b langtag="word-exportflow"></b>: ' + changeunit(row.Flow.ExportFlow) + '&emsp;'
                 + '<b langtag="word-inletflow"></b>: ' + changeunit(row.Flow.InletFlow) + '&emsp;'
                 + '<b langtag="word-crypt"></b>: ' + row.Client.Cnf.Crypt + '&emsp;'
-                + '<b langtag="word-compress"></b>: ' + row.Client.Cnf.Compress + '&emsp;'
+                + '<b langtag="word-compress"></b>: ' + row.Client.Cnf.Compress + '&emsp;<br/><br>'
+                + '<b langtag="word-flowlimit"></b>: ' + row.Flow.FlowLimit + 'm&emsp;'
+                + '<b langtag="word-timelimit"></b>: ' + row.Flow.TimeLimit + '&emsp;<br/><br>'				
+                + '<b langtag="word-autocors"></b>: ' + row.AutoCORS + '&emsp;'				
+                + '<b langtag="word-autohttps"></b>: ' + row.AutoHttps + '&emsp;'
+                + '<b langtag="word-httpsjustproxy"></b>: ' + row.HttpsJustProxy + '&emsp;'				
+                + '<b langtag="word-targetishttps"></b>: ' + row.TargetIsHttps + '&emsp;<br/><br>'
                 + '<b langtag="word-basicusername"></b>: ' + row.Client.Cnf.U + '&emsp;'
                 + '<b langtag="word-basicpassword"></b>: ' + row.Client.Cnf.P + '&emsp;<br/><br>'
                 + '<b langtag="word-httpscert"></b>: <div onclick="oCopy(this)" style="height:60px; max-width:75vw; overflow:auto; white-space:nowrap; border:1px solid #ccc; padding:5px; box-sizing:border-box;">' + row.CertFilePath + '</div>&emsp;<br/>'
@@ -84,13 +90,15 @@
                 field: 'Id', //域值
                 title: '<span langtag="word-id"></span>', //标题
                 halign: 'center',
-                visible: true //false表示不显示
+                visible: true, //false表示不显示
+                sortable: true //启用排序
             },
             {
-                field: 'ClientId', //域值
+                field: 'Client.Id', //域值
                 title: '<span langtag="word-clientid"></span>', //标题
                 halign: 'center',
                 visible: true, //false表示不显示
+                sortable: true,//启用排序
                 formatter: function (value, row, index) {
                     return row.Client.Remark 
                         ? row.Client.Id + ' · ' + row.Client.Remark 
@@ -101,19 +109,25 @@
                 field: 'Remark', //域值
                 title: '<span langtag="word-remark"></span>', //标题
                 halign: 'center',
-                visible: true //false表示不显示
+                visible: true, //false表示不显示
+                sortable: true //启用排序
             },
             {
                 field: 'Client.VerifyKey', //域值
                 title: '<span langtag="word-verifykey"></span>', //标题
                 halign: 'center',
-                visible: true //false表示不显示
+                visible: true, //false表示不显示
+                sortable: true,//启用排序
+                formatter: function (value, row, index) {
+                    return '<span onclick="oCopy(this)">' + value + '</span>'
+                }
             },
             {
                 field: 'Host', //域值
                 title: '<span langtag="word-host"></span>', //标题
                 halign: 'center',
                 visible: true, //false表示不显示
+                sortable: true,//启用排序
                 formatter: function (value, row, index) {
                     hosturl = ((row.Scheme == 'http') ? 'http://' : 'https://') + row.Host + ((row.Scheme == 'http') ? ":{{.data.httpProxyPort}}" : ":{{.data.httpsProxyPort}}") + row.Location
                     return '<a href="' + hosturl + '" target="_blank">' + row.Host + '</a>'
@@ -124,24 +138,24 @@
                 title: '<span langtag="word-scheme"></span>', //标题
                 halign: 'center',
                 visible: true, //false表示不显示
+                sortable: true,//启用排序
                 formatter: function (value, row, index) {
                     return '<span langtag="word-' + value + '"></span>'
                 }
             },
             {
-                field: 'Target', //域值
+                field: 'Target.TargetStr', //域值
                 title: '<span langtag="word-target"></span>', //标题
                 halign: 'center',
                 visible: true, //false表示不显示
-                formatter: function (value, row, index) {
-                    return row.Target.TargetStr
-                }
+                sortable: true //启用排序
             },
             {
                 field: 'Location', //域值
                 title: '<span langtag="word-location"></span>', //标题
                 halign: 'center',
-                visible: true //false表示不显示
+                visible: true, //false表示不显示
+                sortable: true //启用排序
             },
             {
                 field: 'IsClose', //域值
@@ -149,6 +163,7 @@
                 align: 'center',
                 halign: 'center',
                 visible: true, //false表示不显示
+                sortable: true,//启用排序
                 formatter: function (value, row, index) {
                     if (value) {
                         return '<span class="badge badge-badge" langtag="word-close"></span>'
@@ -158,14 +173,15 @@
                 }
             },
             {
-                field: '', //域值
+                field: 'Client.IsConnect', //域值
                 title: '<span langtag="word-clientstatus"></span>', //内容
                 align: 'center',
                 halign: 'center',
                 visible: true, //false表示不显示
+                sortable: true,//启用排序
                 formatter: function (value, row, index) {
                     hosturl = ((row.Scheme == 'http') ? 'http://' : 'https://') + row.Host + row.Location
-                    if (row.Client.IsConnect) {
+                    if (value) {
                         return '<a href="' + hosturl + '" target="_blank"><span class="badge badge-primary" langtag="word-online"></span></a>'
                     } else {
                         return '<span class="badge badge-badge" langtag="word-offline"></span>'

@@ -77,9 +77,16 @@
                 + '<b langtag="word-inletflow"></b>: ' + changeunit(row.Flow.InletFlow) + '&emsp;'
                 + '<b langtag="word-crypt"></b>: ' + row.Client.Cnf.Crypt + '&emsp;'
                 + '<b langtag="word-compress"></b>: ' + row.Client.Cnf.Compress + '&emsp;'
+                + '<b langtag="word-ishttp"></b>: ' + row.IsHttp + '&emsp;<br/><br>'
+                + '<b langtag="word-flowlimit"></b>: ' + row.Flow.FlowLimit + 'm&emsp;'
+                + '<b langtag="word-timelimit"></b>: ' + row.Flow.TimeLimit + '&emsp;<br/><br>'				
                 + '<b langtag="word-basicusername"></b>: ' + row.Client.Cnf.U + '&emsp;'
                 + '<b langtag="word-basicpassword"></b>: ' + row.Client.Cnf.P + '&emsp;'
-                + '<b langtag="word-ishttp"></b>: ' + row.IsHttp + '&emsp;'
+            if (row.Mode == "file") {
+                return tmp + "<br/><br>"
+                    + '<b langtag="word-localpath"></b>: ' + row.LocalPath + '&emsp;'
+                    + '<b langtag="word-stripprefix"></b>: ' + row.StripPre + '&emsp;'
+            }
             if (row.Mode == "p2p") {
                 return tmp + "<br/><br>"
                     + '<b langtag="word-commandaccessp2p"></b>: ' + '<code onclick="oCopy(this)">' + "./npc{{.win}} -server={{.ip}}:{{.p}} -vkey=" + row.Client.VerifyKey
@@ -120,20 +127,25 @@
                 field: 'Remark', //域值
                 title: '<span langtag="word-remark"></span>', //标题
                 halign: 'center',
-                visible: true //false表示不显示
+                visible: true, //false表示不显示
+                sortable: true //启用排序
             },
             {
                 field: 'Client.VerifyKey', //域值
                 title: '<span langtag="word-verifykey"></span>', //标题
                 halign: 'center',
                 sortable: true, //启用排序
-                visible: true //false表示不显示
+                visible: true, //false表示不显示
+                formatter: function (value, row, index) {
+                    return '<span onclick="oCopy(this)">' + value + '</span>'
+                }
             },
             {
                 field: 'Mode', //域值
                 title: '<span langtag="word-scheme"></span>', //标题
                 halign: 'center',
                 visible: true, //false表示不显示
+                sortable: true, //启用排序
                 formatter: function (value, row, index) {
                     return '<span langtag="scheme-' + value + '"></span>'
                 }
@@ -143,7 +155,10 @@
                 title: '<span langtag="word-port"></span>', //标题
                 halign: 'center',
                 sortable: true, //启用排序
-                visible: true //false表示不显示
+                visible: true, //false表示不显示
+                formatter: function (value, row, index) {
+                    return '<span onclick="oCopy(this)">' + value + '</span>'
+                }
             },
             {{ if or (not .type) (eq .type "tcp") (eq .type "udp") (eq .type "secret") (eq .type "p2p") }}
             {
@@ -153,7 +168,7 @@
                 visible: true, //false表示不显示
                 sortable: true, //启用排序
                 formatter: function (value, row, index) {
-                    return row.Target.TargetStr
+                    return '<span onclick="oCopy(this)">' + row.Target.TargetStr + '</span>'
                 }
             },
             {{ end }}
@@ -162,10 +177,14 @@
                 field: 'Password', //域值
                 title: '<span langtag="word-identificationkey"></span>', //标题
                 halign: 'center',
-                visible: true //false表示不显示
+                visible: true, //false表示不显示
+                sortable: true, //启用排序
+                formatter: function (value, row, index) {
+                    return '<span onclick="oCopy(this)">' + value + '</span>'
+                }
             },
             {{ end }}
-            {{ if or (not .type) (eq .type "file") }}
+            {{ if and .type (eq .type "file") }}
             {
                 field: 'LocalPath', //域值
                 title: '<span langtag="word-localpath"></span>', //标题
@@ -185,6 +204,7 @@
                 align: 'center',
                 halign: 'center',
                 visible: true, //false表示不显示
+                sortable: true, //启用排序
                 formatter: function (value, row, index) {
                     if (value) {
                         return '<span class="badge badge-primary" langtag="word-open"></span>'
@@ -199,6 +219,7 @@
                 align: 'center',
                 halign: 'center',
                 visible: true, //false表示不显示
+                sortable: true, //启用排序
                 formatter: function (value, row, index) {
                     if (value) {
                         return '<span class="badge badge-primary" langtag="word-open"></span>'
@@ -208,13 +229,14 @@
                 }
             },
             {
-                field: '', //域值
+                field: 'Client.IsConnect', //域值
                 title: '<span langtag="word-clientstatus"></span>', //内容
                 align: 'center',
                 halign: 'center',
                 visible: true, //false表示不显示
+                sortable: true, //启用排序
                 formatter: function (value, row, index) {
-                    if (row.Client.IsConnect) {
+                    if (value) {
                         return '<span class="badge badge-primary" langtag="word-online"></span>'
                     } else {
                         return '<span class="badge badge-badge" langtag="word-offline"></span>'

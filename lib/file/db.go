@@ -36,7 +36,7 @@ func GetDb() *DbUtils {
 }
 
 func GetMapKeys(m sync.Map, isSort bool, sortKey, order string) (keys []int) {
-	if sortKey != "" && isSort {
+	if (sortKey == "InletFlow" || sortKey == "ExportFlow") && isSort {
 		return sortClientByKey(m, sortKey, order)
 	}
 	m.Range(func(key, value interface{}) bool {
