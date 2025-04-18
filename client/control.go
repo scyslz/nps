@@ -425,10 +425,7 @@ func sendP2PTestMsg(localConn *net.UDPConn, remoteAddr1, remoteAddr2, remoteAddr
 		ip := common.RemovePortFromHost(remoteAddr2)
 		go func() {
 			minPort := common.GetPortByAddr(remoteAddr3)
-			maxPort := minPort + interval*50
-			if maxPort > 65535 {
-				maxPort = 65535
-			}
+			maxPort := (minPort + int(math.Abs(float64(interval)))*50) % 65536
 			logs.Debug("minPort: %d, maxPort: %d", minPort, maxPort)
 			ports := getRandomPortArr(minPort, maxPort)
 			for i := 0; i <= 50; i++ {

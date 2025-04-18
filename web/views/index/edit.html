@@ -143,6 +143,9 @@
                             <button class="btn btn-success" onclick="submitform('edit', '{{.web_base_url}}/index/edit', $('form').serializeArray())" type="button">
                                 <i class="fa fa-fw fa-lg fa-check-circle"></i> <span langtag="word-save"></span>
                             </button>
+                            <button class="btn btn-warning" onclick="if ($('input[name=\'port\']').val() == '{{.t.Port}}') $('input[name=\'port\']').val(0); submitform('add', '{{.web_base_url}}/index/add', $('form').serializeArray())" type="button">
+                                <i class="fa fa-fw fa-lg fa-check-circle"></i> <span langtag="word-add"></span>
+                            </button>
                         </div>
                     </div>
                 </form>

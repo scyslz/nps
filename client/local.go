@@ -237,7 +237,7 @@ func newUdpConn(localAddr string, config *config.CommonConfig, l *config.LocalSe
 		logs.Error(err)
 		return
 	}
-	logs.Debug("remoteAddress: %s", remoteAddress)
+	//logs.Debug("remoteAddress: %s", remoteAddress)
 
 	udpTunnel, err := kcp.NewConn(remoteAddress, nil, 150, 3, localConn)
 	if err != nil || udpTunnel == nil {
