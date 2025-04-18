@@ -40,7 +40,7 @@ func ioctl(s uintptr, ioc int, b []byte) error {
 	return nil
 }
 
-func GetAddress(conn *net.TCPConn) (string, error) {
+func GetAddress(conn net.Conn) (string, error) {
 	f, err := os.Open("/dev/pf")
 	if err != nil {
 		return "", fmt.Errorf("failed to open /dev/pf: %v", err)
@@ -57,11 +57,11 @@ func GetAddress(conn *net.TCPConn) (string, error) {
 	case *net.TCPAddr:
 		raIP = ra.IP
 		raPort = ra.Port
-		nl.Proto = syscall.IPPROTO_TCP // If it's a TCP connection
+		nl.Proto = syscall.IPPROTO_TCP
 	case *net.UDPAddr:
 		raIP = ra.IP
 		raPort = ra.Port
-		nl.Proto = syscall.IPPROTO_UDP // If it's a UDP connection
+		nl.Proto = syscall.IPPROTO_UDP
 	}
 
 	switch la := conn.LocalAddr().(type) {

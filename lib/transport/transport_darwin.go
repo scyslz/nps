@@ -12,7 +12,7 @@ const (
 	PfOut       = 2
 	LEN         = 4*16 + 4*4 + 4*1
 	IOCInOut    = 0x80000000
-	IOCPARMMASK = 0x1FFF
+	IOCPARM_MASK = 0x1FFF
 	DIOCNATLOOK = IOCInOut | ((LEN & IOCPARM_MASK) << 16) | ('D' << 8) | 23
 )
 
@@ -33,19 +33,16 @@ func GetAddress(conn net.Conn) (string, error) {
 
 	var raIP, laIP net.IP
 	var raPort, laPort int
-	var proto uint8
 
 	switch ra := conn.RemoteAddr().(type) {
 	case *net.TCPAddr:
 		raIP = ra.IP
 		raPort = ra.Port
 		nl.proto = syscall.IPPROTO_TCP
-		proto = syscall.IPPROTO_TCP
 	case *net.UDPAddr:
 		raIP = ra.IP
 		raPort = ra.Port
 		nl.proto = syscall.IPPROTO_UDP
-		proto = syscall.IPPROTO_UDP
 	}
 
 	switch la := conn.LocalAddr().(type) {
@@ -78,7 +75,7 @@ func GetAddress(conn net.Conn) (string, error) {
 	nl.sxport[0], nl.sxport[1] = byte(raPort>>8), byte(raPort)
 	nl.dxport[0], nl.dxport[1] = byte(laPort>>8), byte(laPort)
 
-	_, _, errno := syscall.Syscall(syscall.SYS_IOCTL, fd, DIOCNATLOOK, uintptr(unsafe.Pointer(&nl)))
+	_, _, errno := syscall.Syscall(syscall.SYS_IOCTL, uintptr(fd), DIOCNATLOOK, uintptr(unsafe.Pointer(&nl)))
 	if errno != 0 {
 		return "", fmt.Errorf("failed to get redirected address: %v", errno)
 	}
