@@ -77,6 +77,9 @@ func GetFastAddr(addr string, testType string) (string, error) {
 			bestIP, bestLatency = ip, latency
 		}
 	}
+	if bestLatency == time.Duration(1<<63-1) {
+		return addr, nil
+	}
 	return BuildAddress(bestIP, strconv.Itoa(port)), nil
 }
 
@@ -141,7 +144,7 @@ func resolveDNS(domain string, qtype uint16, dnsServer string) ([]string, error)
 		case *dns.AAAA:
 			ipList = append(ipList, r.AAAA.String())
 		case *dns.CNAME:
-			ipList = append(ipList, r.Target+r.String())
+			ipList = append(ipList, r.Target)
 		}
 	}
 	return ipList, nil
