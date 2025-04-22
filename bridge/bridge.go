@@ -47,8 +47,8 @@ func NewClient(t, f *nps_mux.Mux, s *conn.Conn, vs string) *Client {
 
 type Bridge struct {
 	TunnelPort     int //通信隧道端口
-	Client         sync.Map
-	Register       sync.Map
+	Client         *sync.Map
+	Register       *sync.Map
 	tunnelType     string //bridge type kcp or tcp
 	OpenTask       chan *file.Tunnel
 	CloseTask      chan *file.Tunnel
@@ -63,6 +63,8 @@ func NewTunnel(tunnelPort int, tunnelType string, ipVerify bool, runList *sync.M
 	return &Bridge{
 		TunnelPort:     tunnelPort,
 		tunnelType:     tunnelType,
+		Client:         &sync.Map{},
+		Register:       &sync.Map{},
 		OpenTask:       make(chan *file.Tunnel, 100),
 		CloseTask:      make(chan *file.Tunnel, 100),
 		CloseClient:    make(chan int, 100),
@@ -112,10 +114,10 @@ func (s *Bridge) StartTunnel() error {
 		// kcp
 		if ServerKcpEnable {
 			go func() {
-				bridgekcp := *s
-				bridgekcp.tunnelType = "kcp"
+				bridgeKcp := *s
+				bridgeKcp.tunnelType = "kcp"
 				conn.NewKcpListenerAndProcess(common.BuildAddress(beego.AppConfig.String("bridge_ip"), beego.AppConfig.String("bridge_port")), func(c net.Conn) {
-					bridgekcp.cliProcess(conn.NewConn(c))
+					bridgeKcp.cliProcess(conn.NewConn(c))
 				})
 			}()
 		}
