@@ -12,7 +12,7 @@ func InitPProfFromFile() {
 	ip := beego.AppConfig.String("pprof_ip")
 	p := beego.AppConfig.String("pprof_port")
 	if len(ip) > 0 && len(p) > 0 && IsPort(p) {
-		runPProf(ip + ":" + p)
+		runPProf(BuildAddress(ip, p))
 	}
 }
 

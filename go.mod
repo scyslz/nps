@@ -10,11 +10,13 @@ require (
 	github.com/ccding/go-stun v0.1.5
 	github.com/golang/snappy v1.0.0
 	github.com/kardianos/service v1.2.2
+	github.com/miekg/dns v1.1.65
 	github.com/panjf2000/ants/v2 v2.11.3
 	github.com/pkg/errors v0.9.1
 	github.com/shirou/gopsutil/v4 v4.25.3
-	github.com/xtaci/kcp-go v5.4.20+incompatible
+	github.com/xtaci/kcp-go/v5 v5.6.20
 	golang.org/x/net v0.39.0
+	golang.org/x/sys v0.32.0
 )
 
 require (
@@ -34,10 +36,10 @@ require (
 	github.com/prometheus/client_golang v1.22.0 // indirect
 	github.com/prometheus/client_model v0.6.2 // indirect
 	github.com/prometheus/common v0.63.0 // indirect
-	github.com/prometheus/procfs v0.16.0 // indirect
+	github.com/prometheus/procfs v0.16.1 // indirect
 	github.com/shiena/ansicolor v0.0.0-20230509054315-a9deabde6e02 // indirect
-	github.com/templexxx/cpufeat v0.0.0-20180724012125-cef66df7f161 // indirect
-	github.com/templexxx/xor v0.0.0-20191217153810-f85b25db303b // indirect
+	github.com/templexxx/cpu v0.1.1 // indirect
+	github.com/templexxx/xorsimd v0.4.3 // indirect
 	github.com/tjfoc/gmsm v1.4.1 // indirect
 	github.com/tklauser/go-sysconf v0.3.15 // indirect
 	github.com/tklauser/numcpus v0.10.0 // indirect
@@ -45,9 +47,10 @@ require (
 	github.com/xtaci/lossyconn v0.0.0-20200209145036-adba10fffc37 // indirect
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
 	golang.org/x/crypto v0.37.0 // indirect
+	golang.org/x/mod v0.24.0 // indirect
 	golang.org/x/sync v0.13.0 // indirect
-	golang.org/x/sys v0.32.0 // indirect
 	golang.org/x/text v0.24.0 // indirect
+	golang.org/x/tools v0.32.0 // indirect
 	google.golang.org/protobuf v1.36.6 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )

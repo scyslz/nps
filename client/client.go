@@ -16,7 +16,7 @@ import (
 	"github.com/djylb/nps/lib/conn"
 	"github.com/djylb/nps/lib/crypt"
 	"github.com/djylb/nps/lib/nps_mux"
-	"github.com/xtaci/kcp-go"
+	"github.com/xtaci/kcp-go/v5"
 )
 
 type TRPClient struct {

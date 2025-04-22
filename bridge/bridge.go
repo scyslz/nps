@@ -76,7 +76,7 @@ func (s *Bridge) StartTunnel() error {
 	go s.ping()
 	if s.tunnelType == "kcp" {
 		logs.Info("server start, the bridge type is %s, the bridge port is %d", s.tunnelType, s.TunnelPort)
-		return conn.NewKcpListenerAndProcess(beego.AppConfig.String("bridge_ip")+":"+beego.AppConfig.String("bridge_port"), func(c net.Conn) {
+		return conn.NewKcpListenerAndProcess(common.BuildAddress(beego.AppConfig.String("bridge_ip"), beego.AppConfig.String("bridge_port")), func(c net.Conn) {
 			s.cliProcess(conn.NewConn(c))
 		})
 	} else {
@@ -346,14 +346,10 @@ func (s *Bridge) typeDeal(typeVal string, c *conn.Conn, id int, vs string) {
 		} else if v, ok := s.Client.Load(t.Client.Id); ok {
 			//向密钥对应的客户端发送与服务端udp建立连接信息，地址，密钥
 			serverIP := common.GetServerIp()
+			serverPort := beego.AppConfig.String("p2p_port")
 
-			// 检查是否是 IPv6 地址
-			if strings.Contains(serverIP, ":") {
-				serverIP = "[" + serverIP + "]"
-			}
-
-			svrAddr := serverIP + ":" + beego.AppConfig.String("p2p_port")
-			if err != nil {
+			svrAddr := common.BuildAddress(serverIP, serverPort)
+			if serverPort == "" {
 				logs.Warn("get local udp addr error")
 				return
 			}

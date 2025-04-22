@@ -16,7 +16,7 @@ import (
 	"github.com/djylb/nps/lib/file"
 	"github.com/djylb/nps/lib/nps_mux"
 	"github.com/djylb/nps/server/proxy"
-	"github.com/xtaci/kcp-go"
+	"github.com/xtaci/kcp-go/v5"
 )
 
 var (

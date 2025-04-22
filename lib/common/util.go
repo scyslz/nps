@@ -9,6 +9,7 @@ import (
 	"html/template"
 	"io"
 	"io/ioutil"
+	"math"
 	"net"
 	"net/http"
 	"net/url"
@@ -109,6 +110,13 @@ func GetPortByAddr(addr string) int {
 	return 0
 }
 
+func BuildAddress(host string, port string) string {
+	if strings.Contains(host, ":") { // IPv6
+		return fmt.Sprintf("[%s]:%s", host, port)
+	}
+	return fmt.Sprintf("%s:%s", host, port)
+}
+
 // Get the corresponding IP address through domain name
 func GetHostByName(hostname string) string {
 	if !DomainCheck(hostname) {
@@ -139,6 +147,33 @@ func DomainCheck(domain string) bool {
 		match, _ = regexp.MatchString(NotLine, domain)
 	}
 	return match
+}
+
+func Max(values ...int) int {
+	maxVal := math.MinInt
+	for _, v := range values {
+		if v > maxVal {
+			maxVal = v
+		}
+	}
+	return maxVal
+}
+
+func Min(values ...int) int {
+	minVal := math.MaxInt
+	for _, v := range values {
+		if v < minVal {
+			minVal = v
+		}
+	}
+	return minVal
+}
+
+func GetPort(value int) int {
+	if value >= 0 {
+		return value % 65536
+	}
+	return (65536 + value%65536) % 65536
 }
 
 // CheckAuthWithAccountMap

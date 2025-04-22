@@ -44,7 +44,7 @@ func NewTunnelModeServer(process process, bridge NetBridge, task *file.Tunnel) *
 
 // 开始
 func (s *TunnelModeServer) Start() error {
-	return conn.NewTcpListenerAndProcess(s.task.ServerIp+":"+strconv.Itoa(s.task.Port), func(c net.Conn) {
+	return conn.NewTcpListenerAndProcess(common.BuildAddress(s.task.ServerIp, strconv.Itoa(s.task.Port)), func(c net.Conn) {
 		// 将新连接加入到连接池中
 		s.activeConnections.Store(c, struct{}{})
 

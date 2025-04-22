@@ -22,7 +22,7 @@ import (
 	"github.com/djylb/nps/lib/goroutine"
 	"github.com/djylb/nps/lib/pmux"
 	"github.com/djylb/nps/lib/rate"
-	"github.com/xtaci/kcp-go"
+	"github.com/xtaci/kcp-go/v5"
 )
 
 type Conn struct {

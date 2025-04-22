@@ -6,14 +6,16 @@ import (
 	"strconv"
 	"syscall"
 	"unsafe"
+
+	"github.com/djylb/nps/lib/common"
 )
 
 const (
-	PfOut       = 2
-	LEN         = 4*16 + 4*4 + 4*1
-	IOCInOut    = 0x80000000
+	PfOut        = 2
+	LEN          = 4*16 + 4*4 + 4*1
+	IOCInOut     = 0x80000000
 	IOCPARM_MASK = 0x1FFF
-	DIOCNATLOOK = IOCInOut | ((LEN & IOCPARM_MASK) << 16) | ('D' << 8) | 23
+	DIOCNATLOOK  = IOCInOut | ((LEN & IOCPARM_MASK) << 16) | ('D' << 8) | 23
 )
 
 func GetAddress(conn net.Conn) (string, error) {
@@ -91,5 +93,5 @@ func GetAddress(conn net.Conn) (string, error) {
 		copy(odIP, nl.rdaddr[:])
 	}
 
-	return odIP.String() + ":" + strconv.Itoa(int(odPort[0]<<8|odPort[1])), nil
+	return common.BuildAddress(odIP.String(), strconv.Itoa(int(odPort[0]<<8|odPort[1]))), nil
 }

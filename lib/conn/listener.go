@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/beego/beego/logs"
-	"github.com/xtaci/kcp-go"
+	"github.com/xtaci/kcp-go/v5"
 )
 
 func NewTcpListenerAndProcess(addr string, f func(c net.Conn), listener *net.Listener) error {

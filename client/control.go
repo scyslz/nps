@@ -26,7 +26,7 @@ import (
 	"github.com/djylb/nps/lib/conn"
 	"github.com/djylb/nps/lib/crypt"
 	"github.com/djylb/nps/lib/version"
-	"github.com/xtaci/kcp-go"
+	"github.com/xtaci/kcp-go/v5"
 	"golang.org/x/net/proxy"
 )
 
@@ -202,6 +202,8 @@ func NewConn(tp string, vkey string, server string, connType string, proxyUrl st
 
 	timeout := time.Second * 10
 	dialer := net.Dialer{Timeout: timeout}
+
+	server, _ = common.GetFastAddr(server, connType)
 
 	if tp == "tcp" || tp == "tls" {
 		var rawConn net.Conn
@@ -423,11 +425,18 @@ func sendP2PTestMsg(localConn *net.UDPConn, remoteAddr1, remoteAddr2, remoteAddr
 	}()
 	if interval != 0 {
 		ip := common.RemovePortFromHost(remoteAddr2)
+		p1 := common.GetPortByAddr(remoteAddr1)
+		p2 := common.GetPortByAddr(remoteAddr2)
+		p3 := common.GetPortByAddr(remoteAddr3)
 		go func() {
-			minPort := common.GetPortByAddr(remoteAddr3)
-			maxPort := (minPort + int(math.Abs(float64(interval)))*50) % 65536
-			logs.Debug("minPort: %d, maxPort: %d", minPort, maxPort)
-			ports := getRandomPortArr(minPort, maxPort)
+			startPort := p3
+			endPort := startPort + (interval * 50)
+			if (p1 < p3 && p3 < p2) || (p1 > p3 && p3 > p2) {
+				endPort = endPort + (p2 - p3)
+			}
+			endPort = common.GetPort(endPort)
+			logs.Debug("Start Port: %d, End Port: %d, Interval: %d", startPort, endPort, interval)
+			ports := getRandomPortArr(startPort, endPort)
 			for i := 0; i <= 50; i++ {
 				go func(port int) {
 					trueAddress := ip + ":" + strconv.Itoa(port)
@@ -545,17 +554,15 @@ func getRandomPortArr(min, max int) []int {
 	if min > max {
 		min, max = max, min
 	}
-	addrAddr := make([]int, max-min+1)
-	for i := min; i <= max; i++ {
-		addrAddr[max-i] = i
+	length := max - min + 1
+	addrAddr := make([]int, length)
+	for i := 0; i < length; i++ {
+		addrAddr[i] = max - i
 	}
-	rand.Seed(time.Now().UnixNano())
-	var r, temp int
-	for i := max - min; i > 0; i-- {
-		r = rand.Int() % i
-		temp = addrAddr[i]
-		addrAddr[i] = addrAddr[r]
-		addrAddr[r] = temp
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+	for i := length - 1; i > 0; i-- {
+		j := r.Intn(i + 1)
+		addrAddr[i], addrAddr[j] = addrAddr[j], addrAddr[i]
 	}
 	return addrAddr
 }
