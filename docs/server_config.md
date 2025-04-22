@@ -49,7 +49,7 @@ nps.exe -conf_path=D:\test\nps
 |--------------------|-----------------------------------|
 | `bridge_port`      | 客户端与服务端通信端口（默认 `8024`）            |
 | `bridge_ip`        | 监听地址（默认 `0.0.0.0`，监听所有 IP）        |
-| `bridge_type`      | 连接方式（`tcp` 或 `kcp`，默认 `tcp`）      |
+| `bridge_type`      | 连接方式（`tcp`、`kcp`、`both`，默认 `tcp`） |
 | `http_proxy_ip`    | HTTP 代理监听地址（默认 `0.0.0.0`）         |
 | `http_proxy_port`  | HTTP 代理监听端口（默认 `80`，留空不启用）        |
 | `https_proxy_port` | HTTPS 代理监听端口（默认 `443`，留空不启用）      |

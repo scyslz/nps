@@ -81,7 +81,7 @@ func (s *Bridge) StartTunnel() error {
 			s.cliProcess(conn.NewConn(c))
 		})
 	} else {
-
+		// tcp
 		go func() {
 			listener, err := connection.GetBridgeTcpListener()
 			if err != nil {
@@ -112,8 +112,10 @@ func (s *Bridge) StartTunnel() error {
 		// kcp
 		if ServerKcpEnable {
 			go func() {
+				bridgekcp := *s
+				bridgekcp.tunnelType = "kcp"
 				conn.NewKcpListenerAndProcess(common.BuildAddress(beego.AppConfig.String("bridge_ip"), beego.AppConfig.String("bridge_port")), func(c net.Conn) {
-					s.cliProcess(conn.NewConn(c))
+					bridgekcp.cliProcess(conn.NewConn(c))
 				})
 			}()
 		}

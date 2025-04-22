@@ -265,5 +265,10 @@ func run() {
 	if err != nil {
 		timeout = 60
 	}
-	go server.StartNewServer(bridgePort, task, beego.AppConfig.String("bridge_type"), timeout)
+	bridgeType := beego.AppConfig.String("bridge_type")
+	if bridgeType == "both" {
+		bridgeType = "tcp"
+		bridge.ServerKcpEnable = true
+	}
+	go server.StartNewServer(bridgePort, task, bridgeType, timeout)
 }

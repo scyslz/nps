@@ -640,7 +640,11 @@ func GetDashboardData() map[string]interface{} {
 	data["httpProxyCount"] = http
 	data["secretCount"] = secret
 	data["p2pCount"] = p2p
-	data["bridgeType"] = beego.AppConfig.String("bridge_type")
+	bridgeType := beego.AppConfig.String("bridge_type")
+	if bridgeType == "both" {
+		bridgeType = "tcp"
+	}
+	data["bridgeType"] = bridgeType
 	data["httpProxyPort"] = beego.AppConfig.String("http_proxy_port")
 	data["httpsProxyPort"] = beego.AppConfig.String("https_proxy_port")
 	data["ipLimit"] = beego.AppConfig.String("ip_limit")

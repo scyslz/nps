@@ -34,7 +34,11 @@ func (s *ClientController) List() {
 	cmd := make(map[string]interface{})
 	ip := s.Ctx.Request.Host
 	cmd["ip"] = common.GetIpByAddr(ip)
-	cmd["bridgeType"] = beego.AppConfig.String("bridge_type")
+	bridgeType := beego.AppConfig.String("bridge_type")
+	if bridgeType == "both" {
+		bridgeType = "tcp"
+	}
+	cmd["bridgeType"] = bridgeType
 	cmd["bridgePort"] = server.Bridge.TunnelPort
 	s.AjaxTable(list, cnt, cnt, cmd)
 }
