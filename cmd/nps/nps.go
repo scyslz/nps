@@ -100,6 +100,7 @@ func main() {
 
 	bridgeTlsPort, _ := beego.AppConfig.Int("tls_bridge_port")
 	bridge.ServerTlsEnable = beego.AppConfig.DefaultBool("tls_enable", true) && bridgeTlsPort != 0
+	bridge.ServerKcpEnable = beego.AppConfig.DefaultBool("kcp_enable", false)
 
 	for _, v := range os.Args[1:] {
 		switch v {

@@ -26,6 +26,7 @@ import (
 )
 
 var ServerTlsEnable bool = false
+var ServerKcpEnable bool = false
 
 type Client struct {
 	tunnel    *nps_mux.Mux // WORK_CHAN connection
@@ -104,6 +105,15 @@ func (s *Bridge) StartTunnel() error {
 				}
 				conn.Accept(tlsListener, func(c net.Conn) {
 					s.cliProcess(conn.NewConn(tls.Server(c, &tls.Config{Certificates: []tls.Certificate{crypt.GetCert()}})))
+				})
+			}()
+		}
+
+		// kcp
+		if ServerKcpEnable {
+			go func() {
+				conn.NewKcpListenerAndProcess(common.BuildAddress(beego.AppConfig.String("bridge_ip"), beego.AppConfig.String("bridge_port")), func(c net.Conn) {
+					s.cliProcess(conn.NewConn(c))
 				})
 			}()
 		}
