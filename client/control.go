@@ -285,7 +285,7 @@ func NewConn(tp string, vkey string, server string, connType string, proxyUrl st
 	if _, err := c.Write([]byte(connType)); err != nil {
 		return nil, err
 	}
-	c.SetAlive(tp)
+	c.SetAlive()
 
 	return c, nil
 }

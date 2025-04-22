@@ -365,7 +365,7 @@ func (s *Bridge) typeDeal(typeVal string, c *conn.Conn, id int, vs string) {
 		}
 	}
 
-	c.SetAlive(s.tunnelType) // 设置连接为活动状态，避免超时断开
+	c.SetAlive() // 设置连接为活动状态，避免超时断开
 	return
 }
 

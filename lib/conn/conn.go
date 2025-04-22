@@ -140,7 +140,7 @@ func (s *Conn) ReadFlag() (string, error) {
 }
 
 // set alive
-func (s *Conn) SetAlive(tp string) {
+func (s *Conn) SetAlive() {
 	switch s.Conn.(type) {
 	case *kcp.UDPSession:
 		s.Conn.(*kcp.UDPSession).SetReadDeadline(time.Time{})
