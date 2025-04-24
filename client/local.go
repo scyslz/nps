@@ -106,13 +106,6 @@ func StartLocalServer(l *config.LocalServer, config *config.CommonConfig) error 
 		logs.Info("successful start-up of local tcp trans monitoring, port", l.Port)
 		return proxy.NewTunnelModeServer(proxy.HandleTrans, p2pNetBridge, task).Start()
 	case "p2p", "secret":
-		if l.Type == "p2p" {
-			errUDP := proxy.NewUdpModeServer(p2pNetBridge, task).Start()
-			if errUDP != nil {
-				logs.Error("local listen UDP startup failed port %d, error %s", l.Port, errUDP.Error())
-				return errUDP
-			}
-		}
 		listenTCP, errTCP := net.ListenTCP("tcp", &net.TCPAddr{net.ParseIP("0.0.0.0"), l.Port, ""})
 		if errTCP != nil {
 			logs.Error("local listen TCP startup failed port %d, error %s", l.Port, errTCP.Error())
@@ -120,6 +113,11 @@ func StartLocalServer(l *config.LocalServer, config *config.CommonConfig) error 
 		}
 		LocalServer = append(LocalServer, listenTCP)
 		logs.Info("successful start-up of local tcp monitoring, port", l.Port)
+		if l.Type == "p2p" {
+			task.Target.TargetStr = l.Target
+			logs.Info("successful start-up of local udp monitoring, port", l.Port)
+			go proxy.NewUdpModeServer(p2pNetBridge, task).Start()
+		}
 		conn.Accept(listenTCP, func(c net.Conn) {
 			logs.Trace("new %s connection", l.Type)
 			if l.Type == "secret" {
