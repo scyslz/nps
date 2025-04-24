@@ -51,6 +51,8 @@ NPS 是一款轻量高效的内网穿透代理服务器，支持多种协议（T
 
 ***GHCR***： [NPS](https://github.com/djylb/nps/pkgs/container/nps) [NPC](https://github.com/djylb/nps/pkgs/container/npc)
 
+> 有真实IP获取需求可配合 [mmproxy](https://github.com/djylb/mmproxy-docker) 使用。例如：SSH
+
 #### NPS 服务端
 ```bash
 docker pull duan2001/nps
