@@ -9,7 +9,6 @@ import (
 
 	"github.com/beego/beego"
 	"github.com/beego/beego/logs"
-	"github.com/djylb/nps/bridge"
 	"github.com/djylb/nps/lib/common"
 	"github.com/djylb/nps/lib/conn"
 	"github.com/djylb/nps/lib/file"
@@ -21,7 +20,7 @@ type UdpModeServer struct {
 	listener *net.UDPConn
 }
 
-func NewUdpModeServer(bridge *bridge.Bridge, task *file.Tunnel) *UdpModeServer {
+func NewUdpModeServer(bridge NetBridge, task *file.Tunnel) *UdpModeServer {
 	allowLocalProxy, _ := beego.AppConfig.Bool("allow_local_proxy")
 	s := new(UdpModeServer)
 	s.bridge = bridge

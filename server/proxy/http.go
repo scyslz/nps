@@ -18,7 +18,6 @@ import (
 
 	"github.com/beego/beego"
 	"github.com/beego/beego/logs"
-	"github.com/djylb/nps/bridge"
 	"github.com/djylb/nps/lib/common"
 	"github.com/djylb/nps/lib/conn"
 	"github.com/djylb/nps/lib/file"
@@ -97,7 +96,7 @@ type httpServer struct {
 	httpsPortStr  string
 }
 
-func NewHttp(bridge *bridge.Bridge, task *file.Tunnel, httpPort, httpsPort int, httpOnlyPass string, addOrigin bool) *httpServer {
+func NewHttp(bridge NetBridge, task *file.Tunnel, httpPort, httpsPort int, httpOnlyPass string, addOrigin bool) *httpServer {
 	allowLocalProxy, _ := beego.AppConfig.Bool("allow_local_proxy")
 	return &httpServer{
 		BaseServer: BaseServer{
