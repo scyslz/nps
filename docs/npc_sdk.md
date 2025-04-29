@@ -113,9 +113,6 @@ int main() {
     char *versionInfo = Version();
     printf("客户端版本：%s\n", versionInfo);
 
-    // 设置是否启用 TLS：1 表示启用，0 表示禁用
-    SetTlsEnable(1);
-
     // 启动客户端线程（启动后该线程会阻塞，直到客户端退出）
     pthread_t tid;
     if (pthread_create(&tid, NULL, client_thread, NULL) != 0) {
