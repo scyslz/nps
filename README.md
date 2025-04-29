@@ -5,6 +5,8 @@
 [![Release](https://github.com/djylb/nps/workflows/Release/badge.svg)](https://github.com/djylb/nps/actions)
 [![GitHub All Releases](https://img.shields.io/github/downloads/djylb/nps/total)](https://github.com/djylb/nps/releases)
 
+> 由于 GitHub 限制请求头为中文（Accept-Language=zh-CN) 访问 *.githubusercontent.com ，图标可能无法正常显示。
+
 - [English](https://github.com/djylb/nps/blob/master/README_en.md)
 
 ---
