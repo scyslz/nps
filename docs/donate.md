@@ -1,3 +1,4 @@
 # 捐助
 
-不需要捐助
+- [爱发电](https://afdian.com/a/duanlab)
+- [GitHub](https://github.com/sponsors/djylb)

@@ -1,4 +1,4 @@
-![logo](logo.svg)
+![logo](https://cdn.jsdelivr.net/gh/djylb/nps/docs/logo.svg)
 
 # NPS <small>0.26.53</small>
 

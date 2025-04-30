@@ -83,7 +83,7 @@ npc.exe uninstall
 
 📌 **Windows 客户端退出后自动重启**：
 请按照以下图示配置 Windows 任务计划：
-![image](https://github.com/djylb/nps/blob/master/docs/windows_client_service_configuration.png?raw=true)
+![image](https://cdn.jsdelivr.net/gh/djylb/nps/docs/windows_client_service_configuration.png)
 
 📌 **日志文件位置**：[可通过参数配置](/npc_extend?id=_5-其他命令行参数)
 
