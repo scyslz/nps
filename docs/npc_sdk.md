@@ -1,4 +1,4 @@
-# npc SDK 文档
+# NPC SDK 文档
 
 ---
 
