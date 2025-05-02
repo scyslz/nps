@@ -66,7 +66,9 @@
                 languages['content'] = xml2json($(xml).children())['content'];
                 languages['menu'] = languages['content']['languages'];
                 languages['default'] = languages['content']['default'];
-                languages['navigator'] = (getCookie('lang') || navigator.language || navigator.browserLanguage);
+                // languages['navigator'] = (getCookie('lang') || navigator.language || navigator.browserLanguage);
+                var navLang = (getCookie('lang') || navigator.language || navigator.browserLanguage || '');
+                languages['navigator'] = navLang.startsWith('zh') ? 'zh-CN' : navLang;
                 for (var key in languages['menu']) {
                     $('#languagemenu').next().append('<li lang="' + key + '"><a><img src="' + window.nps.web_base_url + '/static/img/flag/' + key + '.png"> ' + languages['menu'][key] + '</a></li>');
                     if (key == languages['navigator']) languages['current'] = key;
@@ -174,11 +176,11 @@ function submitform(action, url, postdata) {
                 data: postdata,
                 success: function (res) {
                     if (res.status) {
-                        showMsg(langreply(res.msg), 'success', 1500, function() {
+                        showMsg(langreply(res.msg), 'success', 1000, function() {
                           if (postsubmit) {
-                            document.location.reload();
+                              document.location.reload();
                           } else {
-                            window.location.href = document.referrer;
+                              window.location.href = document.referrer;
                           }
                         });
                     } else {
@@ -194,8 +196,8 @@ function submitform(action, url, postdata) {
                 data: postdata,
                 success: function (res) {
                     if (res.status) {
-                        msgSuccess(langreply(res.msg), 1500, function() {
-                          document.location.reload();
+                        showMsg(langreply(res.msg), 'success', 1000, function() {
+                            document.location.reload();
                         });
                     } else {
                         showMsg(langreply(res.msg), 'error', 5000);

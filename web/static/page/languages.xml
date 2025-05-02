@@ -894,7 +894,7 @@
 			<zh-CN>停止成功</zh-CN>
 			<en-US>Stop success</en-US>
 		</lang>
-		<lang id="Thenumberoftunnelsexceedsthelimit">
+		<lang id="thenumberoftunnelsexceedsthelimit">
 			<zh-CN>隧道数量超过限制</zh-CN>
 			<en-US>The number of tunnels exceeds the limit</en-US>
 		</lang>
@@ -909,6 +909,30 @@
 		<lang id="webloginusernameduplicatepleasereset">
 			<zh-CN>Web登陆用户名重复，请重新设置</zh-CN>
 			<en-US>Web login username duplicate, please reset</en-US>
+		</lang>
+		<lang id="theverificationcodeiswrongpleasegetitagainandtryagain">
+			<zh-CN>验证码错误，请重新获取并重试</zh-CN>
+			<en-US>The verification code is wrong, please get it again and try again</en-US>
+		</lang>
+		<lang id="loginsuccess">
+			<zh-CN>登录成功</zh-CN>
+			<en-US>Login success</en-US>
+		</lang>
+		<lang id="usernameorpasswordincorrect">
+			<zh-CN>用户名或密码错误</zh-CN>
+			<en-US>Username or password incorrect</en-US>
+		</lang>
+		<lang id="registerisnotallow">
+			<zh-CN>不允许注册</zh-CN>
+			<en-US>Register is not allowed</en-US>
+		</lang>
+		<lang id="pleasecheckyourinput">
+			<zh-CN>请检查您的输入</zh-CN>
+			<en-US>Please check your input</en-US>
+		</lang>
+		<lang id="registersuccess">
+			<zh-CN>注册成功</zh-CN>
+			<en-US>Register success</en-US>
 		</lang>
 		<lang id="copied">
 			<zh-CN>已复制</zh-CN>
