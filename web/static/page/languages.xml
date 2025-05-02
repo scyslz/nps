@@ -910,6 +910,10 @@
 			<zh-CN>Web登陆用户名重复，请重新设置</zh-CN>
 			<en-US>Web login username duplicate, please reset</en-US>
 		</lang>
+		<lang id="copied">
+			<zh-CN>已复制</zh-CN>
+			<en-US>Copied</en-US>
+		</lang>
 	</reply>
 
 	<charts>
