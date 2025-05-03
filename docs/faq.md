@@ -38,15 +38,20 @@ NPS 默认支持 IPv6，无需额外配置，已在 IPv4/IPv6 双栈协议上监
 - `NPS` 作为代理服务器，`NPC` 仅作为隧道客户端。
 ```
 
-### **p2p穿透失败 [p2p服务](/example?id=p2p服务)**
+### **P2P穿透失败 [P2P服务](/example?id=P2P服务)**
 ```
-双方nat类型都是Symmetric Nat一定不成功，建议先查看nat类型。请按照文档操作(标题上有超链接)
+双方NAT类型都是Symmetric Nat一定不成功，建议先查看NAT类型。请按照文档操作(标题上有超链接)
 ```
 
 ### **客户端命令行方式启动多个隧道**
 ```
-支持使用逗号拼接多个隧道 ID：
-npc -server=xxx:8024 -vkey=ytkpyr0er676m0r7,iwnbjfbvygvzyzzt
+支持使用逗号拼接多个隧道：
+客户端支持同时连接多个服务器，示例：  
+`npc -server=xxx:123,yyy:456,zzz:789 -vkey=key1,key2,key3 -type=tcp,tls`  
+这里 `xxx:123` 使用 tcp, `yyy:456` 和 `zzz:789` 使用tls
+
+支持省略填写，示例：
+`npc -server=xxx:123 -vkey=key1,key2,key3`
 ```
 
 ---
@@ -119,7 +124,7 @@ NPS 可自动插入 CORS 头部，允许跨域访问，但建议在后端实现�
 ### **域名转发 HTTPS 处理逻辑**
 ```
 1. 访问 NPS 时使用的模式 ≠ 后端服务器模式。
-2. 目标应填写 **后端 HTTP 端口**，NPS 会自动转发。
+2. 目标应填写 后端 HTTP 端口，NPS 会自动转发。
 3. 如后端仅支持 HTTPS：
    - 选择 `HTTPS` 作为后端类型。
    - 可启用 `由后端处理 HTTPS（仅转发）`，避免 NPS 需要证书。
@@ -185,13 +190,6 @@ allow_time_limit=true
 客户端可选择连接 TLS 端口或非 TLS 端口：
 - `npc.exe -server=xxx:8024 -vkey=xxx`
 - `npc.exe -server=xxx:8025 -vkey=xxx -type=tls`
-```
-
-### **同时连接多台服务器**
-```
-客户端支持同时连接多个服务器，示例：  
-`npc -server=xxx:123,yyy:456,zzz:789 -vkey=key1,key2,key3 -type=tcp,tls`  
-这里 `xxx:123` 使用 tcp, `yyy:456` 和 `zzz:789` 使用tls
 ```
 
 ### **NPS 读取指定配置文件**
