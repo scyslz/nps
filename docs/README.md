@@ -1,4 +1,4 @@
-# 🚀 NPS 内网穿透工具
+# NPS
 
 [![GitHub stars](https://img.shields.io/github/stars/djylb/nps.svg)](https://github.com/djylb/nps)
 [![GitHub forks](https://img.shields.io/github/forks/djylb/nps.svg)](https://github.com/djylb/nps)
