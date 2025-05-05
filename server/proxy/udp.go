@@ -8,10 +8,10 @@ import (
 	"time"
 
 	"github.com/beego/beego"
-	"github.com/beego/beego/logs"
 	"github.com/djylb/nps/lib/common"
 	"github.com/djylb/nps/lib/conn"
 	"github.com/djylb/nps/lib/file"
+	"github.com/djylb/nps/lib/logs"
 )
 
 type UdpModeServer struct {
@@ -59,7 +59,7 @@ func (s *UdpModeServer) Start() error {
 			break
 		}
 
-		logs.Trace("New udp connection,client %d,remote address %s", s.task.Client.Id, addr)
+		logs.Trace("New udp connection,client %d,remote address %v", s.task.Client.Id, addr)
 		go s.process(addr, buf[:n])
 	}
 	return nil
@@ -71,7 +71,7 @@ func (s *UdpModeServer) process(addr *net.UDPAddr, data []byte) {
 		if ok {
 			_, err := clientConn.Write(data)
 			if err != nil {
-				logs.Warn(err)
+				logs.Warn("%v", err)
 				return
 			}
 
@@ -81,7 +81,7 @@ func (s *UdpModeServer) process(addr *net.UDPAddr, data []byte) {
 		}
 	} else {
 		if err := s.CheckFlowAndConnNum(s.task.Client); err != nil {
-			logs.Warn("client id %d, task id %d,error %s, when udp connection", s.task.Client.Id, s.task.Id, err.Error())
+			logs.Warn("client id %d, task id %d,error %v, when udp connection", s.task.Client.Id, s.task.Id, err)
 			return
 		}
 		defer s.task.Client.CutConn()
@@ -96,7 +96,7 @@ func (s *UdpModeServer) process(addr *net.UDPAddr, data []byte) {
 
 		_, err = target.Write(data)
 		if err != nil {
-			logs.Warn(err)
+			logs.Warn("%v", err)
 			return
 		}
 		dataLength := int64(len(data))
@@ -111,12 +111,12 @@ func (s *UdpModeServer) process(addr *net.UDPAddr, data []byte) {
 			n, err := target.Read(buf)
 			if err != nil {
 				s.addrMap.Delete(addr.String())
-				logs.Warn(err)
+				logs.Warn("%v", err)
 				return
 			}
 			_, err = s.listener.WriteTo(buf[:n], addr)
 			if err != nil {
-				logs.Warn(err)
+				logs.Warn("%v", err)
 				return
 			}
 

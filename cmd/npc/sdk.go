@@ -3,17 +3,21 @@ package main
 import (
 	"C"
 
-	"github.com/beego/beego/logs"
 	"github.com/djylb/nps/client"
 	"github.com/djylb/nps/lib/common"
+	"github.com/djylb/nps/lib/logs"
 	"github.com/djylb/nps/lib/version"
 )
 
 var cl *client.TRPClient
 
+func init() {
+	logs.EnableInMemoryBuffer(0) // 0 = Default 64KB
+	logs.Init("off", "trace", "", 0, 0, 0, false)
+}
+
 //export StartClientByVerifyKey
 func StartClientByVerifyKey(serverAddr, verifyKey, connType, proxyUrl *C.char) int {
-	_ = logs.SetLogger("store")
 	if cl != nil {
 		cl.Close()
 	}
@@ -39,9 +43,14 @@ func Version() *C.char {
 	return C.CString(version.VERSION)
 }
 
+//export SetLogsLevel
+func SetLogsLevel(logsLevel *C.char) {
+	logs.SetLevel(C.GoString(logsLevel))
+}
+
 //export Logs
 func Logs() *C.char {
-	return C.CString(common.GetLogMsg())
+	return C.CString(logs.GetBufferedLogs())
 }
 
 //export SetDnsServer

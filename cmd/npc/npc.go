@@ -10,13 +10,13 @@ import (
 	"sync"
 	"time"
 
-	"github.com/beego/beego/logs"
 	"github.com/ccding/go-stun/stun"
 	"github.com/djylb/nps/client"
 	"github.com/djylb/nps/lib/common"
 	"github.com/djylb/nps/lib/config"
 	"github.com/djylb/nps/lib/file"
 	"github.com/djylb/nps/lib/install"
+	"github.com/djylb/nps/lib/logs"
 	"github.com/djylb/nps/lib/version"
 	"github.com/kardianos/service"
 )
@@ -37,9 +37,9 @@ var (
 	localType      = flag.String("local_type", "p2p", "P2P target type")
 	logPath        = flag.String("log_path", "", "NPC log path (empty to use default, 'off' to disable)")
 	logMaxSize     = flag.Int("log_max_size", 5, "Maximum log file size in MB before rotation (0 to disable)")
-	logMaxDays     = flag.String("log_max_days", "7", "Number of days to retain old log files (0 to disable)")
-	logMaxFiles    = flag.String("log_max_files", "10", "Maximum number of log files to retain (0 to disable)")
-	logDaily       = flag.String("log_daily", "true", "Rotate log daily (true or false)")
+	logMaxDays     = flag.Int("log_max_days", 7, "Number of days to retain old log files (0 to disable)")
+	logMaxFiles    = flag.Int("log_max_files", 10, "Maximum number of log files to retain (0 to disable)")
+	logCompress    = flag.Bool("log_compress", false, "Compress rotated log files (true or false)")
 	debug          = flag.Bool("debug", true, "Enable debug mode")
 	pprofAddr      = flag.String("pprof", "", "PProf debug address (ip:port)")
 	stunAddr       = flag.String("stun_addr", "stun.miwifi.com:3478", "STUN server address")
@@ -51,9 +51,6 @@ var (
 
 func main() {
 	flag.Parse()
-	logs.Reset()
-	logs.EnableFuncCallDepth(true)
-	logs.SetLogFuncCallDepth(3)
 
 	// 显示版本并退出
 	if *ver {
@@ -103,7 +100,7 @@ func main() {
 	}
 	s, err := service.New(prg, svcConfig)
 	if err != nil {
-		logs.Error(err, "service function disabled")
+		logs.Error("service function disabled %v", err)
 		run()
 		// run without service
 		wg := sync.WaitGroup{}
@@ -133,7 +130,7 @@ func main() {
 			logs.Info(*stunAddr)
 			nat, host, err := c.Discover()
 			if err != nil {
-				logs.Error("Error:", err)
+				logs.Error("Error: %v", err)
 				return
 			}
 			fmt.Println("NAT Type:", nat)
@@ -150,13 +147,13 @@ func main() {
 				cmd := exec.Command("/etc/init.d/"+svcConfig.Name, os.Args[1])
 				err := cmd.Run()
 				if err != nil {
-					logs.Error(err)
+					logs.Error("%v", err)
 				}
 				return
 			}
 			err := service.Control(s, os.Args[1])
 			if err != nil {
-				logs.Error("Valid actions: %q\n%s", service.ControlAction, err.Error())
+				logs.Error("Valid actions: %q error: %v", service.ControlAction, err)
 			}
 			return
 		case "install":
@@ -165,7 +162,7 @@ func main() {
 			install.InstallNpc()
 			err := service.Control(s, os.Args[1])
 			if err != nil {
-				logs.Error("Valid actions: %q\n%s", service.ControlAction, err.Error())
+				logs.Error("Valid actions: %q error: %v", service.ControlAction, err)
 			}
 			if service.Platform() == "unix-systemv" {
 				logs.Info("unix-systemv service")
@@ -177,7 +174,7 @@ func main() {
 		case "uninstall":
 			err := service.Control(s, os.Args[1])
 			if err != nil {
-				logs.Error("Valid actions: %q\n%s", service.ControlAction, err.Error())
+				logs.Error("Valid actions: %q error: %v", service.ControlAction, err)
 			}
 			if service.Platform() == "unix-systemv" {
 				logs.Info("unix-systemv service")
@@ -193,31 +190,21 @@ func main() {
 // 配置日志记录
 func configureLogging() {
 	// 关闭日志输出
-	if strings.EqualFold(*logType, "off") || strings.EqualFold(*logType, "false") {
-		if common.IsWindows() {
-			logs.SetLogger(logs.AdapterFile, `{"filename":"NUL"}`)
-		} else {
-			logs.SetLogger(logs.AdapterFile, `{"filename":"/dev/null"}`)
-		}
-		return
+	if strings.EqualFold(*logType, "false") {
+		*logType = "off"
 	}
 
 	// 控制台日志
 	if *debug {
-		logs.SetLogger(logs.AdapterConsole, `{"level":7,"color":true}`)
-	} else if strings.EqualFold(*logType, "stdout") || strings.EqualFold(*logType, "both") {
-		logs.SetLogger(logs.AdapterConsole, `{"level":`+*logLevel+`,"color":true}`)
+		if *logType != "both" {
+			*logType = "stdout"
+		}
+		*logLevel = "trace"
 	}
 
 	// 处理日志路径默认值
-	if *logPath == "" {
+	if *logPath == "" || strings.EqualFold(*logPath, "on") || strings.EqualFold(*logPath, "true") {
 		*logPath = common.GetNpcLogPath() // 使用默认路径
-	} else if strings.EqualFold(*logPath, "off") || strings.EqualFold(*logPath, "false") {
-		if common.IsWindows() {
-			logs.SetLogger(logs.AdapterFile, `{"filename":"NUL"}`)
-		} else {
-			logs.SetLogger(logs.AdapterFile, `{"filename":"/dev/null"}`)
-		}
 	}
 
 	// 针对 Windows 系统调整日志路径中的反斜杠
@@ -225,10 +212,7 @@ func configureLogging() {
 		*logPath = strings.Replace(*logPath, "\\", "\\\\", -1)
 	}
 
-	// 设置文件日志，按大小、天数和文件数量滚动
-	if strings.EqualFold(*logType, "file") || strings.EqualFold(*logType, "both") {
-		logs.SetLogger(logs.AdapterFile, `{"level":`+*logLevel+`,"filename":"`+*logPath+`","daily":`+*logDaily+`,"maxfiles":`+*logMaxFiles+`,"maxdays":`+*logMaxDays+`,"maxsize":`+fmt.Sprintf("%d", *logMaxSize*1024*1024)+`,"maxlines":100000,"rotate":true,"color":true}`)
-	}
+	logs.Init(*logType, *logLevel, *logPath, *logMaxSize, *logMaxFiles, *logMaxDays, *logCompress)
 }
 
 type npc struct {
@@ -254,13 +238,13 @@ func (p *npc) run() error {
 			const size = 64 << 10
 			buf := make([]byte, size)
 			buf = buf[:runtime.Stack(buf, false)]
-			logs.Warning("npc: panic serving %v: %v\n%s", err, string(buf))
+			logs.Warn("npc: panic serving %v: %s", err, buf)
 		}
 	}()
 	run()
 	select {
 	case <-p.exit:
-		logs.Warning("stop...")
+		logs.Warn("stop...")
 	}
 	return nil
 }

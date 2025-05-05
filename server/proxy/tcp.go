@@ -10,11 +10,11 @@ import (
 	"unsafe"
 
 	"github.com/beego/beego"
-	"github.com/beego/beego/logs"
 	"github.com/djylb/nps/bridge"
 	"github.com/djylb/nps/lib/common"
 	"github.com/djylb/nps/lib/conn"
 	"github.com/djylb/nps/lib/file"
+	"github.com/djylb/nps/lib/logs"
 	"github.com/djylb/nps/server/connection"
 )
 
@@ -58,12 +58,12 @@ func (s *TunnelModeServer) Start() error {
 		}()
 
 		if err := s.CheckFlowAndConnNum(s.task.Client); err != nil {
-			logs.Warn("client id %d, task id %d,error %s, when tcp connection", s.task.Client.Id, s.task.Id, err.Error())
+			logs.Warn("client id %d, task id %d, error %v, when tcp connection", s.task.Client.Id, s.task.Id, err)
 			c.Close()
 			return
 		}
 
-		logs.Trace("new tcp connection,local port %d,client %d,remote address %s", s.task.Port, s.task.Client.Id, c.RemoteAddr())
+		logs.Trace("new tcp connection,local port %d,client %d,remote address %v", s.task.Port, s.task.Client.Id, c.RemoteAddr())
 
 		s.process(conn.NewConn(c), s)
 		s.task.Client.CutConn()
@@ -111,7 +111,7 @@ func (s *WebServer) Start() error {
 			err = http.Serve(l, beego.BeeApp.Handlers)
 		}
 	} else {
-		logs.Error(err)
+		logs.Error("%v", err)
 	}
 	return err
 }
@@ -135,7 +135,7 @@ func ProcessTunnel(c *conn.Conn, s *TunnelModeServer) error {
 	if err != nil {
 		if s.task.Mode != "file" {
 			c.Close()
-			logs.Warn("tcp port %d, client id %d, task id %d connect error %s", s.task.Port, s.task.Client.Id, s.task.Id, err.Error())
+			logs.Warn("tcp port %d, client id %d, task id %d connect error %v", s.task.Port, s.task.Client.Id, s.task.Id, err)
 			return err
 		}
 		targetAddr = ""
@@ -149,7 +149,7 @@ func ProcessHttp(c *conn.Conn, s *TunnelModeServer) error {
 	_, addr, rb, err, r := c.GetHost()
 	if err != nil {
 		c.Close()
-		logs.Info(err)
+		logs.Info("%v", err)
 		return err
 	}
 

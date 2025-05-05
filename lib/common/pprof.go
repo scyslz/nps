@@ -5,7 +5,7 @@ import (
 	_ "net/http/pprof"
 
 	"github.com/beego/beego"
-	"github.com/beego/beego/logs"
+	"github.com/djylb/nps/lib/logs"
 )
 
 func InitPProfFromFile() {
@@ -26,5 +26,5 @@ func runPProf(ipPort string) {
 	go func() {
 		_ = http.ListenAndServe(ipPort, nil)
 	}()
-	logs.Info("PProf debug listen on", ipPort)
+	logs.Info("PProf debug listen on %s", ipPort)
 }

@@ -11,11 +11,11 @@ import (
 	"time"
 
 	"github.com/beego/beego"
-	"github.com/beego/beego/logs"
 	"github.com/djylb/nps/lib/common"
 	"github.com/djylb/nps/lib/conn"
 	"github.com/djylb/nps/lib/crypt"
 	"github.com/djylb/nps/lib/file"
+	"github.com/djylb/nps/lib/logs"
 	"github.com/pkg/errors"
 )
 
@@ -133,7 +133,7 @@ func (https *HttpsServer) Start() error {
 	conn.Accept(https.listener, func(c net.Conn) {
 		helloInfo, rb, err := crypt.ReadClientHello(c, nil)
 		if err != nil || helloInfo == nil {
-			logs.Warn("Failed to read clientHello from %s, err=%v", c.RemoteAddr(), err)
+			logs.Warn("Failed to read clientHello from %v, err=%v", c.RemoteAddr(), err)
 			// Check if the request is an HTTP request.
 			checkHTTPAndRedirect(c, rb)
 			return
@@ -141,7 +141,7 @@ func (https *HttpsServer) Start() error {
 
 		serverName := helloInfo.ServerName
 		if serverName == "" {
-			logs.Debug("IP access to HTTPS port is not allowed. Remote address: %s", c.RemoteAddr().String())
+			logs.Debug("IP access to HTTPS port is not allowed. Remote address: %v", c.RemoteAddr())
 			c.Close()
 			return
 		}
@@ -149,7 +149,7 @@ func (https *HttpsServer) Start() error {
 		host, err := file.GetDb().FindCertByHost(serverName)
 		if err != nil {
 			c.Close()
-			logs.Debug("The URL %s cannot be parsed! Remote address: %s", serverName, c.RemoteAddr().String())
+			logs.Debug("The URL %s cannot be parsed! Remote address: %v", serverName, c.RemoteAddr())
 			return
 		}
 
@@ -196,7 +196,7 @@ func checkHTTPAndRedirect(c net.Conn, rb []byte) {
 	reader := bufio.NewReader(io.MultiReader(bytes.NewReader(rb), c))
 	req, err := http.ReadRequest(reader)
 	if err != nil {
-		logs.Warn("Failed to parse HTTP request from %s, err=%v", c.RemoteAddr(), err)
+		logs.Warn("Failed to parse HTTP request from %v, err=%v", c.RemoteAddr(), err)
 		return
 	}
 	logs.Debug("HTTP Request Sent to HTTPS Port")
@@ -217,9 +217,9 @@ func checkHTTPAndRedirect(c net.Conn, rb []byte) {
 		"Connection: close\r\n\r\n"
 
 	if _, writeErr := c.Write([]byte(response)); writeErr != nil {
-		logs.Error("Failed to write redirect response to %s, err=%v", c.RemoteAddr(), writeErr)
+		logs.Error("Failed to write redirect response to %v, err=%v", c.RemoteAddr(), writeErr)
 	} else {
-		logs.Info("Redirected HTTP request from %s to %s", c.RemoteAddr(), redirectURL)
+		logs.Info("Redirected HTTP request from %v to %s", c.RemoteAddr(), redirectURL)
 	}
 }
 
@@ -261,7 +261,7 @@ func (https *HttpsServer) NewHttps(l net.Listener, certText string, keyText stri
 
 func (https *HttpsServer) handleHttpsProxy(host *file.Host, c net.Conn, rb []byte, sni string) {
 	if err := https.CheckFlowAndConnNum(host.Client); err != nil {
-		logs.Debug("Client id %d, host id %d, error %s during https connection", host.Client.Id, host.Id, err.Error())
+		logs.Debug("Client id %d, host id %d, error %v during https connection", host.Client.Id, host.Id, err)
 		c.Close()
 		return
 	}
@@ -269,11 +269,11 @@ func (https *HttpsServer) handleHttpsProxy(host *file.Host, c net.Conn, rb []byt
 
 	targetAddr, err := host.Target.GetRandomTarget()
 	if err != nil {
-		logs.Warn(err.Error())
+		logs.Warn("%v", err)
 		c.Close()
 		return
 	}
-	logs.Info("New HTTPS connection, clientId %d, host %s, remote address %s", host.Client.Id, sni, c.RemoteAddr().String())
+	logs.Info("New HTTPS connection, clientId %d, host %s, remote address %v", host.Client.Id, sni, c.RemoteAddr())
 	https.DealClient(conn.NewConn(c), host.Client, targetAddr, rb, common.CONN_TCP, nil, []*file.Flow{host.Flow, host.Client.Flow}, host.Target.ProxyProtocol, host.Target.LocalProxy, nil)
 }
 

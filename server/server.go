@@ -10,10 +10,10 @@ import (
 	"time"
 
 	"github.com/beego/beego"
-	"github.com/beego/beego/logs"
 	"github.com/djylb/nps/bridge"
 	"github.com/djylb/nps/lib/common"
 	"github.com/djylb/nps/lib/file"
+	"github.com/djylb/nps/lib/logs"
 	"github.com/djylb/nps/lib/version"
 	"github.com/djylb/nps/server/proxy"
 	"github.com/djylb/nps/server/tool"
@@ -69,7 +69,7 @@ func DealBridgeTask() {
 		case tunnel := <-Bridge.OpenTask:
 			StartTask(tunnel.Id)
 		case s := <-Bridge.SecretChan:
-			logs.Trace("New secret connection, addr", s.Conn.Conn.RemoteAddr())
+			logs.Trace("New secret connection, addr %v", s.Conn.Conn.RemoteAddr())
 			if t := file.GetDb().GetTaskByMd5Password(s.Password); t != nil {
 				if t.Status {
 					go proxy.NewBaseServer(Bridge, t).DealClient(s.Conn, t.Client, t.Target.TargetStr, nil, common.CONN_TCP, nil, []*file.Flow{t.Flow, t.Client.Flow}, t.Target.ProxyProtocol, t.Target.LocalProxy, t)
@@ -90,7 +90,7 @@ func StartNewServer(bridgePort int, cnf *file.Tunnel, bridgeType string, bridgeD
 	Bridge = bridge.NewTunnel(bridgePort, bridgeType, common.GetBoolByStr(beego.AppConfig.String("ip_limit")), &RunList, bridgeDisconnect)
 	go func() {
 		if err := Bridge.StartTunnel(); err != nil {
-			logs.Error("start server bridge error", err)
+			logs.Error("start server bridge error %v", err)
 			os.Exit(0)
 		}
 	}()
@@ -109,7 +109,7 @@ func StartNewServer(bridgePort int, cnf *file.Tunnel, bridgeType string, bridgeD
 	go dealClientFlow()
 	if svr := NewMode(Bridge, cnf); svr != nil {
 		if err := svr.Start(); err != nil {
-			logs.Error(err)
+			logs.Error("%v", err)
 		}
 		RunList.Store(cnf.Id, svr)
 		//RunList[cnf.Id] = svr
@@ -211,7 +211,7 @@ func AddTask(t *file.Tunnel) error {
 		RunList.Store(t.Id, svr)
 		go func() {
 			if err := svr.Start(); err != nil {
-				logs.Error("clientId %d taskId %d start error %s", t.Client.Id, t.Id, err)
+				logs.Error("clientId %d taskId %d start error %v", t.Client.Id, t.Id, err)
 				//delete(RunList, t.Id)
 				RunList.Delete(t.Id)
 				return

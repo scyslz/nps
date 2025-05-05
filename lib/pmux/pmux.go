@@ -13,8 +13,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/beego/beego/logs"
 	"github.com/djylb/nps/lib/common"
+	"github.com/djylb/nps/lib/logs"
 	"github.com/pkg/errors"
 )
 
@@ -67,14 +67,14 @@ func (pMux *PortMux) Start() error {
 	}
 	pMux.Listener, err = net.ListenTCP("tcp", tcpAddr)
 	if err != nil {
-		logs.Error(err)
+		logs.Error("%v", err)
 		os.Exit(0)
 	}
 	go func() {
 		for {
 			conn, err := pMux.Listener.Accept()
 			if err != nil {
-				logs.Warn(err)
+				logs.Warn("%v", err)
 				//close
 				pMux.Close()
 			}
@@ -104,7 +104,7 @@ func (pMux *PortMux) process(conn net.Conn) {
 			for {
 				b, _, err := r.ReadLine()
 				if err != nil {
-					logs.Warn("read line error", err.Error())
+					logs.Warn("read line error %v", err)
 					conn.Close()
 					break
 				}

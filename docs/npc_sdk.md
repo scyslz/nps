@@ -63,10 +63,23 @@ extern char* Version();
 
 ---
 
-### 5. Logs
+### 5. SetLogsLevel
 
 **功能描述：**  
-获取客户端日志信息，返回一个 C 字符串指针。日志信息实时更新，适用于调试和运行时监控。
+配置日志输出等级
+- 支持传入 "trace"|"debug"|"info"|"warn"|"error"|"fatal"|"panic"|"disable"
+
+**接口原型：**
+```c
+extern void SetLogsLevel(char* logsLevel);
+```
+
+---
+
+### 6. Logs
+
+**功能描述：**  
+获取客户端日志信息，返回一个 C 字符串指针，适用于调试和运行时监控。
 
 **接口原型：**
 ```c
@@ -75,7 +88,7 @@ extern char* Logs();
 
 ---
 
-### 6. SetDnsServer
+### 7. SetDnsServer
 
 **功能描述：**  
 配置解析服务器域名的DNS 

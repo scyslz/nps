@@ -4,7 +4,7 @@ import (
 	"net"
 	"strings"
 
-	"github.com/beego/beego/logs"
+	"github.com/djylb/nps/lib/logs"
 	"github.com/xtaci/kcp-go/v5"
 )
 
@@ -21,14 +21,14 @@ func NewTcpListenerAndProcess(addr string, f func(c net.Conn), listener *net.Lis
 func NewKcpListenerAndProcess(addr string, f func(c net.Conn)) error {
 	kcpListener, err := kcp.ListenWithOptions(addr, nil, 150, 3)
 	if err != nil {
-		logs.Error(err)
+		logs.Error("%v", err)
 		return err
 	}
 	for {
 		c, err := kcpListener.AcceptKCP()
 		SetUdpSession(c)
 		if err != nil {
-			logs.Warn(err)
+			logs.Warn("%v", err)
 			continue
 		}
 		go f(c)
@@ -46,7 +46,7 @@ func Accept(l net.Listener, f func(c net.Conn)) {
 			if strings.Contains(err.Error(), "the mux has closed") {
 				break
 			}
-			logs.Warn(err)
+			logs.Warn("%v", err)
 			continue
 		}
 		if c == nil {

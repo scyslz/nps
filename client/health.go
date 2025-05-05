@@ -7,9 +7,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/beego/beego/logs"
 	"github.com/djylb/nps/lib/conn"
 	"github.com/djylb/nps/lib/file"
+	"github.com/djylb/nps/lib/logs"
 	"github.com/djylb/nps/lib/sheap"
 	"github.com/pkg/errors"
 )

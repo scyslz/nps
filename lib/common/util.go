@@ -23,8 +23,8 @@ import (
 
 	"github.com/araddon/dateparse"
 	"github.com/beego/beego"
-	"github.com/beego/beego/logs"
 	"github.com/djylb/nps/lib/crypt"
+	"github.com/djylb/nps/lib/logs"
 	"github.com/djylb/nps/lib/version"
 )
 
@@ -565,14 +565,12 @@ func in(target string, str_array []string) bool {
 	return false
 }
 
-// 判断访问地址是否在黑名单内
 func IsBlackIp(ipPort, vkey string, blackIpList []string) bool {
 	ip := GetIpByAddr(ipPort)
 	if in(ip, blackIpList) {
-		logs.Error("IP地址[" + ip + "]在隧道[" + vkey + "]黑名单列表内")
+		logs.Warn("IP [%s] is in the blacklist for [%s]", ip, vkey)
 		return true
 	}
-
 	return false
 }
 

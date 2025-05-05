@@ -12,8 +12,8 @@ import (
 	"sync/atomic"
 
 	"github.com/beego/beego"
-	"github.com/beego/beego/logs"
 	"github.com/djylb/nps/lib/common"
+	"github.com/djylb/nps/lib/logs"
 	"github.com/djylb/nps/lib/rate"
 	"github.com/djylb/nps/lib/version"
 )
@@ -74,7 +74,7 @@ func (s *JsonDb) LoadClientFromJsonFile() {
 			local.VerifyKey = "localproxy"
 			s.Clients.Store(local.Id, local)
 			s.ClientIncreaseId = 0
-			logs.Notice("Auto create local proxy client.")
+			logs.Info("Auto create local proxy client.")
 		}
 	}
 	loadSyncMapFromFile(s.ClientFilePath, Client{}, func(v interface{}) {
@@ -188,7 +188,7 @@ func loadSyncMapFromFile(filePath string, t interface{}, f func(value interface{
 	err = loadJsonFile(b, t, f)
 
 	if err != nil {
-		logs.Warning("Load json file %s error: %s", filePath, err)
+		logs.Warn("Load json file %s error: %v", filePath, err)
 		logs.Info("Load %s as obsolete json file", filePath)
 		// 加载新json报错，则加载旧json
 		loadObsoleteJsonFile(b, t, f)
@@ -384,7 +384,7 @@ func storeSyncMapToFile(m sync.Map, filePath string) {
 
 	err = os.Rename(tmpFilePath, filePath)
 	if err != nil {
-		logs.Error(err, "store to file err, data will lost")
+		logs.Error("store to file err %v, data will lost", err)
 	}
 }
 
@@ -406,6 +406,6 @@ func storeGlobalToFile(m *Glob, filePath string) {
 	// must close file first, then rename it
 	err = os.Rename(filePath+".tmp", filePath)
 	if err != nil {
-		logs.Error(err, "store to file err, data will lost")
+		logs.Error("store to file err %v, data will lost", err)
 	}
 }

@@ -12,8 +12,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/beego/beego/logs"
 	"github.com/brianvoe/gofakeit/v7"
+	"github.com/djylb/nps/lib/logs"
 )
 
 var (
@@ -35,7 +35,7 @@ func InitTls(customCert tls.Certificate) {
 		cert, err = tls.X509KeyPair(c, k)
 	}
 	if err != nil {
-		logs.Error("Error initializing crypto certs", err)
+		logs.Error("Error initializing crypto certs %v", err)
 	}
 }
 
@@ -46,7 +46,7 @@ func GetCert() tls.Certificate {
 func NewTlsServerConn(conn net.Conn) net.Conn {
 	var err error
 	if err != nil {
-		logs.Error(err)
+		logs.Error("%v", err)
 		os.Exit(0)
 		return nil
 	}

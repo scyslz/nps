@@ -14,11 +14,11 @@ import (
 	"time"
 
 	"github.com/beego/beego"
-	"github.com/beego/beego/logs"
 	"github.com/djylb/nps/lib/common"
 	"github.com/djylb/nps/lib/conn"
 	"github.com/djylb/nps/lib/crypt"
 	"github.com/djylb/nps/lib/file"
+	"github.com/djylb/nps/lib/logs"
 	"github.com/djylb/nps/lib/nps_mux"
 	"github.com/djylb/nps/lib/version"
 	"github.com/djylb/nps/server/connection"
@@ -87,7 +87,7 @@ func (s *Bridge) StartTunnel() error {
 		go func() {
 			listener, err := connection.GetBridgeTcpListener()
 			if err != nil {
-				logs.Error(err)
+				logs.Error("%v", err)
 				os.Exit(0)
 				return
 			}
@@ -101,7 +101,7 @@ func (s *Bridge) StartTunnel() error {
 			go func() {
 				tlsListener, tlsErr := connection.GetBridgeTlsListener()
 				if tlsErr != nil {
-					logs.Error(tlsErr)
+					logs.Error("%v", tlsErr)
 					os.Exit(0)
 					return
 				}
@@ -213,13 +213,13 @@ func (s *Bridge) cliProcess(c *conn.Conn) {
 
 	//read test flag
 	if _, err := c.GetShortContent(3); err != nil {
-		logs.Info("The client %s connect error: %s", c.Conn.RemoteAddr(), err.Error())
+		logs.Info("The client %v connect error: %v", c.Conn.RemoteAddr(), err)
 		c.Close()
 		return
 	}
 	//version check
 	if ver, err := c.GetShortLenContent(); err != nil || string(ver) != version.GetVersion() {
-		logs.Info("The client %s version does not match or error occurred", c.Conn.RemoteAddr())
+		logs.Info("The client %v version does not match or error occurred", c.Conn.RemoteAddr())
 		//c.Close()
 		//common.SafeClose(c)
 		//return
@@ -228,7 +228,7 @@ func (s *Bridge) cliProcess(c *conn.Conn) {
 	var vs []byte
 	var err error
 	if vs, err = c.GetShortLenContent(); err != nil {
-		logs.Info("Get client %s version error: %s", c.Conn.RemoteAddr(), err.Error())
+		logs.Info("Get client %v version error: %v", c.Conn.RemoteAddr(), err)
 		c.Close()
 		return
 	}
@@ -244,7 +244,7 @@ func (s *Bridge) cliProcess(c *conn.Conn) {
 	//verify
 	id, err := file.GetDb().GetIdByVerifyKey(string(buf), c.Conn.RemoteAddr().String())
 	if err != nil {
-		logs.Error("Client %s vkey %s validation error, close it's connection.", c.Conn.RemoteAddr(), string(buf))
+		logs.Error("Client %v vkey %s validation error, close it's connection.", c.Conn.RemoteAddr(), buf)
 		s.verifyError(c)
 		return
 	} else {
@@ -253,7 +253,7 @@ func (s *Bridge) cliProcess(c *conn.Conn) {
 	if flag, err := c.ReadFlag(); err == nil {
 		s.typeDeal(flag, c, id, string(vs))
 	} else {
-		logs.Warn(err, flag)
+		logs.Warn("%v %s", err, flag)
 	}
 	return
 }
@@ -316,7 +316,7 @@ func (s *Bridge) typeDeal(typeVal string, c *conn.Conn, id int, vs string) {
 		}
 
 		go s.GetHealthFromClient(id, c)
-		logs.Info("clientId %d connection succeeded, address:%s ", id, c.Conn.RemoteAddr())
+		logs.Info("clientId %d connection succeeded, address:%v ", id, c.Conn.RemoteAddr())
 
 	case common.WORK_CHAN:
 		muxConn := nps_mux.NewMux(c.Conn, s.tunnelType, s.disconnectTime)
@@ -354,7 +354,7 @@ func (s *Bridge) typeDeal(typeVal string, c *conn.Conn, id int, vs string) {
 	case common.WORK_P2P:
 		// read md5 secret
 		if b, err := c.GetShortContent(32); err != nil {
-			logs.Error("p2p error,", err.Error())
+			logs.Error("p2p error, %v", err)
 		} else if t := file.GetDb().GetTaskByMd5Password(string(b)); t == nil {
 			logs.Error("p2p error, failed to match the key successfully")
 		} else if v, ok := s.Client.Load(t.Client.Id); ok {
@@ -634,7 +634,7 @@ loop:
 
 				if !client.HasTunnel(tl) {
 					if err := file.GetDb().NewTask(tl); err != nil {
-						logs.Notice("add task error: %s", err.Error())
+						logs.Warn("add task error: %v", err)
 						fail = true
 						c.WriteAddFail()
 						break loop

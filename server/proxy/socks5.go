@@ -3,16 +3,15 @@ package proxy
 import (
 	"encoding/binary"
 	"errors"
-	"fmt"
 	"io"
 	"net"
 	"strconv"
 
 	"github.com/beego/beego"
-	"github.com/beego/beego/logs"
 	"github.com/djylb/nps/lib/common"
 	"github.com/djylb/nps/lib/conn"
 	"github.com/djylb/nps/lib/file"
+	"github.com/djylb/nps/lib/logs"
 )
 
 const (
@@ -68,7 +67,7 @@ func (s *Sock5ModeServer) handleRequest(c net.Conn) {
 	_, err := io.ReadFull(c, header)
 
 	if err != nil {
-		logs.Warn("illegal request", err)
+		logs.Warn("illegal request %v", err)
 		c.Close()
 		return
 	}
@@ -205,10 +204,10 @@ func (s *Sock5ModeServer) handleUDP(c net.Conn) {
 	//读取端口
 	var port uint16
 	binary.Read(c, binary.BigEndian, &port)
-	logs.Info(host, fmt.Sprint(port))
+	logs.Info("%s %d", host, port)
 	replyAddr, err := net.ResolveUDPAddr("udp", s.task.ServerIp+":0")
 	if err != nil {
-		logs.Error("build local reply addr error", err)
+		logs.Error("build local reply addr error %v", err)
 		return
 	}
 	reply, err := net.ListenUDP("udp", replyAddr)
@@ -224,7 +223,7 @@ func (s *Sock5ModeServer) handleUDP(c net.Conn) {
 	link := conn.NewLink("udp5", "", s.task.Client.Cnf.Crypt, s.task.Client.Cnf.Compress, c.RemoteAddr().String(), s.allowLocalProxy && s.task.Target.LocalProxy)
 	target, err := s.bridge.SendLinkInfo(s.task.Client.Id, link, s.task)
 	if err != nil {
-		logs.Warn("get connection from client id %d  error %s", s.task.Client.Id, err.Error())
+		logs.Warn("get connection from client id %d  error %v", s.task.Client.Id, err)
 		return
 	}
 
@@ -238,14 +237,14 @@ func (s *Sock5ModeServer) handleUDP(c net.Conn) {
 		for {
 			n, laddr, err := reply.ReadFrom(b)
 			if err != nil {
-				logs.Debug("read data from %s err %s", reply.LocalAddr().String(), err.Error())
+				logs.Debug("read data from %v err %v", reply.LocalAddr(), err)
 				return
 			}
 			if clientAddr == nil {
 				clientAddr = laddr
 			}
 			if _, err := target.Write(b[:n]); err != nil {
-				logs.Debug("write data to client error", err.Error())
+				logs.Debug("write data to client error %v", err)
 				return
 			}
 		}
@@ -258,16 +257,16 @@ func (s *Sock5ModeServer) handleUDP(c net.Conn) {
 		defer c.Close()
 		for {
 			if err := binary.Read(target, binary.LittleEndian, &l); err != nil || l >= common.PoolSizeUdp || l <= 0 {
-				logs.Debug("read len bytes error", err.Error())
+				logs.Debug("read len bytes error %v", err)
 				return
 			}
 			binary.Read(target, binary.LittleEndian, b[:l])
 			if err != nil {
-				logs.Warn("read data form client error", err.Error())
+				logs.Warn("read data form client error %v", err)
 				return
 			}
 			if _, err := reply.WriteTo(b[:l], clientAddr); err != nil {
-				logs.Warn("write data to user ", err.Error())
+				logs.Warn("write data to user %v", err)
 				return
 			}
 		}
@@ -289,13 +288,13 @@ func (s *Sock5ModeServer) handleUDP(c net.Conn) {
 func (s *Sock5ModeServer) handleConn(c net.Conn) {
 	buf := make([]byte, 2)
 	if _, err := io.ReadFull(c, buf); err != nil {
-		logs.Warn("negotiation err", err)
+		logs.Warn("negotiation err %v", err)
 		c.Close()
 		return
 	}
 
 	if version := buf[0]; version != 5 {
-		logs.Warn("only support socks5, request from: ", c.RemoteAddr())
+		logs.Warn("only support socks5, request from: %v", c.RemoteAddr())
 		c.Close()
 		return
 	}
@@ -312,7 +311,7 @@ func (s *Sock5ModeServer) handleConn(c net.Conn) {
 		c.Write(buf)
 		if err := s.Auth(c); err != nil {
 			c.Close()
-			logs.Warn("Validation failed:", err)
+			logs.Warn("Validation failed: %v", err)
 			return
 		}
 	} else {
@@ -362,11 +361,11 @@ func (s *Sock5ModeServer) Auth(c net.Conn) error {
 func (s *Sock5ModeServer) Start() error {
 	return conn.NewTcpListenerAndProcess(common.BuildAddress(s.task.ServerIp, strconv.Itoa(s.task.Port)), func(c net.Conn) {
 		if err := s.CheckFlowAndConnNum(s.task.Client); err != nil {
-			logs.Warn("client id %d, task id %d, error %s, when socks5 connection", s.task.Client.Id, s.task.Id, err.Error())
+			logs.Warn("client id %d, task id %d, error %v, when socks5 connection", s.task.Client.Id, s.task.Id, err)
 			c.Close()
 			return
 		}
-		logs.Trace("New socks5 connection,client %d,remote address %s", s.task.Client.Id, c.RemoteAddr())
+		logs.Trace("New socks5 connection,client %d,remote address %v", s.task.Client.Id, c.RemoteAddr())
 		s.handleConn(c)
 		s.task.Client.CutConn()
 	}, &s.listener)

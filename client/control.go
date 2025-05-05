@@ -20,11 +20,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/beego/beego/logs"
 	"github.com/djylb/nps/lib/common"
 	"github.com/djylb/nps/lib/config"
 	"github.com/djylb/nps/lib/conn"
 	"github.com/djylb/nps/lib/crypt"
+	"github.com/djylb/nps/lib/logs"
 	"github.com/djylb/nps/lib/version"
 	"github.com/xtaci/kcp-go/v5"
 	"golang.org/x/net/proxy"
@@ -92,7 +92,7 @@ func StartFromFile(path string) {
 	first := true
 	cnf, err := config.NewConfig(path)
 	if err != nil || cnf.CommonConfig == nil {
-		logs.Error("Config file %s loading error %s", path, err.Error())
+		logs.Error("Config file %s loading error %v", path, err)
 		os.Exit(0)
 	}
 	logs.Info("Loading configuration file %s successfully", path)
@@ -115,7 +115,7 @@ func StartFromFile(path string) {
 		}
 		c, err := NewConn(cnf.CommonConfig.Tp, cnf.CommonConfig.VKey, cnf.CommonConfig.Server, common.WORK_CONFIG, cnf.CommonConfig.ProxyUrl)
 		if err != nil {
-			logs.Error(err)
+			logs.Error("%v", err)
 			continue
 		}
 
@@ -128,7 +128,7 @@ func StartFromFile(path string) {
 		if isPub {
 			// send global configuration to server and get status of config setting
 			if _, err := c.SendInfo(cnf.CommonConfig.Client, common.NEW_CONF); err != nil {
-				logs.Error(err)
+				logs.Error("%v", err)
 				continue
 			}
 			if !c.GetAddStatus() {
@@ -137,25 +137,25 @@ func StartFromFile(path string) {
 			}
 
 			if b, err = c.GetShortContent(16); err != nil {
-				logs.Error(err)
+				logs.Error("%v", err)
 				continue
 			}
 			vkey = string(b)
 		}
 
 		if err := ioutil.WriteFile(filepath.Join(common.GetTmpPath(), "npc_vkey.txt"), []byte(vkey), 0600); err != nil {
-			logs.Debug("Failed to write vkey file:", err)
+			logs.Debug("Failed to write vkey file: %v", err)
 			//continue
 		}
 
 		//send hosts to server
 		for _, v := range cnf.Hosts {
 			if _, err := c.SendInfo(v, common.NEW_HOST); err != nil {
-				logs.Error(err)
+				logs.Error("%v", err)
 				continue
 			}
 			if !c.GetAddStatus() {
-				logs.Error(errAdd, v.Host)
+				logs.Error("%v %s", errAdd, v.Host)
 				continue
 			}
 		}
@@ -163,11 +163,11 @@ func StartFromFile(path string) {
 		//send  task to server
 		for _, v := range cnf.Tasks {
 			if _, err := c.SendInfo(v, common.NEW_TASK); err != nil {
-				logs.Error(err)
+				logs.Error("%v", err)
 				continue
 			}
 			if !c.GetAddStatus() {
-				logs.Error(errAdd, v.Ports, v.Remark)
+				logs.Error("%v %s %s", errAdd, v.Ports, v.Remark)
 				continue
 			}
 			if v.Mode == "file" {
@@ -183,9 +183,9 @@ func StartFromFile(path string) {
 
 		c.Close()
 		if cnf.CommonConfig.Client.WebUserName == "" || cnf.CommonConfig.Client.WebPassword == "" {
-			logs.Notice("web access login username:user password:%s", vkey)
+			logs.Info("web access login username:user password:%s", vkey)
 		} else {
-			logs.Notice("web access login username:%s password:%s", cnf.CommonConfig.Client.WebUserName, cnf.CommonConfig.Client.WebPassword)
+			logs.Info("web access login username:%s password:%s", cnf.CommonConfig.Client.WebUserName, cnf.CommonConfig.Client.WebPassword)
 		}
 
 		NewRPClient(cnf.CommonConfig.Server, vkey, cnf.CommonConfig.Tp, cnf.CommonConfig.ProxyUrl, cnf, cnf.CommonConfig.DisconnectTime).Start()
@@ -265,7 +265,7 @@ func NewConn(tp string, vkey string, server string, connType string, proxyUrl st
 
 	b, err := c.GetShortContent(32)
 	if err != nil {
-		logs.Error(err)
+		logs.Error("%v", err)
 		return nil, err
 	}
 	if crypt.Md5(version.GetVersion()) != string(b) {
@@ -326,7 +326,7 @@ func basicAuth(username, password string) string {
 func getRemoteAddressFromServer(rAddr string, localConn *net.UDPConn, md5Password, role string, add int) error {
 	rAddr, err := getNextAddr(rAddr, add)
 	if err != nil {
-		logs.Error(err)
+		logs.Error("%v", err)
 		return err
 	}
 	addr, err := net.ResolveUDPAddr("udp", rAddr)
@@ -346,17 +346,17 @@ func handleP2PUdp(localAddr, rAddr, md5Password, role string) (remoteAddress str
 	}
 	err = getRemoteAddressFromServer(rAddr, localConn, md5Password, role, 0)
 	if err != nil {
-		logs.Error(err)
+		logs.Error("%v", err)
 		return
 	}
 	err = getRemoteAddressFromServer(rAddr, localConn, md5Password, role, 1)
 	if err != nil {
-		logs.Error(err)
+		logs.Error("%v", err)
 		return
 	}
 	err = getRemoteAddressFromServer(rAddr, localConn, md5Password, role, 2)
 	if err != nil {
-		logs.Error(err)
+		logs.Error("%v", err)
 		return
 	}
 	var remoteAddr1, remoteAddr2, remoteAddr3 string
@@ -391,7 +391,7 @@ func handleP2PUdp(localAddr, rAddr, md5Password, role string) (remoteAddress str
 }
 
 func sendP2PTestMsg(localConn *net.UDPConn, remoteAddr1, remoteAddr2, remoteAddr3 string) (string, error) {
-	logs.Trace(remoteAddr3, remoteAddr2, remoteAddr1)
+	logs.Trace("%s %s %s", remoteAddr3, remoteAddr2, remoteAddr1)
 	defer localConn.Close()
 	isClose := false
 	defer func() { isClose = true }()
@@ -482,12 +482,12 @@ func sendP2PTestMsg(localConn *net.UDPConn, remoteAddr1, remoteAddr2, remoteAddr
 			}
 			return addr.String(), nil
 		case common.WORK_P2P_END:
-			logs.Trace("Remotely Address %s Reply Packet Successfully Received", addr.String())
+			logs.Trace("Remotely Address %v Reply Packet Successfully Received", addr)
 			return addr.String(), nil
 		case common.WORK_P2P_CONNECT:
 			go func() {
 				for i := 20; i > 0; i-- {
-					logs.Trace("try send receive success packet to target %s", addr.String())
+					logs.Trace("try send receive success packet to target %v", addr)
 					if _, err = localConn.WriteTo([]byte(common.WORK_P2P_SUCCESS), addr); err != nil {
 						return
 					}

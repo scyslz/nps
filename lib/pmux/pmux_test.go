@@ -4,13 +4,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/beego/beego/logs"
+	"github.com/djylb/nps/lib/logs"
 )
 
 func TestPortMux_Close(t *testing.T) {
-	logs.Reset()
-	logs.EnableFuncCallDepth(true)
-	logs.SetLogFuncCallDepth(3)
+	logs.Init("stdout", "trace", "", 0, 0, 0, false)
 
 	pMux := NewPortMux(8888, "Ds", "Cs")
 	go func() {
@@ -22,19 +20,19 @@ func TestPortMux_Close(t *testing.T) {
 	go func() {
 		l := pMux.GetHttpListener()
 		conn, err := l.Accept()
-		logs.Warn(conn, err)
+		logs.Warn("%v %v", conn, err)
 	}()
 	go func() {
 		l := pMux.GetHttpListener()
 		conn, err := l.Accept()
-		logs.Warn(conn, err)
+		logs.Warn("%v %v", conn, err)
 	}()
 	go func() {
 		l := pMux.GetHttpListener()
 		conn, err := l.Accept()
-		logs.Warn(conn, err)
+		logs.Warn("%v %v", conn, err)
 	}()
 	l := pMux.GetHttpListener()
 	conn, err := l.Accept()
-	logs.Warn(conn, err)
+	logs.Warn("%v %v", conn, err)
 }

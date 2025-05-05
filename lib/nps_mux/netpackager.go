@@ -5,7 +5,7 @@ import (
 	"errors"
 	"io"
 
-	"github.com/beego/beego/logs"
+	"github.com/djylb/nps/lib/logs"
 )
 
 type basePackager struct {

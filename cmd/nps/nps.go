@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"log"
 	"os"
 	"os/exec"
@@ -12,13 +11,13 @@ import (
 	"sync"
 
 	"github.com/beego/beego"
-	"github.com/beego/beego/logs"
 	"github.com/djylb/nps/bridge"
 	"github.com/djylb/nps/lib/common"
 	"github.com/djylb/nps/lib/crypt"
 	"github.com/djylb/nps/lib/daemon"
 	"github.com/djylb/nps/lib/file"
 	"github.com/djylb/nps/lib/install"
+	"github.com/djylb/nps/lib/logs"
 	"github.com/djylb/nps/lib/version"
 	"github.com/djylb/nps/server"
 	"github.com/djylb/nps/server/connection"
@@ -34,7 +33,6 @@ var (
 )
 
 func main() {
-
 	flag.Parse()
 	// init log
 	if *ver {
@@ -59,12 +57,7 @@ func main() {
 
 	common.InitPProfFromFile()
 	common.SetCustomDNS(beego.AppConfig.String("dns_server"))
-	if level = beego.AppConfig.String("log_level"); level == "" {
-		level = "7"
-	}
-	logs.Reset()
-	logs.EnableFuncCallDepth(true)
-	logs.SetLogFuncCallDepth(3)
+	level = beego.AppConfig.DefaultString("log_level", "trace")
 	logPath := beego.AppConfig.String("log_path")
 	if logPath == "" || strings.EqualFold(logPath, "on") || strings.EqualFold(logPath, "true") {
 		logPath = common.GetLogPath()
@@ -72,22 +65,10 @@ func main() {
 	if common.IsWindows() {
 		logPath = strings.Replace(logPath, "\\", "\\\\", -1)
 	}
-	logDaily := beego.AppConfig.String("log_daily")
-	if logDaily == "" {
-		logDaily = "true"
-	}
-	logMaxFiles := beego.AppConfig.String("log_max_files")
-	if logMaxFiles == "" {
-		logMaxFiles = "30"
-	}
-	logMaxDays := beego.AppConfig.String("log_max_days")
-	if logMaxDays == "" {
-		logMaxDays = "30"
-	}
-	logMaxSize, err := beego.AppConfig.Int("log_max_size")
-	if err != nil {
-		logMaxSize = 5
-	}
+	logCompress := beego.AppConfig.DefaultBool("log_compress", false)
+	logMaxFiles := beego.AppConfig.DefaultInt("log_max_files", 30)
+	logMaxDays := beego.AppConfig.DefaultInt("log_max_days", 30)
+	logMaxSize := beego.AppConfig.DefaultInt("log_max_size", 5)
 
 	// init service
 	options := make(service.KeyValue)
@@ -111,13 +92,11 @@ func main() {
 	}
 
 	svcConfig.Arguments = append(svcConfig.Arguments, "service")
-	if len(os.Args) > 1 && os.Args[1] == "service" && !strings.EqualFold(logPath, "docker") {
-		if !strings.EqualFold(logPath, "off") && !strings.EqualFold(logPath, "false") {
-			_ = logs.SetLogger(logs.AdapterFile, `{"level":`+level+`,"filename":"`+logPath+`","daily":`+logDaily+`,"maxfiles":`+logMaxFiles+`,"maxdays":`+logMaxDays+`,"maxsize":`+fmt.Sprintf("%d", logMaxSize*1024*1024)+`,"maxlines":100000,"rotate":true,"color":true}`)
-		}
-	} else {
-		_ = logs.SetLogger(logs.AdapterConsole, `{"level":`+level+`,"color":true}`)
+	logType := beego.AppConfig.DefaultString("log", "stdout")
+	if len(os.Args) > 1 && os.Args[1] == "service" && !strings.EqualFold(logType, "off") && !strings.EqualFold(logType, "both") {
+		logType = "file"
 	}
+	logs.Init(logType, level, logPath, logMaxSize, logMaxFiles, logMaxDays, logCompress)
 	if !common.IsWindows() {
 		svcConfig.Dependencies = []string{
 			"Requires=network.target",
@@ -129,7 +108,7 @@ func main() {
 	prg.exit = make(chan struct{})
 	s, err := service.New(prg, svcConfig)
 	if err != nil {
-		logs.Error(err, "service function disabled")
+		logs.Error("service function disabled %v", err)
 		run()
 		// run without service
 		wg := sync.WaitGroup{}
@@ -152,12 +131,12 @@ func main() {
 			svcConfig.Executable = binPath
 			s, err := service.New(prg, svcConfig)
 			if err != nil {
-				logs.Error(err)
+				logs.Error("%v", err)
 				return
 			}
 			err = service.Control(s, os.Args[1])
 			if err != nil {
-				logs.Error("Valid actions: %q\n%s", service.ControlAction, err.Error())
+				logs.Error("Valid actions: %q error: %v", service.ControlAction, err)
 			}
 			if service.Platform() == "unix-systemv" {
 				logs.Info("unix-systemv service")
@@ -172,19 +151,19 @@ func main() {
 				cmd := exec.Command("/etc/init.d/"+svcConfig.Name, os.Args[1])
 				err := cmd.Run()
 				if err != nil {
-					logs.Error(err)
+					logs.Error("%v", err)
 				}
 				return
 			}
 			err := service.Control(s, os.Args[1])
 			if err != nil {
-				logs.Error("Valid actions: %q\n%s", service.ControlAction, err.Error())
+				logs.Error("Valid actions: %q error: %v", service.ControlAction, err)
 			}
 			return
 		case "uninstall":
 			err := service.Control(s, os.Args[1])
 			if err != nil {
-				logs.Error("Valid actions: %q\n%s", service.ControlAction, err.Error())
+				logs.Error("Valid actions: %q error: %v", service.ControlAction, err)
 			}
 			if service.Platform() == "unix-systemv" {
 				logs.Info("unix-systemv service")
@@ -228,13 +207,13 @@ func (p *nps) run() error {
 			const size = 64 << 10
 			buf := make([]byte, size)
 			buf = buf[:runtime.Stack(buf, false)]
-			logs.Warning("nps: panic serving %v: %v\n%s", err, string(buf))
+			logs.Warn("nps: panic serving %v: %s", err, buf)
 		}
 	}()
 	run()
 	select {
 	case <-p.exit:
-		logs.Warning("stop...")
+		logs.Warn("stop...")
 	}
 	return nil
 }
@@ -246,7 +225,7 @@ func run() {
 	}
 	bridgePort, err := beego.AppConfig.Int("bridge_port")
 	if err != nil {
-		logs.Error("Getting bridge_port error", err)
+		logs.Error("Getting bridge_port error %v", err)
 		os.Exit(0)
 	}
 

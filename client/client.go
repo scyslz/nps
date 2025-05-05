@@ -10,11 +10,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/beego/beego/logs"
 	"github.com/djylb/nps/lib/common"
 	"github.com/djylb/nps/lib/config"
 	"github.com/djylb/nps/lib/conn"
 	"github.com/djylb/nps/lib/crypt"
+	"github.com/djylb/nps/lib/logs"
 	"github.com/djylb/nps/lib/nps_mux"
 	"github.com/xtaci/kcp-go/v5"
 )
@@ -60,7 +60,7 @@ retry:
 	NowStatus = 0
 	c, err := NewConn(s.bridgeConnType, s.vKey, s.svrAddr, common.WORK_MAIN, s.proxyUrl)
 	if err != nil {
-		logs.Error("The connection server failed and will be reconnected in five seconds, error", err.Error())
+		logs.Error("The connection server failed and will be reconnected in five seconds, error %v", err)
 		time.Sleep(time.Second * 5)
 		goto retry
 	}
@@ -89,14 +89,14 @@ func (s *TRPClient) handleMain() {
 	for {
 		flags, err := s.signal.ReadFlag()
 		if err != nil {
-			logs.Error("Accept server data error %s, end this service", err.Error())
+			logs.Error("Accept server data error %v, end this service", err)
 			break
 		}
 		switch flags {
 		case common.NEW_UDP_CONN:
 			//read server udp addr and password
 			if lAddr, err := s.signal.GetShortLenContent(); err != nil {
-				logs.Warn(err)
+				logs.Warn("%v", err)
 				return
 			} else if pwd, err := s.signal.GetShortLenContent(); err == nil {
 				var localAddr string
@@ -105,14 +105,14 @@ func (s *TRPClient) handleMain() {
 					if strings.Contains(string(lAddr), "]:") {
 						tmpConn, err := common.GetLocalUdp6Addr()
 						if err != nil {
-							logs.Error(err)
+							logs.Error("%v", err)
 							return
 						}
 						localAddr = tmpConn.LocalAddr().String()
 					} else {
 						tmpConn, err := common.GetLocalUdp4Addr()
 						if err != nil {
-							logs.Error(err)
+							logs.Error("%v", err)
 							return
 						}
 						localAddr = tmpConn.LocalAddr().String()
@@ -133,25 +133,25 @@ func (s *TRPClient) newUdpConn(localAddr, rAddr string, md5Password string) {
 	var remoteAddress string
 	//logs.Debug("newUdpConn %s %s", localAddr, rAddr)
 	if remoteAddress, localConn, err = handleP2PUdp(localAddr, rAddr, md5Password, common.WORK_P2P_PROVIDER); err != nil {
-		logs.Error(err)
+		logs.Error("%v", err)
 		return
 	}
 	l, err := kcp.ServeConn(nil, 150, 3, localConn)
 	if err != nil {
-		logs.Error(err)
+		logs.Error("%v", err)
 		return
 	}
-	logs.Trace("start local p2p udp listen, local address", localConn.LocalAddr().String())
+	logs.Trace("start local p2p udp listen, local address %v", localConn.LocalAddr())
 	for {
 		udpTunnel, err := l.AcceptKCP()
 		if err != nil {
-			logs.Error(err)
+			logs.Error("%v", err)
 			l.Close()
 			return
 		}
 		if udpTunnel.RemoteAddr().String() == string(remoteAddress) {
 			conn.SetUdpSession(udpTunnel)
-			logs.Trace("successful connection with client ,address %s", udpTunnel.RemoteAddr().String())
+			logs.Trace("successful connection with client ,address %v", udpTunnel.RemoteAddr())
 			//read link info from remote
 			conn.Accept(nps_mux.NewMux(udpTunnel, s.bridgeConnType, s.disconnectTime), func(c net.Conn) {
 				go s.handleChan(c)
@@ -165,14 +165,14 @@ func (s *TRPClient) newUdpConn(localAddr, rAddr string, md5Password string) {
 func (s *TRPClient) newChan() {
 	tunnel, err := NewConn(s.bridgeConnType, s.vKey, s.svrAddr, common.WORK_CHAN, s.proxyUrl)
 	if err != nil {
-		logs.Error("connect to ", s.svrAddr, "error:", err)
+		logs.Error("connect to %s error: %v", s.svrAddr, err)
 		return
 	}
 	s.tunnel = nps_mux.NewMux(tunnel.Conn, s.bridgeConnType, s.disconnectTime)
 	for {
 		src, err := s.tunnel.Accept()
 		if err != nil {
-			logs.Warn(err)
+			logs.Warn("%v", err)
 			s.Close()
 			break
 		}
@@ -184,7 +184,7 @@ func (s *TRPClient) handleChan(src net.Conn) {
 	lk, err := conn.NewConn(src).GetLinkInfo()
 	if err != nil || lk == nil {
 		src.Close()
-		logs.Error("get connection info from server error ", err)
+		logs.Error("get connection info from server error %v", err)
 		return
 	}
 	//host for target processing
@@ -192,7 +192,7 @@ func (s *TRPClient) handleChan(src net.Conn) {
 	//if Conn type is http, read the request and log
 	if lk.ConnType == "http" {
 		if targetConn, err := net.DialTimeout(common.CONN_TCP, lk.Host, lk.Option.Timeout); err != nil {
-			logs.Warn("connect to %s error %s", lk.Host, err.Error())
+			logs.Warn("connect to %s error %v", lk.Host, err)
 			src.Close()
 		} else {
 			srcConn := conn.GetConn(src, lk.Crypt, lk.Compress, nil, false)
@@ -203,7 +203,7 @@ func (s *TRPClient) handleChan(src net.Conn) {
 			}()
 			for {
 				if r, err := http.ReadRequest(bufio.NewReader(srcConn)); err != nil {
-					logs.Error("http read error:", err.Error())
+					logs.Error("http read error: %v", err)
 					srcConn.Close()
 					targetConn.Close()
 					break
@@ -225,7 +225,7 @@ func (s *TRPClient) handleChan(src net.Conn) {
 	}
 	//connect to target if conn type is tcp or udp
 	if targetConn, err := net.DialTimeout(lk.ConnType, lk.Host, lk.Option.Timeout); err != nil {
-		logs.Warn("connect to %s error %s", lk.Host, err.Error())
+		logs.Warn("connect to %s error %v", lk.Host, err)
 		src.Close()
 	} else {
 		logs.Trace("new %s connection with the goal of %s, remote address:%s", lk.ConnType, lk.Host, lk.RemoteAddr)
@@ -239,7 +239,7 @@ func (s *TRPClient) handleUdp(serverConn net.Conn) {
 	defer local.Close()
 	defer serverConn.Close()
 	if err != nil {
-		logs.Error("bind local udp port error ", err.Error())
+		logs.Error("bind local udp port error %v", err)
 		return
 	}
 	go func() {
@@ -249,18 +249,18 @@ func (s *TRPClient) handleUdp(serverConn net.Conn) {
 		for {
 			n, raddr, err := local.ReadFrom(b)
 			if err != nil {
-				logs.Error("read data from remote server error", err.Error())
+				logs.Error("read data from remote server error %v", err)
 			}
 			buf := bytes.Buffer{}
 			dgram := common.NewUDPDatagram(common.NewUDPHeader(0, 0, common.ToSocksAddr(raddr)), b[:n])
 			dgram.Write(&buf)
 			b, err := conn.GetLenBytes(buf.Bytes())
 			if err != nil {
-				logs.Warn("get len bytes error", err.Error())
+				logs.Warn("get len bytes error %v", err)
 				continue
 			}
 			if _, err := serverConn.Write(b); err != nil {
-				logs.Error("write data to remote  error", err.Error())
+				logs.Error("write data to remote error %v", err)
 				return
 			}
 		}
@@ -270,23 +270,23 @@ func (s *TRPClient) handleUdp(serverConn net.Conn) {
 	for {
 		n, err := serverConn.Read(b)
 		if err != nil {
-			logs.Error("read udp data from server error ", err.Error())
+			logs.Error("read udp data from server error %v", err)
 			return
 		}
 
 		udpData, err := common.ReadUDPDatagram(bytes.NewReader(b[:n]))
 		if err != nil {
-			logs.Error("unpack data error", err.Error())
+			logs.Error("unpack data error %v", err)
 			return
 		}
 		raddr, err := net.ResolveUDPAddr("udp", udpData.Header.Addr.String())
 		if err != nil {
-			logs.Error("build remote addr err", err.Error())
+			logs.Error("build remote addr err %v", err)
 			continue // drop silently
 		}
 		_, err = local.WriteTo(udpData.Data, raddr)
 		if err != nil {
-			logs.Error("write data to remote ", raddr.String(), "error", err.Error())
+			logs.Error("write data to remote %v error %v", raddr, err)
 			return
 		}
 	}

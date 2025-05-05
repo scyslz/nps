@@ -6,7 +6,7 @@ import (
 	"strconv"
 
 	"github.com/beego/beego"
-	"github.com/beego/beego/logs"
+	"github.com/djylb/nps/lib/logs"
 	"github.com/djylb/nps/lib/pmux"
 )
 
@@ -27,7 +27,7 @@ func InitConnectionService() {
 	if httpPort == bridgePort || httpsPort == bridgePort || webPort == bridgePort || bridgeTlsPort == bridgePort {
 		port, err := strconv.Atoi(bridgePort)
 		if err != nil {
-			logs.Error(err)
+			logs.Error("%v", err)
 			os.Exit(0)
 		}
 		pMux = pmux.NewPortMux(port, beego.AppConfig.String("web_host"), beego.AppConfig.String("tls_bridge_host"))
@@ -62,35 +62,35 @@ func GetBridgeTlsListener() (net.Listener, error) {
 
 func GetHttpListener() (net.Listener, error) {
 	if pMux != nil && httpPort == bridgePort {
-		logs.Info("start http listener, port is", bridgePort)
+		logs.Info("start http listener, port is %s", bridgePort)
 		return pMux.GetHttpListener(), nil
 	}
-	logs.Info("start http listener, port is", httpPort)
+	logs.Info("start http listener, port is %s", httpPort)
 	return getTcpListener(beego.AppConfig.String("http_proxy_ip"), httpPort)
 }
 
 func GetHttpsListener() (net.Listener, error) {
 	if pMux != nil && httpsPort == bridgePort {
-		logs.Info("start https listener, port is", bridgePort)
+		logs.Info("start https listener, port is %s", bridgePort)
 		return pMux.GetHttpsListener(), nil
 	}
-	logs.Info("start https listener, port is", httpsPort)
+	logs.Info("start https listener, port is %s", httpsPort)
 	return getTcpListener(beego.AppConfig.String("http_proxy_ip"), httpsPort)
 }
 
 func GetWebManagerListener() (net.Listener, error) {
 	if pMux != nil && webPort == bridgePort {
-		logs.Info("Web management start, access port is", bridgePort)
+		logs.Info("Web management start, access port is %s", bridgePort)
 		return pMux.GetManagerListener(), nil
 	}
-	logs.Info("web management start, access port is", webPort)
+	logs.Info("web management start, access port is %s", webPort)
 	return getTcpListener(beego.AppConfig.String("web_ip"), webPort)
 }
 
 func getTcpListener(ip, p string) (net.Listener, error) {
 	port, err := strconv.Atoi(p)
 	if err != nil {
-		logs.Error(err)
+		logs.Error("%v", err)
 		os.Exit(0)
 	}
 	if ip == "" {

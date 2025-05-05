@@ -154,8 +154,8 @@ log_level=7
 # 日志路径（路径 | off | docker）
 log_path=off
 
-# 是否按日期保存日志
-log_daily=false
+# 是否启用日志压缩
+log_compress=false
 
 # 允许存在的日志总文件个数
 log_max_files=10

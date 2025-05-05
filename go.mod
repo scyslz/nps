@@ -13,10 +13,12 @@ require (
 	github.com/miekg/dns v1.1.65
 	github.com/panjf2000/ants/v2 v2.11.3
 	github.com/pkg/errors v0.9.1
-	github.com/shirou/gopsutil/v4 v4.25.3
+	github.com/rs/zerolog v1.34.0
+	github.com/shirou/gopsutil/v4 v4.25.4
 	github.com/xtaci/kcp-go/v5 v5.6.20
 	golang.org/x/net v0.39.0
 	golang.org/x/sys v0.32.0
+	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 )
 
 require (
@@ -31,6 +33,8 @@ require (
 	github.com/klauspost/pgzip v1.2.6 // indirect
 	github.com/klauspost/reedsolomon v1.12.4 // indirect
 	github.com/lufia/plan9stats v0.0.0-20250317134145-8bc96cf8fc35 // indirect
+	github.com/mattn/go-colorable v0.1.14 // indirect
+	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/power-devops/perfstat v0.0.0-20240221224432-82ca36839d55 // indirect
 	github.com/prometheus/client_golang v1.22.0 // indirect

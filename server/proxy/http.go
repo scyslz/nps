@@ -17,11 +17,11 @@ import (
 	"time"
 
 	"github.com/beego/beego"
-	"github.com/beego/beego/logs"
 	"github.com/djylb/nps/lib/common"
 	"github.com/djylb/nps/lib/conn"
 	"github.com/djylb/nps/lib/file"
 	"github.com/djylb/nps/lib/goroutine"
+	"github.com/djylb/nps/lib/logs"
 	"github.com/djylb/nps/server/connection"
 )
 
@@ -215,7 +215,7 @@ func (s *httpServer) handleProxy(w http.ResponseWriter, r *http.Request) {
 	// 连接数和流量控制
 	if err := s.CheckFlowAndConnNum(host.Client); err != nil {
 		http.Error(w, "Access denied: "+err.Error(), http.StatusTooManyRequests)
-		logs.Warn("Connection limit exceeded, client id %d, host id %d, error %s", host.Client.Id, host.Id, err.Error())
+		logs.Warn("Connection limit exceeded, client id %d, host id %d, error %v", host.Client.Id, host.Id, err)
 		return
 	}
 	defer host.Client.CutConn()
@@ -233,7 +233,7 @@ func (s *httpServer) handleProxy(w http.ResponseWriter, r *http.Request) {
 	// 获取目标地址
 	targetAddr, err := host.Target.GetRandomTarget()
 	if err != nil {
-		logs.Warn("No backend found for host: %s Err: %s", r.Host, err.Error())
+		logs.Warn("No backend found for host: %s Err: %v", r.Host, err)
 		//http.Error(w, "502 Bad Gateway", http.StatusBadGateway)
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		w.WriteHeader(http.StatusBadGateway)
@@ -293,7 +293,7 @@ func (s *httpServer) handleProxy(w http.ResponseWriter, r *http.Request) {
 				link := conn.NewLink("tcp", targetAddr, host.Client.Cnf.Crypt, host.Client.Cnf.Compress, r.RemoteAddr, s.allowLocalProxy && host.Target.LocalProxy)
 				target, err := s.bridge.SendLinkInfo(host.Client.Id, link, nil)
 				if err != nil {
-					logs.Notice("DialContext: connection to host %s (target %s) failed: %v", r.Host, targetAddr, err)
+					logs.Info("DialContext: connection to host %s (target %s) failed: %v", r.Host, targetAddr, err)
 					return nil, err
 				}
 				rawConn := conn.GetConn(target, link.Crypt, link.Compress, host.Client.Rate, true)
@@ -350,7 +350,7 @@ func (s *httpServer) handleWebsocket(w http.ResponseWriter, r *http.Request, hos
 	link := conn.NewLink("tcp", targetAddr, host.Client.Cnf.Crypt, host.Client.Cnf.Compress, r.RemoteAddr, host.Target.LocalProxy)
 	targetConn, err := s.bridge.SendLinkInfo(host.Client.Id, link, nil)
 	if err != nil {
-		logs.Notice("handleWebsocket: connection to target %s failed: %v", link.Host, err)
+		logs.Info("handleWebsocket: connection to target %s failed: %v", link.Host, err)
 		//http.Error(w, "502 Bad Gateway", http.StatusBadGateway)
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		w.WriteHeader(http.StatusBadGateway)

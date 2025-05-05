@@ -9,10 +9,10 @@ import (
 	"time"
 
 	"github.com/beego/beego"
-	"github.com/beego/beego/logs"
 	"github.com/djylb/nps/lib/common"
 	"github.com/djylb/nps/lib/conn"
 	"github.com/djylb/nps/lib/file"
+	"github.com/djylb/nps/lib/logs"
 )
 
 type Service interface {
@@ -124,7 +124,7 @@ func (s *BaseServer) DealClient(c *conn.Conn, client *file.Client, addr string,
 	// 获取目标连接
 	target, err := s.bridge.SendLinkInfo(client.Id, link, s.task)
 	if err != nil {
-		logs.Warn("get connection from client id %d  error %s", client.Id, err.Error())
+		logs.Warn("get connection from client id %d  error %v", client.Id, err)
 		c.Close()
 		return err
 	}
@@ -146,7 +146,7 @@ func IsGlobalBlackIp(ipPort string) bool {
 	if global != nil {
 		ip := common.GetIpByAddr(ipPort)
 		if in(ip, global.BlackIpList) {
-			logs.Error("IP地址[" + ip + "]在全局黑名单列表内")
+			logs.Error("IP address [%s] is in the global blacklist", ip)
 			return true
 		}
 	}

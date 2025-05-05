@@ -15,11 +15,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/beego/beego/logs"
 	"github.com/djylb/nps/lib/common"
 	"github.com/djylb/nps/lib/crypt"
 	"github.com/djylb/nps/lib/file"
 	"github.com/djylb/nps/lib/goroutine"
+	"github.com/djylb/nps/lib/logs"
 	"github.com/djylb/nps/lib/pmux"
 	"github.com/djylb/nps/lib/rate"
 	"github.com/xtaci/kcp-go/v5"
@@ -392,7 +392,7 @@ func CopyWaitGroup(conn1, conn2 net.Conn, crypt bool, snappy bool, rate *rate.Ra
 	err := goroutine.CopyConnsPool.Invoke(goroutine.NewConns(connHandle, conn2, flows, wg, task))
 	wg.Wait()
 	if err != nil {
-		logs.Error(err)
+		logs.Error("%v", err)
 	}
 }
 
