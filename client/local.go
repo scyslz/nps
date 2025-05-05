@@ -253,7 +253,7 @@ func newUdpConn(localAddr string, config *config.CommonConfig, l *config.LocalSe
 		logs.Warn("%v", err)
 		return
 	}
-	logs.Trace("successful create a connection with server %s", remoteAddress)
+	logs.Info("successful create a connection with server %s", remoteAddress)
 	conn.SetUdpSession(udpTunnel)
 	udpConn = udpTunnel
 	muxSession = nps_mux.NewMux(udpConn, "kcp", config.DisconnectTime)

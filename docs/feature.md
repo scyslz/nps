@@ -59,7 +59,7 @@ Http Basic Auth 来保护，访问时需要输入正确的用户名和密码。
 ## 流量限制
 
 支持客户端级流量限制，当该客户端入口流量与出口流量达到设定的总量后会拒绝服务
-，域名代理会返回404页面，其他代理会拒绝连接,使用该功能需要在`nps.conf`中设置`allow_flow_limit`，默认是关闭的。
+，域名代理会返回 404 页面，其他代理会拒绝连接,使用该功能需要在`nps.conf`中设置`allow_flow_limit`，默认是关闭的。
 
 ## 带宽限制
 
@@ -254,37 +254,29 @@ health_check_target=127.0.0.1:8083,127.0.0.1:8082
 
 如果失败次数超过`health_check_max_failed`，nps则会移除该npc下的所有该目标，如果失败后目标重新上线，nps将自动将目标重新加入。
 
- 项                       | 含义                
--------------------------|-------------------
- health_check_timeout    | 健康检查超时时间          
- health_check_max_failed | 健康检查允许失败次数        
- health_check_interval   | 健康检查间隔            
- health_check_type       | 健康检查类型            
- health_check_target     | 健康检查目标，多个以逗号（,）分隔 
- health_check_type       | 健康检查类型            
- health_http_url         | 健康检查url，仅http模式适用 
+| 项                       | 含义                |
+|-------------------------|-------------------|
+| health_check_timeout    | 健康检查超时时间          |
+| health_check_max_failed | 健康检查允许失败次数        |
+| health_check_interval   | 健康检查间隔            |
+| health_check_type       | 健康检查类型            |
+| health_check_target     | 健康检查目标，多个以逗号（,）分隔 |
+| health_check_type       | 健康检查类型            |
+| health_http_url         | 健康检查url，仅http模式适用 |
 
 ## 日志输出
 
 日志输出级别
 
+(trace|debug|info|warn|error|fatal|panic|off)
+
 **对于npc：**
 
 ```
--log_level=0~7 -log_path=npc.log
+-log_level=info -log_path=npc.log
 ```
 
-```
-LevelEmergency->0  LevelAlert->1
-
-LevelCritical->2 LevelError->3
-
-LevelWarning->4 LevelNotice->5
-
-LevelInformational->6 LevelDebug->7
-```
-
-默认为全输出,级别为0到7
+默认为全输出
 
 **对于nps：**
 

@@ -482,12 +482,12 @@ func sendP2PTestMsg(localConn *net.UDPConn, remoteAddr1, remoteAddr2, remoteAddr
 			}
 			return addr.String(), nil
 		case common.WORK_P2P_END:
-			logs.Trace("Remotely Address %v Reply Packet Successfully Received", addr)
+			logs.Debug("Remotely Address %v Reply Packet Successfully Received", addr)
 			return addr.String(), nil
 		case common.WORK_P2P_CONNECT:
 			go func() {
 				for i := 20; i > 0; i-- {
-					logs.Trace("try send receive success packet to target %v", addr)
+					logs.Debug("try send receive success packet to target %v", addr)
 					if _, err = localConn.WriteTo([]byte(common.WORK_P2P_SUCCESS), addr); err != nil {
 						return
 					}

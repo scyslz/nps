@@ -29,7 +29,7 @@ var (
 	logType        = flag.String("log", "file", "Log output mode (stdout|file|both|off)")
 	connType       = flag.String("type", "tcp", "Connection type with the server (kcp|tcp|tls) (eg: tcp,tls)")
 	proxyUrl       = flag.String("proxy", "", "Proxy socks5 URL (eg: socks5://user:pass@127.0.0.1:9007)")
-	logLevel       = flag.String("log_level", "7", "Log level 0~7")
+	logLevel       = flag.String("log_level", "trace", "Log level (trace|debug|info|warn|error|fatal|panic|off)")
 	registerTime   = flag.Int("time", 2, "Register time in hours")
 	localPort      = flag.Int("local_port", 2000, "P2P local port")
 	password       = flag.String("password", "", "P2P password flag")
@@ -127,7 +127,8 @@ func main() {
 			c := stun.NewClient()
 			flag.CommandLine.Parse(os.Args[2:])
 			c.SetServerAddr(*stunAddr)
-			logs.Info(*stunAddr)
+			//logs.Info(*stunAddr)
+			fmt.Println("STUN Server:", *stunAddr)
 			nat, host, err := c.Discover()
 			if err != nil {
 				logs.Error("Error: %v", err)
@@ -257,6 +258,7 @@ func run() {
 	}
 	//p2p or secret command
 	if *password != "" {
+		logs.Info("the version of client is %s, the core version of client is %s", version.VERSION, version.GetVersion())
 		commonConfig := new(config.CommonConfig)
 		commonConfig.Server = *serverAddr
 		commonConfig.VKey = *verifyKey

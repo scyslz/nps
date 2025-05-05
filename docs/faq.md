@@ -148,22 +148,19 @@ NPS 可自动插入 CORS 头部，允许跨域访问，但建议在后端实现�
 
 ### **NPS 日志配置（nps.conf）**
 ```ini
-# 日志级别 (0-7) LevelEmergency->0  LevelAlert->1 LevelCritical->2 LevelError->3 LevelWarning->4 LevelNotice->5 LevelInformational->6 LevelDebug->7
-log_level=7
-
-# 日志路径（路径 | off | docker）
-log_path=off
-
-# 是否启用日志压缩
+# 日志模式:stdout|file|both|off
+log=stdout
+# 日志级别:trace|debug|info|warn|error|fatal|panic|off
+log_level=trace
+# 日志输出路径
+log_path=conf/nps.log
+# 是否启用日志压缩 (true|false)
 log_compress=false
-
-# 允许存在的日志总文件个数
+# 允许保存的日志文件总数
 log_max_files=10
-
 # 允许保存日志的最大天数
 log_max_days=7
-
-# 单个日志文件的最大大小（MB），超过大小或日志超过 100000 行则新增日志文件
+# 单个日志文件的最大大小（MB），超过此大小将自动轮换
 log_max_size=2
 ```
 

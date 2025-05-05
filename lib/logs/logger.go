@@ -2,8 +2,10 @@ package logs
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 	"strings"
 	"sync"
 	"time"
@@ -136,7 +138,10 @@ func Init(
 	}
 
 	multi := zerolog.MultiLevelWriter(writers...)
-	logger = zerolog.New(multi).With().Timestamp().Logger()
+	zerolog.CallerMarshalFunc = func(pc uintptr, file string, line int) string {
+		return fmt.Sprintf("%s:%d", filepath.Base(file), line)
+	}
+	logger = zerolog.New(multi).With().Timestamp().CallerWithSkipFrameCount(zerolog.CallerSkipFrameCount + 1).Logger()
 }
 
 func Trace(msg string, v ...interface{}) { logger.Trace().Msgf(msg, v...) }

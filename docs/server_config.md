@@ -21,26 +21,26 @@ nps.exe -conf_path=D:\test\nps
 ---
 
 ## 1. 基础配置
-| 名称               | 说明 |
-|------------------|-------------------------------------|
-| `appname`        | 应用名称 |
-| `runmode`        | 运行模式（dev/pro） |
-| `dns_server`     | DNS 服务器 |
+| 名称           | 说明            |
+|--------------|---------------|
+| `appname`    | 应用名称          |
+| `runmode`    | 运行模式（dev/pro） |
+| `dns_server` | DNS 服务器       |
 
 ---
 ## 2. Web 管理面板相关
-| 名称               | 说明 |
-|------------------|-------------------------------------|
-| `web_port`       | Web 管理端口（默认 `8081`） |
-| `web_ip`         | Web 管理界面监听地址（默认 `0.0.0.0`，监听所有 IP） |
-| `web_host`       | Web 界面域名（默认 `a.o.com`，端口复用时访问管理页面的地址） |
-| `web_username`   | Web 管理员账号（默认 `admin`） |
-| `web_password`   | Web 管理员密码（默认 `123`，建议修改！） |
-| `web_open_ssl`   | 是否启用 Web 面板 HTTPS（默认 `false`，启用需配置证书） |
-| `web_cert_file`  | Web HTTPS 证书文件路径 |
-| `web_key_file`   | Web HTTPS 证书密钥文件路径 |
-| `web_base_url`   | Web 管理主路径（默认 `/`，适用于 Web 反向代理时调整路径） |
-| `open_captcha`   | 是否启用验证码 |
+| 名称              | 说明                                    |
+|-----------------|---------------------------------------|
+| `web_port`      | Web 管理端口（默认 `8081`）                   |
+| `web_ip`        | Web 管理界面监听地址（默认 `0.0.0.0`，监听所有 IP）    |
+| `web_host`      | Web 界面域名（默认 `a.o.com`，端口复用时访问管理页面的地址） |
+| `web_username`  | Web 管理员账号（默认 `admin`）                 |
+| `web_password`  | Web 管理员密码（默认 `123`，建议修改！）             |
+| `web_open_ssl`  | 是否启用 Web 面板 HTTPS（默认 `false`，启用需配置证书） |
+| `web_cert_file` | Web HTTPS 证书文件路径                      |
+| `web_key_file`  | Web HTTPS 证书密钥文件路径                    |
+| `web_base_url`  | Web 管理主路径（默认 `/`，适用于 Web 反向代理时调整路径）   |
+| `open_captcha`  | 是否启用验证码                               |
 
 ---
 
@@ -58,52 +58,52 @@ nps.exe -conf_path=D:\test\nps
 ---
 
 ## 4. 认证与密钥
-| 名称                 | 说明 |
-|--------------------|--------------------------------------|
-| `auth_key`        | Web API 认证密钥（建议填充复杂密钥） |
-| `auth_crypt_key`  | 获取 `authKey` 的 AES 加密密钥（16 位） |
-| `public_vkey`     | 客户端以配置文件模式启动时的密钥 |
+| 名称               | 说明                            |
+|------------------|-------------------------------|
+| `auth_key`       | Web API 认证密钥（建议填充复杂密钥）        |
+| `auth_crypt_key` | 获取 `authKey` 的 AES 加密密钥（16 位） |
+| `public_vkey`    | 客户端以配置文件模式启动时的密钥              |
 
 ---
 
 ## 5. 访问控制
-| 名称                  | 说明 |
-|---------------------|----------------------------|
-| `ip_limit`         | 是否限制 IP 访问（`true` 或 `false`） |
-| `allow_ports`      | 允许客户端映射的端口范围（示例：`9001-9009,10001,11000-12000`） |
-| `allow_user_login` | 是否允许用户登录管理（`true` 或 `false`） |
-| `allow_user_register` | 是否允许用户注册（`true` 或 `false`） |
-| `allow_user_change_username` | 是否允许用户修改用户名（`true` 或 `false`） |
+| 名称                           | 说明                                             |
+|------------------------------|------------------------------------------------|
+| `ip_limit`                   | 是否限制 IP 访问（`true` 或 `false`）                   |
+| `allow_ports`                | 允许客户端映射的端口范围（示例：`9001-9009,10001,11000-12000`） |
+| `allow_user_login`           | 是否允许用户登录管理（`true` 或 `false`）                   |
+| `allow_user_register`        | 是否允许用户注册（`true` 或 `false`）                     |
+| `allow_user_change_username` | 是否允许用户修改用户名（`true` 或 `false`）                  |
 
 ---
 
 ## 6. P2P 相关
-| 名称      | 说明 |
-|---------|--------------------|
-| `p2p_ip`  | P2P 服务端 IP（指定P2P使用的公网IP） |
-| `p2p_port` | P2P 端口（用于 P2P 通信） |
+| 名称         | 说明                       |
+|------------|--------------------------|
+| `p2p_ip`   | P2P 服务端 IP（指定P2P使用的公网IP） |
+| `p2p_port` | P2P 端口（用于 P2P 通信）        |
 
 ---
 
 ## 7. 日志与流量控制
-| 名称                    | 说明                             |
-|-----------------------|--------------------------------|
-| `log`                 | 日志模式（stdout、file、both、off）     |
-| `log_level`           | 日志级别（`0-7`，默认 `7` 为 Debug 级别）  |
-| `log_path`            | 日志路径（可选 `具体路径`、`off`、`docker`） |
-| `log_compress`        | 是否启用日志压缩（`true` 开启，`false` 关闭） |
-| `log_max_files`       | 允许存在的日志总文件个数（默认 `10`）          |
-| `log_max_days`        | 允许保存日志的最大天数（默认 `7`）            |
-| `log_max_size`        | 单个日志文件的最大大小（MB）（默认 `2MB`）      |
-| `flow_store_interval` | 流量数据持久化间隔（分钟），留空表示不持久化         |
+| 名称                    | 说明                                                              |
+|-----------------------|-----------------------------------------------------------------|
+| `log`                 | 日志模式（stdout、file、both、off）                                      |
+| `log_level`           | 日志级别（`trace、debug、info、warn、error、fatal、panic、off`，默认为 `trace`） |
+| `log_path`            | 日志路径（可选 `具体路径`、`off`、`docker`）                                  |
+| `log_compress`        | 是否启用日志压缩（`true` 开启，`false` 关闭）                                  |
+| `log_max_files`       | 允许存在的日志总文件个数（默认 `10`）                                           |
+| `log_max_days`        | 允许保存日志的最大天数（默认 `7`）                                             |
+| `log_max_size`        | 单个日志文件的最大大小（MB）（默认 `2MB`）                                       |
+| `flow_store_interval` | 流量数据持久化间隔（分钟），留空表示不持久化                                          |
 
 ---
 
 ## 8. 反向代理与安全
-| 名称                  | 说明 |
-|---------------------|----------------------------|
-| `http_add_origin_header` | 是否添加真实IP头（`true` 或 `false`） |
-| `x_nps_http_only`  | 前置代理传递 `X-NPS-Http-Only` 头验证，信任该代理 |
+| 名称                       | 说明                                 |
+|--------------------------|------------------------------------|
+| `http_add_origin_header` | 是否添加真实IP头（`true` 或 `false`）        |
+| `x_nps_http_only`        | 前置代理传递 `X-NPS-Http-Only` 头验证，信任该代理 |
 
 ### **Nginx 代理示例**
 ```nginx
@@ -135,18 +135,18 @@ server {
 ---
 
 ## 9. 其他高级配置
-| 名称                  | 说明 |
-|---------------------|----------------------------|
-| `allow_flow_limit` | 是否允许流量限制 |
-| `allow_rate_limit` | 是否允许带宽限制 |
-| `allow_time_limit` | 是否允许到期时间限制 |
-| `allow_tunnel_num_limit` | 是否允许限制客户端最大隧道数 |
-| `allow_local_proxy` | 是否允许 NPS 本地代理连接（相当于在nps服务器上启动一个npc） |
-| `allow_connection_num_limit` | 是否限制客户端最大连接数 |
-| `allow_multi_ip` | 是否允许配置隧道监听IP地址 |
-| `system_info_display` | 是否显示系统负载监控信息 |
-| `disconnect_timeout` | TCP 中断超时等待时间（单位 5s，默认值 60，即 300s = 5mins） |
-| `http_cache` | 是否启用 HTTP 缓存（已弃用，不再支持该功能） |
+| 名称                           | 说明                                        |
+|------------------------------|-------------------------------------------|
+| `allow_flow_limit`           | 是否允许流量限制                                  |
+| `allow_rate_limit`           | 是否允许带宽限制                                  |
+| `allow_time_limit`           | 是否允许到期时间限制                                |
+| `allow_tunnel_num_limit`     | 是否允许限制客户端最大隧道数                            |
+| `allow_local_proxy`          | 是否允许 NPS 本地代理连接（相当于在nps服务器上启动一个npc）       |
+| `allow_connection_num_limit` | 是否限制客户端最大连接数                              |
+| `allow_multi_ip`             | 是否允许配置隧道监听IP地址                            |
+| `system_info_display`        | 是否显示系统负载监控信息                              |
+| `disconnect_timeout`         | TCP 中断超时等待时间（单位 5s，默认值 60，即 300s = 5mins） |
+| `http_cache`                 | 是否启用 HTTP 缓存（已弃用，不再支持该功能）                 |
 
 ---
 
