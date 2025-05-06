@@ -75,14 +75,14 @@ func GetBufferedLogs() string {
 }
 
 // Init initializes the global logger.
-// logType:   "stdout"|"file"|"both"|"off"
-// logLevel:  "trace"|"debug"|"info"|"warn"|"error"|"fatal"|"panic"|"off"
-// logPath:   file path (required for file/both)
-// maxSize:   max size per file in MB
+// logType:    "stdout"|"file"|"both"|"off"
+// logLevel:   "trace"|"debug"|"info"|"warn"|"error"|"fatal"|"panic"|"off"
+// logPath:    file path (required for file/both)
+// maxSize:    max size per file in MB
 // maxBackups: max number of backups
-// maxAge:    max age in days
-// compress:  whether to compress old logs
-// color: whether to enable ANSI color codes in console output
+// maxAge:     max age in days
+// compress:   whether to compress old logs
+// color:      whether to enable ANSI color codes in console output
 func Init(
 	logType, logLevel, logPath string,
 	maxSize, maxBackups, maxAge int,

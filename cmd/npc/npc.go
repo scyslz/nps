@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"runtime"
 	"strings"
 	"sync"
@@ -212,6 +213,11 @@ func configureLogging() {
 	// 针对 Windows 系统调整日志路径中的反斜杠
 	if common.IsWindows() {
 		*logPath = strings.Replace(*logPath, "\\", "\\\\", -1)
+	}
+
+	// 相对路径使用配置文件路径
+	if !filepath.IsAbs(*logPath) {
+		*logPath = filepath.Join(common.GetRunPath(), *logPath)
 	}
 
 	logs.Init(*logType, *logLevel, *logPath, *logMaxSize, *logMaxFiles, *logMaxDays, *logCompress, *logColor)

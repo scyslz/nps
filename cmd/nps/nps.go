@@ -66,6 +66,9 @@ func main() {
 	if common.IsWindows() {
 		logPath = strings.Replace(logPath, "\\", "\\\\", -1)
 	}
+	if !filepath.IsAbs(logPath) {
+		logPath = filepath.Join(common.GetRunPath(), logPath)
+	}
 	logMaxFiles := beego.AppConfig.DefaultInt("log_max_files", 30)
 	logMaxDays := beego.AppConfig.DefaultInt("log_max_days", 30)
 	logMaxSize := beego.AppConfig.DefaultInt("log_max_size", 5)
