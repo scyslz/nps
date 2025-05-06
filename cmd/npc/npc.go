@@ -198,7 +198,7 @@ func configureLogging() {
 	}
 
 	// 控制台日志
-	if *debug {
+	if *debug && *logType != "off" {
 		if *logType != "both" {
 			*logType = "stdout"
 		}
@@ -306,7 +306,6 @@ func run() {
 			//logs.Info(connTypes)
 		}
 		//logs.Debug(connTypes)
-		logs.Logger.Warn()
 
 		if len(serverAddrs) == 0 || len(verifyKeys) == 0 || serverAddrs[0] == "" || verifyKeys[0] == "" {
 			logs.Error("serverAddr or verifyKey cannot be empty")
