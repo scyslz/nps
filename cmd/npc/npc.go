@@ -40,6 +40,7 @@ var (
 	logMaxDays     = flag.Int("log_max_days", 7, "Number of days to retain old log files (0 to disable)")
 	logMaxFiles    = flag.Int("log_max_files", 10, "Maximum number of log files to retain (0 to disable)")
 	logCompress    = flag.Bool("log_compress", false, "Compress rotated log files (true or false)")
+	logColor       = flag.Bool("log_color", true, "Enable ANSI color codes in console output (true or false)")
 	debug          = flag.Bool("debug", true, "Enable debug mode")
 	pprofAddr      = flag.String("pprof", "", "PProf debug address (ip:port)")
 	stunAddr       = flag.String("stun_addr", "stun.miwifi.com:3478", "STUN server address")
@@ -213,7 +214,7 @@ func configureLogging() {
 		*logPath = strings.Replace(*logPath, "\\", "\\\\", -1)
 	}
 
-	logs.Init(*logType, *logLevel, *logPath, *logMaxSize, *logMaxFiles, *logMaxDays, *logCompress)
+	logs.Init(*logType, *logLevel, *logPath, *logMaxSize, *logMaxFiles, *logMaxDays, *logCompress, *logColor)
 }
 
 type npc struct {
@@ -299,6 +300,7 @@ func run() {
 			//logs.Info(connTypes)
 		}
 		//logs.Debug(connTypes)
+		logs.Logger.Warn()
 
 		if len(serverAddrs) == 0 || len(verifyKeys) == 0 || serverAddrs[0] == "" || verifyKeys[0] == "" {
 			logs.Error("serverAddr or verifyKey cannot be empty")

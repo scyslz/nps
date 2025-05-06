@@ -15,7 +15,7 @@ import (
 )
 
 var (
-	logger       zerolog.Logger
+	Logger       zerolog.Logger
 	bufferWriter *BufferWriter
 )
 
@@ -59,12 +59,14 @@ func (w *BufferWriter) GetAndClear() string {
 	return s
 }
 
+// EnableInMemoryBuffer activates an in-memory circular buffer of given capacity
 func EnableInMemoryBuffer(capacity int) {
 	if bufferWriter == nil {
 		bufferWriter = NewBufferWriter(capacity)
 	}
 }
 
+// GetBufferedLogs returns and clears the in-memory buffer
 func GetBufferedLogs() string {
 	if bufferWriter == nil {
 		return ""
@@ -72,18 +74,20 @@ func GetBufferedLogs() string {
 	return bufferWriter.GetAndClear()
 }
 
-// Init 初始化全局 logger。
+// Init initializes the global logger.
 // logType:   "stdout"|"file"|"both"|"off"
 // logLevel:  "trace"|"debug"|"info"|"warn"|"error"|"fatal"|"panic"|"off"
-// logPath:   文件路径（file/both 模式必填）
-// maxSize:   单文件最大 MB
-// maxBackups:最大备份个数
-// maxAge:    最大保留天数
-// compress:  是否压缩旧日志
+// logPath:   file path (required for file/both)
+// maxSize:   max size per file in MB
+// maxBackups: max number of backups
+// maxAge:    max age in days
+// compress:  whether to compress old logs
+// color: whether to enable ANSI color codes in console output
 func Init(
 	logType, logLevel, logPath string,
 	maxSize, maxBackups, maxAge int,
 	compress bool,
+	color bool,
 ) {
 	lvlKey := strings.ToLower(logLevel)
 	var lvl zerolog.Level
@@ -111,17 +115,27 @@ func Init(
 	zerolog.TimeFieldFormat = time.RFC3339
 
 	if (strings.EqualFold(logType, "off") || lvl == zerolog.Disabled) && bufferWriter == nil {
-		logger = zerolog.Nop()
+		Logger = zerolog.Nop()
 		return
 	}
 
 	var writers []io.Writer
 	if strings.EqualFold(logType, "stdout") || strings.EqualFold(logType, "both") {
 		writers = append(writers,
-			zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: zerolog.TimeFieldFormat},
+			zerolog.ConsoleWriter{
+				Out:        os.Stdout,
+				TimeFormat: zerolog.TimeFieldFormat,
+				NoColor:    !color,
+			},
 		)
 	}
-	if (strings.EqualFold(logType, "file") || strings.EqualFold(logType, "both")) && !(logPath == "" || strings.EqualFold(logPath, "off") || strings.EqualFold(logPath, "false") || strings.EqualFold(logPath, "docker") || strings.EqualFold(logPath, "/dev/null")) {
+	if (strings.EqualFold(logType, "file") || strings.EqualFold(logType, "both")) &&
+		logPath != "" &&
+		!strings.EqualFold(logPath, "off") &&
+		!strings.EqualFold(logPath, "false") &&
+		!strings.EqualFold(logPath, "docker") &&
+		logPath != "/dev/null" {
+
 		lj := &lumberjack.Logger{
 			Filename:   logPath,
 			MaxSize:    maxSize,
@@ -141,17 +155,23 @@ func Init(
 	zerolog.CallerMarshalFunc = func(pc uintptr, file string, line int) string {
 		return fmt.Sprintf("%s:%d", filepath.Base(file), line)
 	}
-	logger = zerolog.New(multi).With().Timestamp().CallerWithSkipFrameCount(zerolog.CallerSkipFrameCount + 1).Logger()
+	Logger = zerolog.New(multi).
+		With().
+		Timestamp().
+		CallerWithSkipFrameCount(zerolog.CallerSkipFrameCount + 1).
+		Logger()
 }
 
-func Trace(msg string, v ...interface{}) { logger.Trace().Msgf(msg, v...) }
-func Debug(msg string, v ...interface{}) { logger.Debug().Msgf(msg, v...) }
-func Info(msg string, v ...interface{})  { logger.Info().Msgf(msg, v...) }
-func Warn(msg string, v ...interface{})  { logger.Warn().Msgf(msg, v...) }
-func Error(msg string, v ...interface{}) { logger.Error().Msgf(msg, v...) }
-func Fatal(msg string, v ...interface{}) { logger.Fatal().Msgf(msg, v...) }
-func Panic(msg string, v ...interface{}) { logger.Panic().Msgf(msg, v...) }
+// Simple convenience methods
+func Trace(msg string, v ...interface{}) { Logger.Trace().Msgf(msg, v...) }
+func Debug(msg string, v ...interface{}) { Logger.Debug().Msgf(msg, v...) }
+func Info(msg string, v ...interface{})  { Logger.Info().Msgf(msg, v...) }
+func Warn(msg string, v ...interface{})  { Logger.Warn().Msgf(msg, v...) }
+func Error(msg string, v ...interface{}) { Logger.Error().Msgf(msg, v...) }
+func Fatal(msg string, v ...interface{}) { Logger.Fatal().Msgf(msg, v...) }
+func Panic(msg string, v ...interface{}) { Logger.Panic().Msgf(msg, v...) }
 
+// SetLevel updates the global minimum level
 func SetLevel(levelStr string) {
 	if lvl, err := zerolog.ParseLevel(strings.ToLower(levelStr)); err == nil {
 		zerolog.SetGlobalLevel(lvl)

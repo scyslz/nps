@@ -13,7 +13,7 @@ var cl *client.TRPClient
 
 func init() {
 	logs.EnableInMemoryBuffer(0) // 0 = Default 64KB
-	logs.Init("off", "trace", "", 0, 0, 0, false)
+	logs.Init("off", "trace", "", 0, 0, 0, false, false)
 }
 
 //export StartClientByVerifyKey

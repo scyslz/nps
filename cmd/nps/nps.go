@@ -27,7 +27,7 @@ import (
 )
 
 var (
-	level    string
+	logLevel string
 	ver      = flag.Bool("version", false, "show current version")
 	confPath = flag.String("conf_path", "", "set current confPath")
 )
@@ -57,7 +57,8 @@ func main() {
 
 	common.InitPProfFromFile()
 	common.SetCustomDNS(beego.AppConfig.String("dns_server"))
-	level = beego.AppConfig.DefaultString("log_level", "trace")
+	logType := beego.AppConfig.DefaultString("log", "stdout")
+	logLevel = beego.AppConfig.DefaultString("log_level", "trace")
 	logPath := beego.AppConfig.String("log_path")
 	if logPath == "" || strings.EqualFold(logPath, "on") || strings.EqualFold(logPath, "true") {
 		logPath = common.GetLogPath()
@@ -65,10 +66,11 @@ func main() {
 	if common.IsWindows() {
 		logPath = strings.Replace(logPath, "\\", "\\\\", -1)
 	}
-	logCompress := beego.AppConfig.DefaultBool("log_compress", false)
 	logMaxFiles := beego.AppConfig.DefaultInt("log_max_files", 30)
 	logMaxDays := beego.AppConfig.DefaultInt("log_max_days", 30)
 	logMaxSize := beego.AppConfig.DefaultInt("log_max_size", 5)
+	logCompress := beego.AppConfig.DefaultBool("log_compress", false)
+	logColor := beego.AppConfig.DefaultBool("log_color", true)
 
 	// init service
 	options := make(service.KeyValue)
@@ -92,11 +94,10 @@ func main() {
 	}
 
 	svcConfig.Arguments = append(svcConfig.Arguments, "service")
-	logType := beego.AppConfig.DefaultString("log", "stdout")
 	if len(os.Args) > 1 && os.Args[1] == "service" && !strings.EqualFold(logType, "off") && !strings.EqualFold(logType, "both") {
 		logType = "file"
 	}
-	logs.Init(logType, level, logPath, logMaxSize, logMaxFiles, logMaxDays, logCompress)
+	logs.Init(logType, logLevel, logPath, logMaxSize, logMaxFiles, logMaxDays, logCompress, logColor)
 	if !common.IsWindows() {
 		svcConfig.Dependencies = []string{
 			"Requires=network.target",

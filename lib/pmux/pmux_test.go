@@ -8,7 +8,7 @@ import (
 )
 
 func TestPortMux_Close(t *testing.T) {
-	logs.Init("stdout", "trace", "", 0, 0, 0, false)
+	logs.Init("stdout", "trace", "", 0, 0, 0, false, true)
 
 	pMux := NewPortMux(8888, "Ds", "Cs")
 	go func() {
