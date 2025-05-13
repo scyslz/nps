@@ -318,7 +318,7 @@ func (s *Bridge) cliProcess(c *conn.Conn) {
 			return
 		}
 		//verify
-		id, err := file.GetDb().GetIdByVerifyKey(string(keyBuf), c.Conn.RemoteAddr().String(), "", common.Getverifyval)
+		id, err := file.GetDb().GetIdByVerifyKey(string(keyBuf), c.Conn.RemoteAddr().String(), "", crypt.Blake2b)
 		if err != nil {
 			logs.Error("Client %v proto-ver %d vkey %s validation error", c.Conn.RemoteAddr(), ver, keyBuf)
 			s.verifyError(c)

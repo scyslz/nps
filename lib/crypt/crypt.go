@@ -9,6 +9,8 @@ import (
 	"errors"
 	"math/rand"
 	"time"
+
+	"golang.org/x/crypto/blake2b"
 )
 
 // en
@@ -61,6 +63,12 @@ func Md5(s string) string {
 	h := md5.New()
 	h.Write([]byte(s))
 	return hex.EncodeToString(h.Sum(nil))
+}
+
+// Generate 32-bit BLAKE2b-256 strings
+func Blake2b(s string) string {
+	hash := blake2b.Sum256([]byte(s))
+	return hex.EncodeToString(hash[:])
 }
 
 // GetRandomString 生成指定长度的随机密钥，支持可选传入id

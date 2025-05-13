@@ -10,7 +10,6 @@ import (
 	"crypto/tls"
 	"encoding/base64"
 	"encoding/binary"
-	"encoding/hex"
 	"fmt"
 	"html/template"
 	"io"
@@ -32,7 +31,6 @@ import (
 	"github.com/beego/beego"
 	"github.com/djylb/nps/lib/logs"
 	"github.com/djylb/nps/lib/version"
-	"golang.org/x/crypto/blake2b"
 )
 
 // ExtractHost
@@ -327,13 +325,7 @@ func ContainsFold(s, substr string) bool {
 	return strings.Contains(strings.ToLower(s), strings.ToLower(substr))
 }
 
-// Get verify value
-func Getverifyval(vkey string) string {
-	//return crypt.Md5(vkey)
-	hash := blake2b.Sum256([]byte(vkey))
-	return hex.EncodeToString(hash[:])
-}
-
+// Get HMAC value
 func ComputeHMAC(vkey string, timestamp int64, randomDataPieces ...[]byte) []byte {
 	key := []byte(vkey)
 	tsBuf := make([]byte, 8)

@@ -274,7 +274,7 @@ func NewConn(tp string, vkey string, server string, connType string, proxyUrl st
 			logs.Error("%v", err)
 			return nil, err
 		}
-		if crypt.Md5(version.GetVersion(0)) != string(b) {
+		if crypt.Md5(version.GetVersion(Ver)) != string(b) {
 			logs.Warn("The client does not match the server version. The current core version of the client is", version.GetVersion(Ver))
 			//return nil, err
 		}
@@ -295,7 +295,7 @@ func NewConn(tp string, vkey string, server string, connType string, proxyUrl st
 		if _, err := c.Write(common.TimestampToBytes(ts)); err != nil {
 			return nil, err
 		}
-		if _, err := c.Write([]byte(common.Getverifyval(vkey))); err != nil {
+		if _, err := c.Write([]byte(crypt.Blake2b(vkey))); err != nil {
 			return nil, err
 		}
 		ipBuf, err := common.EncryptBytes(common.EncodeIP(common.GetOutboundIP()), vkey)
@@ -317,8 +317,8 @@ func NewConn(tp string, vkey string, server string, connType string, proxyUrl st
 			logs.Error("%v", err)
 			return nil, errors.New(fmt.Sprintf("Validation key %s incorrect", vkey))
 		}
-		if crypt.Md5(version.GetVersion(1)) != string(b) {
-			logs.Warn("The client does not match the server version. The current core version of the client is", version.GetVersion(1))
+		if crypt.Md5(version.GetVersion(Ver)) != string(b) {
+			logs.Warn("The client does not match the server version. The current core version of the client is", version.GetVersion(Ver))
 			return nil, err
 		}
 		if _, err := c.Write([]byte(connType)); err != nil {
