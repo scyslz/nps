@@ -312,7 +312,7 @@ func (s *Bridge) cliProcess(c *conn.Conn) {
 			c.Close()
 			return
 		}
-		keyBuf, err := c.GetShortContent(32)
+		keyBuf, err := c.GetShortContent(64)
 		if err != nil {
 			c.Close()
 			return
