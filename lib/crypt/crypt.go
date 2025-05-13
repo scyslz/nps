@@ -13,6 +13,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"math/big"
 	"time"
 
 	"golang.org/x/crypto/blake2b"
@@ -141,7 +142,7 @@ func Blake2b(s string) string {
 func GetRandomString(l int, id ...int) string {
 	// 字符集
 	str := "0123456789abcdefghijklmnopqrstuvwxyz"
-	bytes := []byte(str)
+	dictBytes := []byte(str)
 	var result []byte
 
 	// 如果传入id，则将id转换为字符集映射并倒序放在最前面
@@ -166,10 +167,18 @@ func GetRandomString(l int, id ...int) string {
 	remainingLength := l - len(result)
 	if remainingLength > 0 {
 		// 使用当前时间的UnixNano作为随机数种子
-		r := rand.New(rand.NewSource(time.Now().UnixNano()))
+		//r := rand.New(rand.NewSource(time.Now().UnixNano()))
 		// 生成剩余的随机字符
 		for i := 0; i < remainingLength; i++ {
-			result = append(result, bytes[r.Intn(len(bytes))])
+			//result = append(result, dictBytes[r.Intn(len(dictBytes))])
+			nBig, err := rand.Int(rand.Reader, big.NewInt(int64(len(dictBytes))))
+			if err != nil {
+				// 如果安全随机生成失败，回退到时间戳伪随机
+				idx := int(time.Now().UnixNano() % int64(len(dictBytes)))
+				result = append(result, dictBytes[idx])
+				continue
+			}
+			result = append(result, dictBytes[int(nBig.Int64())])
 		}
 	}
 
