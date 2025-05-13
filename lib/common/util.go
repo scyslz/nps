@@ -2,11 +2,7 @@ package common
 
 import (
 	"bytes"
-	"crypto/aes"
-	"crypto/cipher"
-	"crypto/hmac"
 	"crypto/rand"
-	"crypto/sha256"
 	"crypto/tls"
 	"encoding/base64"
 	"encoding/binary"
@@ -323,19 +319,6 @@ func GetTimeNoErrByStr(str string) time.Time {
 
 func ContainsFold(s, substr string) bool {
 	return strings.Contains(strings.ToLower(s), strings.ToLower(substr))
-}
-
-// Get HMAC value
-func ComputeHMAC(vkey string, timestamp int64, randomDataPieces ...[]byte) []byte {
-	key := []byte(vkey)
-	tsBuf := make([]byte, 8)
-	binary.BigEndian.PutUint64(tsBuf, uint64(timestamp))
-	mac := hmac.New(sha256.New, key)
-	mac.Write(tsBuf)
-	for _, data := range randomDataPieces {
-		mac.Write(data)
-	}
-	return mac.Sum(nil) // 32bit
 }
 
 // Change headers and host of request
@@ -931,54 +914,6 @@ func DecodeIP(data []byte) net.IP {
 	default:
 		return nil
 	}
-}
-
-// EncryptBytes AES-GCM
-func EncryptBytes(data []byte, keyStr string) ([]byte, error) {
-	if keyStr == "" {
-		return data, nil
-	}
-	key := sha256.Sum256([]byte(keyStr))
-	block, err := aes.NewCipher(key[:])
-	if err != nil {
-		return nil, fmt.Errorf("aes.NewCipher: %w", err)
-	}
-	gcm, err := cipher.NewGCM(block)
-	if err != nil {
-		return nil, fmt.Errorf("cipher.NewGCM: %w", err)
-	}
-	nonce := make([]byte, gcm.NonceSize())
-	if _, err := io.ReadFull(rand.Reader, nonce); err != nil {
-		return nil, fmt.Errorf("io.ReadFull: %w", err)
-	}
-	ct := gcm.Seal(nil, nonce, data, nil)
-	return append(nonce, ct...), nil
-}
-
-// DecryptBytes AES-GCM
-func DecryptBytes(enc []byte, keyStr string) ([]byte, error) {
-	if keyStr == "" {
-		return enc, nil
-	}
-	key := sha256.Sum256([]byte(keyStr))
-	block, err := aes.NewCipher(key[:])
-	if err != nil {
-		return nil, fmt.Errorf("aes.NewCipher: %w", err)
-	}
-	gcm, err := cipher.NewGCM(block)
-	if err != nil {
-		return nil, fmt.Errorf("cipher.NewGCM: %w", err)
-	}
-	ns := gcm.NonceSize()
-	if len(enc) < ns+gcm.Overhead() {
-		return nil, fmt.Errorf("ciphertext too short: %d", len(enc))
-	}
-	nonce, ct := enc[:ns], enc[ns:]
-	pt, err := gcm.Open(nil, nonce, ct, nil)
-	if err != nil {
-		return nil, fmt.Errorf("gcm.Open: %w", err)
-	}
-	return pt, nil
 }
 
 func RandomBytes(maxLen int) ([]byte, error) {

@@ -298,7 +298,7 @@ func NewConn(tp string, vkey string, server string, connType string, proxyUrl st
 		if _, err := c.Write([]byte(crypt.Blake2b(vkey))); err != nil {
 			return nil, err
 		}
-		ipBuf, err := common.EncryptBytes(common.EncodeIP(common.GetOutboundIP()), vkey)
+		ipBuf, err := crypt.EncryptBytes(common.EncodeIP(common.GetOutboundIP()), vkey)
 		if err := c.WriteLenContent(ipBuf); err != nil {
 			return nil, err
 		}
@@ -309,7 +309,7 @@ func NewConn(tp string, vkey string, server string, connType string, proxyUrl st
 		if err := c.WriteLenContent(randBuf); err != nil {
 			return nil, err
 		}
-		if _, err := c.Write(common.ComputeHMAC(vkey, ts, minVerBytes, vs, ipBuf, randBuf)); err != nil {
+		if _, err := c.Write(crypt.ComputeHMAC(vkey, ts, minVerBytes, vs, ipBuf, randBuf)); err != nil {
 			return nil, err
 		}
 		b, err := c.GetShortContent(32)

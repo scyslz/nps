@@ -334,7 +334,7 @@ func (s *Bridge) cliProcess(c *conn.Conn) {
 			c.Close()
 			return
 		}
-		ipDec, err := common.DecryptBytes(ipBuf, client.VerifyKey)
+		ipDec, err := crypt.DecryptBytes(ipBuf, client.VerifyKey)
 		if err != nil {
 			c.Close()
 			return
@@ -350,7 +350,7 @@ func (s *Bridge) cliProcess(c *conn.Conn) {
 			c.Close()
 			return
 		}
-		if ServerSecureMode && !bytes.Equal(hmacBuf, common.ComputeHMAC(client.VerifyKey, ts, minVerBytes, vs, ipBuf, randBuf)) {
+		if ServerSecureMode && !bytes.Equal(hmacBuf, crypt.ComputeHMAC(client.VerifyKey, ts, minVerBytes, vs, ipBuf, randBuf)) {
 			c.Close()
 			return
 		}
