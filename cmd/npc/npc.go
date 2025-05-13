@@ -46,6 +46,7 @@ var (
 	pprofAddr      = flag.String("pprof", "", "PProf debug address (ip:port)")
 	stunAddr       = flag.String("stun_addr", "stun.miwifi.com:3478", "STUN server address")
 	ver            = flag.Bool("version", false, "Show current version")
+	protoVer       = flag.Int("proto_version", version.GetLatestIndex(), fmt.Sprintf("Protocol version (0-%d)", version.GetLatestIndex()))
 	disconnectTime = flag.Int("disconnect_timeout", 60, "Disconnect timeout in seconds")
 	dnsServer      = flag.String("dns_server", "8.8.8.8", "DNS server for domain lookup")
 	tlsEnable      = flag.Bool("tls_enable", false, "Enable TLS (Deprecated)")
@@ -56,9 +57,10 @@ func main() {
 
 	// 显示版本并退出
 	if *ver {
-		common.PrintVersion()
+		common.PrintVersion(*protoVer)
 		return
 	}
+	client.Ver = *protoVer
 
 	// 配置日志
 	configureLogging()
@@ -265,7 +267,7 @@ func run() {
 	}
 	//p2p or secret command
 	if *password != "" {
-		logs.Info("the version of client is %s, the core version of client is %s", version.VERSION, version.GetVersion())
+		logs.Info("the version of client is %s, the core version of client is %s", version.VERSION, version.GetVersion(*protoVer))
 		commonConfig := new(config.CommonConfig)
 		commonConfig.Server = *serverAddr
 		commonConfig.VKey = *verifyKey
@@ -288,7 +290,7 @@ func run() {
 		*verifyKey, _ = env["NPC_SERVER_VKEY"]
 	}
 	if *verifyKey != "" && *serverAddr != "" && *configPath == "" {
-		logs.Info("the version of client is %s, the core version of client is %s", version.VERSION, version.GetVersion())
+		logs.Info("the version of client is %s, the core version of client is %s", version.VERSION, version.GetVersion(*protoVer))
 		*serverAddr = strings.ReplaceAll(*serverAddr, "，", ",")
 		*verifyKey = strings.ReplaceAll(*verifyKey, "，", ",")
 		*connType = strings.ReplaceAll(*connType, "，", ",")

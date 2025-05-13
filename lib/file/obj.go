@@ -44,6 +44,7 @@ type Client struct {
 	Id              int        //id
 	VerifyKey       string     //verify key
 	Addr            string     //the ip of client
+	LocalAddr       string     //the local ip of client
 	Remark          string     //remark
 	Status          bool       //is allowed connect
 	IsConnect       bool       //is the client connect

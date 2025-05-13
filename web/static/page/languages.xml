@@ -124,6 +124,10 @@
 		<zh-CN>客户端地址</zh-CN>
 		<en-US>Client address</en-US>
 	</lang>
+	<lang id="word-localaddress">
+		<zh-CN>客户端本地地址</zh-CN>
+		<en-US>Client local address</en-US>
+	</lang>
 	<lang id="word-add">
 		<zh-CN>新增</zh-CN>
 		<en-US>Add</en-US>
@@ -897,6 +901,14 @@
 		<lang id="thenumberoftunnelsexceedsthelimit">
 			<zh-CN>隧道数量超过限制</zh-CN>
 			<en-US>The number of tunnels exceeds the limit</en-US>
+		</lang>
+		<lang id="theportopenerror">
+			<zh-CN>隧道模式有误。</zh-CN>
+			<en-US>The mode is not correct.</en-US>
+		</lang>
+		<lang id="themodeisnotcorrect">
+			<zh-CN>无法打开端口，因为它可能已被占用或不再被允许。</zh-CN>
+			<en-US>The port cannot be opened because it may has been occupied or is no longer allowed.</en-US>
 		</lang>
 		<lang id="theportcannotbeopenedbecauseitmayhasbeenoccupiedorisnolongerallowed">
 			<zh-CN>无法打开端口，因为它可能已被占用或不再被允许。</zh-CN>

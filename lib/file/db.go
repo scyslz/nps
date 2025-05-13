@@ -77,12 +77,13 @@ func (s *DbUtils) GetClientList(start, length int, search, sort, order string, c
 	return list, cnt
 }
 
-func (s *DbUtils) GetIdByVerifyKey(vKey string, addr string) (id int, err error) {
+func (s *DbUtils) GetIdByVerifyKey(vKey, addr, localAddr string, hashFunc func(string) string) (id int, err error) {
 	var exist bool
 	s.JsonDb.Clients.Range(func(key, value interface{}) bool {
 		v := value.(*Client)
-		if common.Getverifyval(v.VerifyKey) == vKey && v.Status && v.Id > 0 {
+		if hashFunc(v.VerifyKey) == vKey && v.Status && v.Id > 0 {
 			v.Addr = common.GetIpByAddr(addr)
+			v.LocalAddr = common.GetIpByAddr(localAddr)
 			id = v.Id
 			exist = true
 			return false
@@ -326,7 +327,7 @@ func (s *DbUtils) GetClient(id int) (c *Client, err error) {
 		c = v.(*Client)
 		return
 	}
-	err = errors.New("未找到客户端")
+	err = errors.New("can not find client")
 	return
 }
 
@@ -334,7 +335,7 @@ func (s *DbUtils) GetGlobal() (c *Glob) {
 	return s.JsonDb.Global
 }
 
-func (s *DbUtils) GetClientIdByVkey(vkey string) (id int, err error) {
+func (s *DbUtils) GetClientIdByMd5Vkey(vkey string) (id int, err error) {
 	var exist bool
 	s.JsonDb.Clients.Range(func(key, value interface{}) bool {
 		v := value.(*Client)
@@ -348,7 +349,7 @@ func (s *DbUtils) GetClientIdByVkey(vkey string) (id int, err error) {
 	if exist {
 		return
 	}
-	err = errors.New("未找到客户端")
+	err = errors.New("can not find client")
 	return
 }
 
@@ -357,7 +358,7 @@ func (s *DbUtils) GetHostById(id int) (h *Host, err error) {
 		h = v.(*Host)
 		return
 	}
-	err = errors.New("The host could not be parsed")
+	err = errors.New("the host could not be parsed")
 	return
 }
 

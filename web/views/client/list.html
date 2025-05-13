@@ -127,6 +127,16 @@
                 }
             },
             {
+                field: 'LocalAddr',//域值
+                title: '<span langtag="word-localaddress"></span>',//标题
+                halign: 'center',
+                visible: true,//false表示不显示
+                sortable: true,//启用排序
+                formatter: function (value, row, index) {
+                    return '<span onclick="oCopy(this)">' + value + '</span>'
+                }
+            },
+            {
                 field: 'InletFlow',//域值
                 title: '<span langtag="word-inletflow"></span>',//标题
                 halign: 'center',

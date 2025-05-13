@@ -1,6 +1,7 @@
 package bridge
 
 import (
+	"bytes"
 	"crypto/tls"
 	_ "crypto/tls"
 	"encoding/binary"
@@ -25,15 +26,48 @@ import (
 	"github.com/djylb/nps/server/tool"
 )
 
-var ServerTlsEnable bool = false
-var ServerKcpEnable bool = false
+var (
+	ServerTlsEnable  bool = false
+	ServerKcpEnable  bool = false
+	ServerWsEnable   bool = false
+	ServerWssEnable  bool = false
+	ServerSecureMode bool = false
+)
+
+type replay struct {
+	mu    sync.Mutex
+	items map[string]int64
+	ttl   int64
+}
+
+var rep = replay{
+	items: make(map[string]int64, 100),
+	ttl:   30,
+}
+
+func IsReplay(key string) bool {
+	now := time.Now().Unix()
+	rep.mu.Lock()
+	defer rep.mu.Unlock()
+	expireBefore := now - rep.ttl
+	for k, ts := range rep.items {
+		if ts < expireBefore {
+			delete(rep.items, k)
+		}
+	}
+	if _, ok := rep.items[key]; ok {
+		return true
+	}
+	rep.items[key] = now
+	return false
+}
 
 type Client struct {
 	tunnel    *nps_mux.Mux // WORK_CHAN connection
 	signal    *conn.Conn   // WORK_MAIN connection
 	file      *nps_mux.Mux // WORK_FILE connection
 	Version   string
-	retryTime int // it will be add 1 when ping not ok until to 3 will close the client
+	retryTime int // it will add 1 when ping not ok until to 3 will close the client
 }
 
 func NewClient(t, f *nps_mux.Mux, s *conn.Conn, vs string) *Client {
@@ -197,7 +231,9 @@ func (s *Bridge) GetHealthFromClient(id int, c *conn.Conn) {
 
 // 验证失败，返回错误验证flag，并且关闭连接
 func (s *Bridge) verifyError(c *conn.Conn) {
-	c.Write([]byte(common.VERIFY_EER))
+	if !ServerSecureMode {
+		c.Write([]byte(common.VERIFY_EER))
+	}
 	c.Close()
 }
 
@@ -218,42 +254,114 @@ func (s *Bridge) cliProcess(c *conn.Conn) {
 		return
 	}
 	//version check
-	if ver, err := c.GetShortLenContent(); err != nil || string(ver) != version.GetVersion() {
-		logs.Info("The client %v version does not match or error occurred", c.Conn.RemoteAddr())
-		//c.Close()
-		//common.SafeClose(c)
-		//return
+	ver := version.GetLatestIndex()
+	minVerBytes, err := c.GetShortLenContent()
+	if err == nil && !ServerSecureMode {
+		ver = version.GetIndex(string(minVerBytes))
 	}
+	if err != nil || string(minVerBytes) != version.GetVersion(ver) {
+		logs.Info("The client %v version does not match or error occurred", c.Conn.RemoteAddr())
+		c.Close()
+		return
+	}
+
 	//version get
-	var vs []byte
-	var err error
-	if vs, err = c.GetShortLenContent(); err != nil {
+	vs, err := c.GetShortLenContent()
+	if err != nil {
 		logs.Info("Get client %v version error: %v", c.Conn.RemoteAddr(), err)
 		c.Close()
 		return
 	}
-	//write server version to client
-	c.Write([]byte(crypt.Md5(version.GetVersion())))
-	c.SetReadDeadlineBySecond(5)
-	var buf []byte
-	//get vKey from client
-	if buf, err = c.GetShortContent(32); err != nil {
-		c.Close()
-		return
-	}
-	//verify
-	id, err := file.GetDb().GetIdByVerifyKey(string(buf), c.Conn.RemoteAddr().String())
-	if err != nil {
-		logs.Error("Client %v vkey %s validation error, close it's connection.", c.Conn.RemoteAddr(), buf)
-		s.verifyError(c)
-		return
-	} else {
+	clientVer := string(vs)
+
+	if ver == 0 {
+		// 0.26.0
+		//write server version to client
+		c.Write([]byte(crypt.Md5(version.GetVersion(ver))))
+		c.SetReadDeadlineBySecond(5)
+		//get vKey from client
+		keyBuf, err := c.GetShortContent(32)
+		if err != nil {
+			c.Close()
+			return
+		}
+		//verify
+		id, err := file.GetDb().GetIdByVerifyKey(string(keyBuf), c.Conn.RemoteAddr().String(), "", crypt.Md5)
+		if err != nil {
+			logs.Error("Client %v proto-ver %d vkey %s validation error", c.Conn.RemoteAddr(), ver, keyBuf)
+			s.verifyError(c)
+			return
+		}
 		s.verifySuccess(c)
-	}
-	if flag, err := c.ReadFlag(); err == nil {
-		s.typeDeal(flag, c, id, string(vs))
+
+		if flag, err := c.ReadFlag(); err == nil {
+			s.typeDeal(flag, c, id, clientVer)
+		} else {
+			logs.Warn("%v %s", err, flag)
+		}
 	} else {
-		logs.Warn("%v %s", err, flag)
+		// 0.27.0
+		tsBuf, err := c.GetShortContent(8)
+		if err != nil {
+			c.Close()
+			return
+		}
+		ts := common.BytesToTimestamp(tsBuf)
+		now := time.Now().Unix()
+		if ServerSecureMode && (ts > now || ts < now-rep.ttl) {
+			c.Close()
+			return
+		}
+		keyBuf, err := c.GetShortContent(32)
+		if err != nil {
+			c.Close()
+			return
+		}
+		//verify
+		id, err := file.GetDb().GetIdByVerifyKey(string(keyBuf), c.Conn.RemoteAddr().String(), "", common.Getverifyval)
+		if err != nil {
+			logs.Error("Client %v proto-ver %d vkey %s validation error", c.Conn.RemoteAddr(), ver, keyBuf)
+			s.verifyError(c)
+			return
+		}
+		client, err := file.GetDb().GetClient(id)
+		if err != nil {
+			c.Close()
+			return
+		}
+		ipBuf, err := c.GetShortLenContent()
+		if err != nil {
+			c.Close()
+			return
+		}
+		ipDec, err := common.DecryptBytes(ipBuf, client.VerifyKey)
+		if err != nil {
+			c.Close()
+			return
+		}
+		client.LocalAddr = common.DecodeIP(ipDec).String()
+		randBuf, err := c.GetShortLenContent()
+		if err != nil {
+			c.Close()
+			return
+		}
+		hmacBuf, err := c.GetShortContent(32)
+		if err != nil {
+			c.Close()
+			return
+		}
+		if ServerSecureMode && !bytes.Equal(hmacBuf, common.ComputeHMAC(client.VerifyKey, ts, minVerBytes, vs, ipBuf, randBuf)) {
+			c.Close()
+			return
+		}
+		c.Write([]byte(crypt.Md5(version.GetVersion(ver))))
+		c.SetReadDeadlineBySecond(5)
+
+		if flag, err := c.ReadFlag(); err == nil {
+			s.typeDeal(flag, c, id, clientVer)
+		} else {
+			logs.Warn("%v %s", err, flag)
+		}
 	}
 	return
 }
@@ -509,7 +617,7 @@ loop:
 				break loop
 			}
 
-			id, err := file.GetDb().GetClientIdByVkey(string(b))
+			id, err := file.GetDb().GetClientIdByMd5Vkey(string(b))
 			if err != nil {
 				break loop
 			}

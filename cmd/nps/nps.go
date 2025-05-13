@@ -36,7 +36,7 @@ func main() {
 	flag.Parse()
 	// init log
 	if *ver {
-		common.PrintVersion()
+		common.PrintVersion(version.GetLatestIndex())
 		return
 	}
 
@@ -234,7 +234,7 @@ func run() {
 	}
 
 	logs.Info("the config path is:" + common.GetRunPath())
-	logs.Info("the version of server is %s ,allow client core version to be %s,tls enable is %t", version.VERSION, version.GetVersion(), bridge.ServerTlsEnable)
+	logs.Info("the version of server is %s ,allow client core version to be %s,tls enable is %t", version.VERSION, version.GetLatest(), bridge.ServerTlsEnable)
 	connection.InitConnectionService()
 	//crypt.InitTls(filepath.Join(common.GetRunPath(), "conf", "server.pem"), filepath.Join(common.GetRunPath(), "conf", "server.key"))
 	cert, ok := common.LoadCert(beego.AppConfig.String("tls_bridge_cert_file"), beego.AppConfig.String("tls_bridge_key_file"))
@@ -252,6 +252,9 @@ func run() {
 	if bridgeType == "both" {
 		bridgeType = "tcp"
 		bridge.ServerKcpEnable = true
+	}
+	if beego.AppConfig.DefaultBool("secure_mode", false) {
+		bridge.ServerSecureMode = true
 	}
 	go server.StartNewServer(bridgePort, task, bridgeType, timeout)
 }

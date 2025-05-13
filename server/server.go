@@ -166,6 +166,13 @@ func NewMode(Bridge *bridge.Bridge, c *file.Tunnel) proxy.Service {
 
 // stop server
 func StopServer(id int) error {
+	if t, err := file.GetDb().GetTask(id); err != nil {
+		return err
+	} else {
+		t.Status = false
+		logs.Info("close port %d,remark %s,client id %d,task id %d", t.Port, t.Remark, t.Client.Id, t.Id)
+		file.GetDb().UpdateTask(t)
+	}
 	//if v, ok := RunList[id]; ok {
 	if v, ok := RunList.Load(id); ok {
 		if svr, ok := v.(proxy.Service); ok {
@@ -175,13 +182,6 @@ func StopServer(id int) error {
 			logs.Info("stop server id %d", id)
 		} else {
 			logs.Warn("stop server id %d error", id)
-		}
-		if t, err := file.GetDb().GetTask(id); err != nil {
-			return err
-		} else {
-			t.Status = false
-			logs.Info("close port %d,remark %s,client id %d,task id %d", t.Port, t.Remark, t.Client.Id, t.Id)
-			file.GetDb().UpdateTask(t)
 		}
 		//delete(RunList, id)
 		RunList.Delete(id)
@@ -228,6 +228,9 @@ func StartTask(id int) error {
 	if t, err := file.GetDb().GetTask(id); err != nil {
 		return err
 	} else {
+		if !tool.TestServerPort(t.Port, t.Mode) {
+			return errors.New("the port open error")
+		}
 		AddTask(t)
 		t.Status = true
 		file.GetDb().UpdateTask(t)
@@ -455,6 +458,12 @@ func GetClientList(start, length int, search, sortField, order string, clientId 
 			sort.SliceStable(list, func(i, j int) bool { return list[i].Addr < list[j].Addr })
 		} else {
 			sort.SliceStable(list, func(i, j int) bool { return list[i].Addr > list[j].Addr })
+		}
+	} else if sortField == "LocalAddr" {
+		if order == "asc" {
+			sort.SliceStable(list, func(i, j int) bool { return list[i].LocalAddr < list[j].LocalAddr })
+		} else {
+			sort.SliceStable(list, func(i, j int) bool { return list[i].LocalAddr > list[j].LocalAddr })
 		}
 	} else if sortField == "Remark" {
 		if order == "asc" {

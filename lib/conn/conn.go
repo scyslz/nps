@@ -3,6 +3,7 @@ package conn
 import (
 	"bufio"
 	"bytes"
+	"crypto/tls"
 	"encoding/binary"
 	"encoding/json"
 	"errors"
@@ -145,12 +146,17 @@ func (s *Conn) SetAlive() {
 	case *kcp.UDPSession:
 		s.Conn.(*kcp.UDPSession).SetReadDeadline(time.Time{})
 	case *net.TCPConn:
-		conn := s.Conn.(*net.TCPConn)
-		conn.SetReadDeadline(time.Time{})
-		//conn.SetKeepAlive(false)
-		//conn.SetKeepAlivePeriod(time.Duration(2 * time.Second))
+		s.Conn.(*net.TCPConn).SetReadDeadline(time.Time{})
 	case *pmux.PortConn:
 		s.Conn.(*pmux.PortConn).SetReadDeadline(time.Time{})
+	case *tls.Conn:
+		s.Conn.(*tls.Conn).SetReadDeadline(time.Time{})
+	case *TlsConn:
+		s.Conn.(*TlsConn).SetReadDeadline(time.Time{})
+	default:
+		if conn, ok := s.Conn.(interface{ SetReadDeadline(time.Time) error }); ok {
+			conn.SetReadDeadline(time.Time{})
+		}
 	}
 }
 
@@ -163,6 +169,14 @@ func (s *Conn) SetReadDeadlineBySecond(t time.Duration) {
 		s.Conn.(*net.TCPConn).SetReadDeadline(time.Now().Add(time.Duration(t) * time.Second))
 	case *pmux.PortConn:
 		s.Conn.(*pmux.PortConn).SetReadDeadline(time.Now().Add(time.Duration(t) * time.Second))
+	case *tls.Conn:
+		s.Conn.(*tls.Conn).SetReadDeadline(time.Now().Add(time.Duration(t) * time.Second))
+	case *TlsConn:
+		s.Conn.(*TlsConn).SetReadDeadline(time.Now().Add(time.Duration(t) * time.Second))
+	default:
+		if conn, ok := s.Conn.(interface{ SetReadDeadline(time.Time) error }); ok {
+			conn.SetReadDeadline(time.Now().Add(time.Duration(t) * time.Second))
+		}
 	}
 }
 

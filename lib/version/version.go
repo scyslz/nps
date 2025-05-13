@@ -1,8 +1,42 @@
 package version
 
-const VERSION = "0.26.56"
+const VERSION = "0.27.0"
 
-// Compulsory minimum version, Minimum downward compatibility to this version
-func GetVersion() string {
-	return "0.26.0"
+var MinVersions = []string{
+	"0.26.0",
+	"0.27.0",
+}
+
+func GetVersion(index int) string {
+	if index < 0 || index >= len(MinVersions) {
+		return GetLatest()
+	}
+	return MinVersions[index]
+}
+
+func GetCount() int {
+	return len(MinVersions)
+}
+
+func GetLatest() string {
+	if len(MinVersions) == 0 {
+		return ""
+	}
+	return MinVersions[len(MinVersions)-1]
+}
+
+func GetIndex(ver string) int {
+	for i, v := range MinVersions {
+		if v == ver {
+			return i
+		}
+	}
+	return -1
+}
+
+func GetLatestIndex() int {
+	if GetCount() == 0 {
+		return 0
+	}
+	return GetCount() - 1
 }

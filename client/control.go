@@ -30,6 +30,8 @@ import (
 	"golang.org/x/net/proxy"
 )
 
+var Ver = version.GetLatestIndex()
+
 func GetTaskStatus(path string) {
 	cnf, err := config.NewConfig(path)
 	if err != nil {
@@ -99,7 +101,7 @@ func StartFromFile(path string) {
 
 	common.SetCustomDNS(cnf.CommonConfig.DnsServer)
 
-	logs.Info("the version of client is %s, the core version of client is %s", version.VERSION, version.GetVersion())
+	logs.Info("the version of client is %s, the core version of client is %s", version.VERSION, version.GetLatest())
 
 	for {
 		if !first && !cnf.CommonConfig.AutoReconnection {
@@ -256,35 +258,74 @@ func NewConn(tp string, vkey string, server string, connType string, proxyUrl st
 	if _, err := c.Write([]byte(common.CONN_TEST)); err != nil {
 		return nil, err
 	}
-	if err := c.WriteLenContent([]byte(version.GetVersion())); err != nil {
+	minVerBytes := []byte(version.GetVersion(Ver))
+	if err := c.WriteLenContent(minVerBytes); err != nil {
 		return nil, err
 	}
-	if err := c.WriteLenContent([]byte(version.VERSION)); err != nil {
+	vs := []byte(version.VERSION)
+	if err := c.WriteLenContent(vs); err != nil {
 		return nil, err
 	}
 
-	b, err := c.GetShortContent(32)
-	if err != nil {
-		logs.Error("%v", err)
-		return nil, err
-	}
-	if crypt.Md5(version.GetVersion()) != string(b) {
-		logs.Warn("The client does not match the server version. The current core version of the client is", version.GetVersion())
-		//return nil, err
+	if Ver == 0 {
+		// 0.26.0
+		b, err := c.GetShortContent(32)
+		if err != nil {
+			logs.Error("%v", err)
+			return nil, err
+		}
+		if crypt.Md5(version.GetVersion(0)) != string(b) {
+			logs.Warn("The client does not match the server version. The current core version of the client is", version.GetVersion(Ver))
+			//return nil, err
+		}
+		if _, err := c.Write([]byte(crypt.Md5(vkey))); err != nil {
+			return nil, err
+		}
+		if s, err := c.ReadFlag(); err != nil {
+			return nil, err
+		} else if s == common.VERIFY_EER {
+			return nil, errors.New(fmt.Sprintf("Validation key %s incorrect", vkey))
+		}
+		if _, err := c.Write([]byte(connType)); err != nil {
+			return nil, err
+		}
+	} else {
+		// 0.27.0
+		ts := time.Now().Unix() - int64(rand.Intn(6))
+		if _, err := c.Write(common.TimestampToBytes(ts)); err != nil {
+			return nil, err
+		}
+		if _, err := c.Write([]byte(common.Getverifyval(vkey))); err != nil {
+			return nil, err
+		}
+		ipBuf, err := common.EncryptBytes(common.EncodeIP(common.GetOutboundIP()), vkey)
+		if err := c.WriteLenContent(ipBuf); err != nil {
+			return nil, err
+		}
+		randBuf, err := common.RandomBytes(1000)
+		if err != nil {
+			return nil, err
+		}
+		if err := c.WriteLenContent(randBuf); err != nil {
+			return nil, err
+		}
+		if _, err := c.Write(common.ComputeHMAC(vkey, ts, minVerBytes, vs, ipBuf, randBuf)); err != nil {
+			return nil, err
+		}
+		b, err := c.GetShortContent(32)
+		if err != nil {
+			logs.Error("%v", err)
+			return nil, errors.New(fmt.Sprintf("Validation key %s incorrect", vkey))
+		}
+		if crypt.Md5(version.GetVersion(1)) != string(b) {
+			logs.Warn("The client does not match the server version. The current core version of the client is", version.GetVersion(1))
+			return nil, err
+		}
+		if _, err := c.Write([]byte(connType)); err != nil {
+			return nil, err
+		}
 	}
 
-	if _, err := c.Write([]byte(common.Getverifyval(vkey))); err != nil {
-		return nil, err
-	}
-	if s, err := c.ReadFlag(); err != nil {
-		return nil, err
-	} else if s == common.VERIFY_EER {
-		return nil, errors.New(fmt.Sprintf("Validation key %s incorrect", vkey))
-	}
-
-	if _, err := c.Write([]byte(connType)); err != nil {
-		return nil, err
-	}
 	c.SetAlive()
 
 	return c, nil

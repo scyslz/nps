@@ -239,6 +239,9 @@ func (s *IndexController) Del() {
 func (s *IndexController) Start() {
 	id := s.GetIntNoErr("id")
 	if err := server.StartTask(id); err != nil {
+		if err.Error() == "the port open error" {
+			s.AjaxErr("The port cannot be opened because it may has been occupied or is no longer allowed.")
+		}
 		s.AjaxErr("start error")
 	}
 	s.AjaxOk("start success")
