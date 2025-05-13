@@ -222,7 +222,7 @@ func (s *IndexController) Edit() {
 
 func (s *IndexController) Stop() {
 	id := s.GetIntNoErr("id")
-	if err := server.StopServer(id); err != nil {
+	if err := server.StopServer(id); err != nil && err.Error() != "task is not running" {
 		s.AjaxErr("stop error")
 	}
 	s.AjaxOk("stop success")
