@@ -3,13 +3,13 @@ package common
 import (
 	"context"
 	"fmt"
-	"github.com/xtaci/kcp-go/v5"
 	"net"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/miekg/dns"
+	"github.com/xtaci/kcp-go/v5"
 )
 
 var customDnsAddr string
@@ -56,20 +56,28 @@ func GetFastAddr(addr string, testType string) (string, error) {
 	}
 
 	port := GetPortByAddr(addr)
+	//logs.Debug("port: %s", port)
 
 	var ipv4List, ipv6List []string
 	ipv4List, ipv6List, err := resolveDomain(host, ipv4List, ipv6List, dnsServer, 10)
+	if err != nil {
+		return addr, err
+	}
 
-	if err != nil || (len(ipv4List) == 0 && len(ipv6List) == 0) {
+	if len(ipv4List) == 0 && len(ipv6List) == 0 {
 		return addr, fmt.Errorf("Can not resolve %s", host)
 	}
 
 	ipList := append(ipv4List, ipv6List...)
+	//logs.Debug("IP: %v %v", ipv4List, ipv6List)
+	ipList = unique(ipList)
+	//logs.Debug("IP unique: %v", ipList)
 
 	bestIP, bestLatency := ipList[0], time.Duration(1<<63-1)
-
+	//logs.Debug("IP: %s BestLatency: %d", bestIP, bestLatency)
 	for _, ip := range ipList {
 		latency, err := TestLatency(BuildAddress(ip, strconv.Itoa(port)), testType)
+		//logs.Debug("IP: %s Latency: %d Err: %w", bestIP, latency, err)
 		if err != nil {
 			continue
 		}
@@ -77,13 +85,16 @@ func GetFastAddr(addr string, testType string) (string, error) {
 			bestIP, bestLatency = ip, latency
 		}
 	}
+	//logs.Debug("Final Best IP: %s", bestIP)
 	if bestLatency == time.Duration(1<<63-1) {
 		return addr, nil
 	}
+	//logs.Debug("Final1 Best IP: %s", bestIP)
 	return BuildAddress(bestIP, strconv.Itoa(port)), nil
 }
 
 func resolveDomain(domain string, ipv4List, ipv6List []string, dnsServer string, redirects int) ([]string, []string, error) {
+	//logs.Debug("%s %v %v %s %d", domain, ipv4List, ipv6List, dnsServer, redirects)
 	if redirects <= 0 {
 		return ipv4List, ipv6List, fmt.Errorf("Too many CNAME")
 	}
@@ -95,8 +106,9 @@ func resolveDomain(domain string, ipv4List, ipv6List []string, dnsServer string,
 
 	ipv4List = append(ipv4List, ipv4s...)
 	ipv6List = append(ipv6List, ipv6s...)
-
-	cnameList, err := resolveDNS(domain, dns.TypeCNAME, dnsServer)
+	//logs.Debug("IP: %v %v", ipv4List, ipv6List)
+	cnameList, err := resolveRecords(domain, dns.TypeCNAME, dnsServer, true)
+	//logs.Debug("Cname: %v", cnameList)
 	if err != nil || len(cnameList) == 0 {
 		return ipv4List, ipv6List, nil
 	}
@@ -111,43 +123,97 @@ func resolveDomain(domain string, ipv4List, ipv6List []string, dnsServer string,
 	return ipv4List, ipv6List, nil
 }
 
-func resolveIPs(domain, dnsServer string) ([]string, []string, error) {
-	ipv4List, err := resolveDNS(domain, dns.TypeA, dnsServer)
-	if err != nil {
-		return nil, nil, err
+func resolveIPs(domain, dnsServer string) (ipv4List, ipv6List []string, err error) {
+	//logs.Debug("Domain: %s DNS: %s", domain, dnsServer)
+	current := domain
+	var nsHosts []string
+	for {
+		nsHosts, err = resolveRecords(current, dns.TypeNS, dnsServer, true)
+		//logs.Debug("Domain: %s DNS: %s %v", current, dnsServer, err)
+		if err != nil {
+			return nil, nil, fmt.Errorf("lookup NS for %q failed: %w", current, err)
+		}
+		if len(nsHosts) > 0 {
+			break
+		}
+		idx := strings.Index(current, ".")
+		if idx < 0 {
+			break
+		}
+		current = current[idx+1:]
+	}
+	//logs.Debug("NS: %v", nsHosts)
+	if len(nsHosts) == 0 {
+		return nil, nil, fmt.Errorf("no NS records found for %s (and its parents)", domain)
 	}
 
-	ipv6List, err := resolveDNS(domain, dns.TypeAAAA, dnsServer)
-	if err != nil {
-		return nil, nil, err
+	var nsServers []string
+	for _, ns := range nsHosts {
+		// IPv4
+		if v4s, err := resolveRecords(ns, dns.TypeA, dnsServer, true); err == nil {
+			for _, ip := range v4s {
+				nsServers = append(nsServers, net.JoinHostPort(ip, "53"))
+			}
+		}
+		// IPv6
+		if v6s, err := resolveRecords(ns, dns.TypeAAAA, dnsServer, true); err == nil {
+			for _, ip := range v6s {
+				nsServers = append(nsServers, net.JoinHostPort(ip, "53"))
+			}
+		}
 	}
+	if len(nsServers) == 0 {
+		return nil, nil, fmt.Errorf("failed to resolve any NS IPs for %s", domain)
+	}
+	//logs.Debug("NSS: %v", nsServers)
 
+	for _, srv := range nsServers {
+		if len(ipv4List) == 0 {
+			if v4s, _ := resolveRecords(domain, dns.TypeA, srv, true); len(v4s) > 0 {
+				ipv4List = v4s
+			}
+		}
+		if len(ipv6List) == 0 {
+			if v6s, _ := resolveRecords(domain, dns.TypeAAAA, srv, true); len(v6s) > 0 {
+				ipv6List = v6s
+			}
+		}
+		if len(ipv4List) > 0 && len(ipv6List) > 0 {
+			break
+		}
+	}
+	//logs.Debug("IP: %v %v", ipv4List, ipv6List)
 	return ipv4List, ipv6List, nil
 }
 
-func resolveDNS(domain string, qtype uint16, dnsServer string) ([]string, error) {
+func resolveRecords(domain string, qtype uint16, server string, recurse bool) ([]string, error) {
+	if !strings.Contains(server, ":") {
+		server = net.JoinHostPort(server, "53")
+	}
 	c := new(dns.Client)
 	m := new(dns.Msg)
 	m.SetQuestion(dns.Fqdn(domain), qtype)
-	m.RecursionDesired = false
+	m.RecursionDesired = recurse
 
-	resp, _, err := c.Exchange(m, dnsServer)
+	resp, _, err := c.Exchange(m, server)
 	if err != nil {
 		return nil, err
 	}
 
-	var ipList []string
+	var out []string
 	for _, ans := range resp.Answer {
-		switch r := ans.(type) {
+		switch rr := ans.(type) {
 		case *dns.A:
-			ipList = append(ipList, r.A.String())
+			out = append(out, rr.A.String())
 		case *dns.AAAA:
-			ipList = append(ipList, r.AAAA.String())
+			out = append(out, rr.AAAA.String())
 		case *dns.CNAME:
-			ipList = append(ipList, r.Target)
+			out = append(out, rr.Target)
+		case *dns.NS:
+			out = append(out, rr.Ns)
 		}
 	}
-	return ipList, nil
+	return out, nil
 }
 
 func TestLatency(addr string, testType string) (time.Duration, error) {
@@ -170,4 +236,16 @@ func TestLatency(addr string, testType string) (time.Duration, error) {
 		return 0, fmt.Errorf("Unsupported test type: %s", testType)
 	}
 	return time.Since(start), nil
+}
+
+func unique(addrs []string) []string {
+	seen := make(map[string]struct{}, len(addrs))
+	var out []string
+	for _, a := range addrs {
+		if _, ok := seen[a]; !ok {
+			seen[a] = struct{}{}
+			out = append(out, a)
+		}
+	}
+	return out
 }

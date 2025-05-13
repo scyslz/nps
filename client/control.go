@@ -204,10 +204,17 @@ func NewConn(tp string, vkey string, server string, connType string, proxyUrl st
 
 	timeout := time.Second * 10
 	dialer := net.Dialer{Timeout: timeout}
+	path := "/"
+	server, path = common.SplitServerAndPath(server)
+	logs.Debug("Server: %s Path: %s", server, path)
+	server, err = common.GetFastAddr(server, tp)
+	if err != nil {
+		logs.Debug("Fast Server: %s Path: %s Error: %v", server, path, err)
+	} else {
+		logs.Debug("Fast Server: %s Path: %s", server, path)
+	}
 
-	server, _ = common.GetFastAddr(server, connType)
-
-	if tp == "tcp" || tp == "tls" {
+	if tp == "tcp" || tp == "tls" || tp == "ws" || tp == "wss" {
 		var rawConn net.Conn
 
 		if proxyUrl != "" {

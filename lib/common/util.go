@@ -118,6 +118,14 @@ func BuildAddress(host string, port string) string {
 	return fmt.Sprintf("%s:%s", host, port)
 }
 
+func SplitServerAndPath(s string) (server, path string) {
+	index := strings.Index(s, "/")
+	if index == -1 {
+		return s, "/"
+	}
+	return s[:index], s[index:]
+}
+
 // Get the corresponding IP address through domain name
 func GetHostByName(hostname string) string {
 	if !DomainCheck(hostname) {
