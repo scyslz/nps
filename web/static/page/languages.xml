@@ -125,8 +125,8 @@
 		<en-US>Client address</en-US>
 	</lang>
 	<lang id="word-localaddress">
-		<zh-CN>客户端本地地址</zh-CN>
-		<en-US>Client local address</en-US>
+		<zh-CN>本地地址</zh-CN>
+		<en-US>Local address</en-US>
 	</lang>
 	<lang id="word-add">
 		<zh-CN>新增</zh-CN>
