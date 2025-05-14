@@ -115,6 +115,15 @@ func StartFromFile(path string) {
 		if cnf.CommonConfig.TlsEnable {
 			cnf.CommonConfig.Tp = "tls"
 		}
+		// Fetch latest server URL from subscription if provided
+		if cnf.CommonConfig.SubsriptionServer != "" {
+			if updatedServer, err := fetchServerFromSubscription(cnf.CommonConfig.SubsriptionServer); err == nil {
+				logs.Info("Successfully fetched latest server from subscription: %s", updatedServer)
+				cnf.CommonConfig.Server = updatedServer
+			} else {
+				logs.Error("Failed to fetch latest server from subscription: %v. Using configured server: %s", err, cnf.CommonConfig.Server)
+			}
+		}
 		c, err := NewConn(cnf.CommonConfig.Tp, cnf.CommonConfig.VKey, cnf.CommonConfig.Server, common.WORK_CONFIG, cnf.CommonConfig.ProxyUrl)
 		if err != nil {
 			logs.Error("%v", err)
@@ -193,6 +202,21 @@ func StartFromFile(path string) {
 		NewRPClient(cnf.CommonConfig.Server, vkey, cnf.CommonConfig.Tp, cnf.CommonConfig.ProxyUrl, cnf, cnf.CommonConfig.DisconnectTime).Start()
 		CloseLocalServer()
 	}
+}
+
+// Fetches the latest server URL from a subscription address
+func fetchServerFromSubscription(subAddr string) (string, error) {
+	resp, err := http.Get(subAddr)
+	if err != nil {
+		return "", fmt.Errorf("failed to perform HTTP GET request to subscription address: %v", err)
+	}
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return "", fmt.Errorf("failed to read response body from subscription address: %v", err)
+	}
+	return strings.TrimSpace(string(body)), nil
 }
 
 // Create a new connection with the server and verify it

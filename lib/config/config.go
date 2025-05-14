@@ -20,6 +20,7 @@ type CommonConfig struct {
 	DnsServer        string
 	Client           *file.Client
 	DisconnectTime   int
+	SubsriptionServer string
 }
 
 type LocalServer struct {
@@ -120,6 +121,8 @@ func dealCommon(s string) *CommonConfig {
 		switch item[0] {
 		case "server_addr":
 			c.Server = item[1]
+		case "subcription_server_addr":
+			c.SubsriptionServer = item[1]
 		case "vkey":
 			c.VKey = item[1]
 		case "conn_type":
