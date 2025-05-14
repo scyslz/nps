@@ -52,19 +52,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Trigger Update NPS Client
-        run: |
-          curl -X POST https://api.github.com/repos/djylb/npsclient/dispatches \
-            -H "Accept: application/vnd.github+json" \
-            -H "Authorization: Bearer ${{ secrets.GH_PAT }}" \
-            -d '{"event_type":"trigger-update"}'
-
-      - name: Trigger Update NPS OpenWRT
-        run: |
-          curl -X POST https://api.github.com/repos/djylb/nps-openwrt/dispatches \
-            -H "Accept: application/vnd.github+json" \
-            -H "Authorization: Bearer ${{ secrets.GH_PAT }}" \
-            -d '{"event_type":"trigger-update"}'
 
   build_assets_old:
     runs-on: ubuntu-latest
